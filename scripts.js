@@ -22,7 +22,13 @@ function getAllPlaylistUrls() {
 }
 
 let PLAYLIST_URLS = getAllPlaylistUrls();
-const EPG_URL = "https://raw.githubusercontent.com/jonathansanfilippo/xvb-data/refs/heads/main/data/guides/it.xml";
+
+
+
+const EPG_URLS = [
+  "https://raw.githubusercontent.com/jonathansanfilippo/xvb-data/refs/heads/main/data/guides/it.xml",
+  "https://raw.githubusercontent.com/jonathansanfilippo/xvb-data/refs/heads/main/data/guides/uk.xml"
+];
 
 /* ===== ONLINE USERS ===== */
 const serverUrl = "https://render-com-a2ck.onrender.com";
@@ -621,29 +627,38 @@ function parseXmlDate(s) {
 
 async function fetchEpg() {
   try {
-    const res = await fetch(EPG_URL);
-    const text = await res.text();
-    const xml = new DOMParser().parseFromString(text, "application/xml");
-
-    if (xml.querySelector("parsererror")) {
-      throw new Error("EPG XML non valido (parsererror).");
-    }
-
-    const programs = Array.from(xml.getElementsByTagName("programme"));
     epgData.clear();
 
-    programs.forEach(p => {
-      const channelId = normalizeEPGName(p.getAttribute("channel"));
-      if (!channelId) return;
+    const results = await Promise.allSettled(
+      (EPG_URLS || []).map(async (url) => {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`HTTP ${res.status} su ${url}`);
+        const text = await res.text();
+        const xml = new DOMParser().parseFromString(text, "application/xml");
+        if (xml.querySelector("parsererror")) throw new Error(`EPG XML non valido: ${url}`);
+        return xml;
+      })
+    );
 
-      const start = parseXmlDate(p.getAttribute("start"));
-      const stop = parseXmlDate(p.getAttribute("stop"));
-      if (!start || !stop) return;
+    results.forEach(r => {
+      if (r.status !== "fulfilled") return;
 
-      const title = p.getElementsByTagName("title")[0]?.textContent || "Nessun titolo";
+      const xml = r.value;
+      const programs = Array.from(xml.getElementsByTagName("programme"));
 
-      if (!epgData.has(channelId)) epgData.set(channelId, []);
-      epgData.get(channelId).push({ start, stop, title });
+      programs.forEach(p => {
+        const channelId = normalizeEPGName(p.getAttribute("channel"));
+        if (!channelId) return;
+
+        const start = parseXmlDate(p.getAttribute("start"));
+        const stop  = parseXmlDate(p.getAttribute("stop"));
+        if (!start || !stop) return;
+
+        const title = p.getElementsByTagName("title")[0]?.textContent || "Nessun titolo";
+
+        if (!epgData.has(channelId)) epgData.set(channelId, []);
+        epgData.get(channelId).push({ start, stop, title });
+      });
     });
 
     for (const [k, arr] of epgData.entries()) {
@@ -653,7 +668,6 @@ async function fetchEpg() {
     console.error("Errore EPG:", e);
   }
 }
-
 function updateEPGUI(channelName) {
   if (!el.epgNow || !el.epgFill || !el.epgNextList) return;
 
