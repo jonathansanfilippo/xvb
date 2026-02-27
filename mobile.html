@@ -81,9 +81,7 @@
                   >
                 </div>
 
-                <button class="icon-btn" onclick="toggleFullScreen()" aria-label="Fullscreen" style="margin-left:auto">
-                  <i class="fa-duotone fa-solid fa-expand"></i>
-                </button>
+               
 
                 <div id="qualityBadge" class="quality-badge"></div>
               </div>
@@ -109,7 +107,7 @@
           <span class="logo">v0.2b Mobile</span>
         </a>
 
-        
+        <!--
 
         <span class="hint-sep"></span>
 
@@ -160,7 +158,42 @@
       </div>
 
     </div>
+
+
+
   </div>
+
+
+
+  <nav class="mobile-footer">
+    
+
+    <div class="footer-item" onclick="addCustomUrl()" title="Add M3U URL">
+        <i class="fa-solid fa-file-circle-plus"></i>
+        <span>Link</span>
+    </div>
+
+    <div class="footer-item" onclick="document.getElementById('localFile').click()" title="Load local file">
+        <i class="fa-solid fa-folder-plus"></i>
+        <span>File</span>
+        <input type="file" id="localFile" accept=".m3u,.m3u8" onchange="loadLocalFile(event)" style="display:none;">
+    </div>
+
+    <div class="footer-item" onclick="clearCache()" title="Clear cache">
+        <i class="fa-solid fa-trash"></i>
+        <span>Reset</span>
+    </div>
+
+    <div class="footer-item" onclick="toggleFullScreen()" title="Fullscreen">
+        <i class="fa-solid fa-expand"></i>
+        <span>Full</span>
+    </div>
+
+    <div class="footer-item active" id="playPauseBtn" onclick="togglePlay()" title="Play/Pause">
+        <i class="fa-solid fa-pause"></i>
+        <span>Play</span>
+    </div>
+</nav>
 
   <script src="js/scripts.js"></script>
 </body>
