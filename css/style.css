@@ -160,7 +160,7 @@ font-weight: 700;
 .sidebar{
   position: absolute;
   top: 65px;
-  bottom: 200px;
+  bottom: 260px;
   width: 370px;
 
   display: flex;
