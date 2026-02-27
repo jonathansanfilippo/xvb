@@ -5,21 +5,26 @@
 
 @media (max-width:1100px){
 
-  /* ===== TOP BAR ===== */
+  /* ===== TOP BAR ===== padding: 4px 16px; */
   .video-controls-hint{
-    padding: 4px 16px;
-    font-size: 11px;
+    
+    font-size: 20px;
     gap: 8px;
   }
 
   .video-controls-hint i{
-    font-size: 13px !important;
+    font-size: 20px !important;
   }
 
   /* ===== SIDEBAR ===== */
   .sidebar{
     top: 38px;     /* top bar più bassa */
     bottom: 110px; /* bottom panel più piccolo */
+
+  }
+
+  .sidebar-right{
+    right: 60px;
   }
 
   /* ===== BOTTOM PANEL ===== */
@@ -114,7 +119,11 @@
   /* Sidebar ora possono scendere fino in fondo */
   .sidebar{
     bottom: 0 !important;
+    width: 50% !important;
+   
   }
+
+  .sidebar-right { right: 0 !important;}
 
   /* Nasconde campo cerca */
   .channel-search{
