@@ -686,7 +686,7 @@ function updateEPGUI(channelName, tvgId = "") {
   const pct = total > 0 ? (done / total) * 100 : 0;
   el.epgFill.style.width = Math.max(0, Math.min(100, pct)) + "%";
 
-  const nextPrograms = list.filter(p => p.start >= now).slice(0, 3);
+  const nextPrograms = list.filter(p => p.start >= now).slice(0, 6);
 
   el.epgNextList.innerHTML = "";
   if (nextPrograms.length > 0) {
