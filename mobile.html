@@ -59,9 +59,7 @@
                   <i class="fa-duotone fa-solid fa-arrow-rotate-left-10"></i>
                 </button>
 
-                <button class="icon-btn" id="playPauseBtn" onclick="togglePlay()" aria-label="Pause">
-                  <i class="fa-duotone fa-solid fa-pause"></i>
-                </button>
+               
 
                 <button class="icon-btn" onclick="forward()" aria-label="Forward 10 seconds">
                   <i class="fa-duotone fa-solid fa-arrow-rotate-right-10"></i>
@@ -120,25 +118,34 @@
               title="Download playlist from server"
               style="cursor: pointer;">
           <i id="serverListIcon" class="fa-solid fa-cloud-arrow-down"
-             style="font-size:18px; color: rgba(255,255,255,0.8);"></i>
+             style=" color: rgba(255,255,255,0.8);"></i>
         </span>
 
         <div class="playlist-actions">
           <span class="hint-btn" onclick="addCustomUrl()" title="Add M3U URL">
-            <i style="font-size: 18px; cursor: pointer; margin-right: 5px;"
+            <i style=" cursor: pointer; margin-right: 5px;"
                class="fa-duotone fa-solid fa-file-circle-plus"></i>
           </span>
 
           <span class="hint-btn" onclick="document.getElementById('localFile').click()" title="Load local file">
-            <i style="font-size: 18px; cursor: pointer; margin-right: 3px;"
+            <i style=" cursor: pointer; margin-right: 3px;"
                class="fa-duotone fa-solid fa-folder-plus"></i>
             <input type="file" id="localFile" accept=".m3u,.m3u8" onchange="loadLocalFile(event)" style="display:none;">
           </span>
 
           <span class="hint-btn" onclick="clearCache()" title="Clear playlist cache">
-            <i style="font-size: 18px; cursor: pointer; margin-right: 3px;"
+            <i style="cursor: pointer; margin-right: 3px;"
                class="fa-duotone fa-solid fa-trash"></i>
           </span>
+             
+          <a class="icon-btn" onclick="toggleFullScreen()" aria-label="Fullscreen" style="margin-left:auto">
+                  <i style="cursor: pointer; margin-right: 3px;" class="fa-duotone fa-solid fa-expand"></i>
+          </a>
+             
+            <a class="icon-btn" id="playPauseBtn" onclick="togglePlay()" aria-label="Pause">
+                  <i class="fa-duotone fa-solid fa-pause"></i>
+                </a>
+
 
           <!--
           <span class="hint-btn"
