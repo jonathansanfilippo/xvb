@@ -28,7 +28,8 @@ body, html {
 #videoPlayer {
     width: 100%;
     display: block;
-    aspect-ratio: 16 / 9;
+    margin: auto; 
+    
 }
 
 /* 2. AREA CENTRALE */
