@@ -207,7 +207,7 @@ font-weight: 700;
 .section-label {
   font-size: 14px; /* Leggermente più piccolo per un look pro */
   text-transform: uppercase;
-  color: rgba(255,255,255,0.40);
+  color: rgba(255,255,255,0.70);
   letter-spacing: 2px;
   margin: 10px 0 8px 8px; /* Margin ridotto */
   font-weight: 700;

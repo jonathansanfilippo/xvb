@@ -1,13 +1,52 @@
-/* ===========================
-   CONFIG (Versione Pro)
-   =========================== */
+
+
 
 const LOCAL_STORAGE_PLAYLISTS_KEY = 'dvb-K@8$dL%3vZ&nB1xR*';
 const LOCAL_STORAGE_CHANNELS_KEY = 'dvb-m^7Y!zR4*P8&kQ3@h';
 
 const DEFAULT_PLAYLISTS = [
-  "https://raw.githubusercontent.com/jonathansanfilippo/xvb-data/refs/heads/main/data/lists/main.m3u"
+  " "
 ];
+
+
+
+
+const SERVER_PLAYLIST_URL = "https://raw.githubusercontent.com/jonathansanfilippo/xvb-data/refs/heads/main/data/lists/main.m3u";
+
+async function addServerPlaylist() {
+  try {
+    // 1) salva URL nelle playlist custom
+    let currentLists = [];
+    try {
+      currentLists = JSON.parse(localStorage.getItem(LOCAL_STORAGE_PLAYLISTS_KEY)) || [];
+    } catch (e) {
+      currentLists = [];
+    }
+
+    if (!currentLists.includes(SERVER_PLAYLIST_URL)) {
+      currentLists.push(SERVER_PLAYLIST_URL);
+      localStorage.setItem(LOCAL_STORAGE_PLAYLISTS_KEY, JSON.stringify(currentLists));
+    }
+
+    // 2) aggiorna PLAYLIST_URLS in RAM
+    PLAYLIST_URLS = getAllPlaylistUrls();
+
+    // 3) refresh (usa la tua funzione già esistente)
+    await refreshAllPlaylists();
+    updateServerIconState();
+
+
+    // opzionale: feedback
+    alert("Lista server caricata ✅");
+  } catch (err) {
+    console.error(err);
+    alert("Errore nel caricamento lista server ❌");
+  }
+}
+
+
+
+
 
 function getAllPlaylistUrls() {
   let custom = [];
@@ -23,20 +62,13 @@ function getAllPlaylistUrls() {
 
 let PLAYLIST_URLS = getAllPlaylistUrls();
 
-
-
 const EPG_URLS = [
   "https://raw.githubusercontent.com/jonathansanfilippo/xvb-data/refs/heads/main/data/guides/it.xml",
   "https://raw.githubusercontent.com/jonathansanfilippo/xvb-data/refs/heads/main/data/guides/uk.xml"
 ];
 
-/* ===== ONLINE USERS ===== */
 const serverUrl = "https://render-com-a2ck.onrender.com";
-
-/* ===== TAB TITLE ===== */
 const DEFAULT_TITLE = "XVB";
-
-/* ✅ scaling reference (TENUTO, ma ora fisso) */
 const UI_BASE_W = 1920;
 const UI_BASE_H = 1080;
 
@@ -49,8 +81,7 @@ let _playToken = 0;
 let hideUiTimer = null;
 let epgTimer = null;
 let activeChannelName = null;
-
-/* ✅ autoplay solo all’avvio */
+let activeChannelTvgId = "";
 let initialAutoplayDone = false;
 
 const el = {
@@ -67,32 +98,11 @@ const el = {
   clock: document.getElementById('sidebarClock')
 };
 
-
-
-/* ===========================
-   GROUP-TITLE (fallback)
-   =========================== */
-
 function getGroupFromExtinf(extinfLine, fallback = "Altri") {
   const m = String(extinfLine || "").match(/group-title="([^"]*)"/i);
   const g = (m && m[1] != null ? m[1] : "").trim();
   return g || fallback;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-/* ===========================
-   ✅ AUTO-SKIP & DEAD CHANNELS
-   =========================== */
 
 let activeChannelItemEl = null;
 
@@ -136,10 +146,6 @@ function markDeadAndSkip(reason) {
   }
 }
 
-/* ===========================
-   TIME / CLOCK
-   =========================== */
-
 const userTZ = Intl.DateTimeFormat().resolvedOptions().timeZone;
 const timeFmt = new Intl.DateTimeFormat("it-IT", {
   hour: "2-digit",
@@ -151,13 +157,10 @@ function fmtTime(d) {
   return d ? timeFmt.format(d) : "--:--";
 }
 
-/* ===========================
-   ✅ UI SCALE (FISSO)
-   =========================== */
-
 function applyUiScale() {
   document.documentElement.style.setProperty('--ui-scale', "1");
 }
+
 let _scaleRaf = null;
 function requestUiScale() {
   if (_scaleRaf) cancelAnimationFrame(_scaleRaf);
@@ -166,12 +169,9 @@ function requestUiScale() {
     _scaleRaf = null;
   });
 }
+
 window.addEventListener('resize', requestUiScale);
 window.addEventListener('orientationchange', requestUiScale);
-
-/* ===========================
-   TAB TITLE
-   =========================== */
 
 function updateTabTitle(channelName) {
   if (!channelName) {
@@ -180,10 +180,6 @@ function updateTabTitle(channelName) {
   }
   document.title = `${channelName} • ${DEFAULT_TITLE}`;
 }
-
-/* ===========================
-   PLAY/PAUSE ICON
-   =========================== */
 
 function setPlayPauseIcon(isPlaying) {
   const btn = document.getElementById('playPauseBtn');
@@ -197,14 +193,10 @@ function setPlayPauseIcon(isPlaying) {
 
 function initPlayPauseSync() {
   if (!el.video) return;
-  el.video.addEventListener("play",  () => setPlayPauseIcon(true));
+  el.video.addEventListener("play", () => setPlayPauseIcon(true));
   el.video.addEventListener("pause", () => setPlayPauseIcon(false));
   el.video.addEventListener("ended", () => setPlayPauseIcon(false));
 }
-
-/* ===========================
-   SIDEBAR CLOCK
-   =========================== */
 
 function formatSidebarClock(dateObj) {
   const fmt = new Intl.DateTimeFormat("it-IT", {
@@ -243,10 +235,6 @@ function initSidebarClock() {
   tick();
   setInterval(tick, 30000);
 }
-
-/* ===========================
-   ONLINE USERS
-   =========================== */
 
 function formatNumber(num) {
   if (num >= 1_000_000) return (num / 1_000_000).toFixed(1).replace('.0', '') + 'M';
@@ -321,10 +309,6 @@ function initOnlineUsers() {
   }
 }
 
-/* ===========================
-   QUALITY BADGE (LOGICA UNIFICATA)
-   =========================== */
-
 function showQualityBadge(label, opts = {}) {
   if (!el.qBadge) return;
 
@@ -349,11 +333,11 @@ function showQualityBadge(label, opts = {}) {
 
 function qualityIconForKey(key) {
   switch (key) {
-    case "4k":  return "fa-duotone fa-solid fa-rectangle-4k";
+    case "4k": return "fa-duotone fa-solid fa-rectangle-4k";
     case "hdr": return "fa-duotone fa-solid  fa-rectangle-high-dynamic-range";
-    case "hd":  return "fa-duotone fa-solid  fa-high-definition";
-    case "sd":  return "fa-duotone fa-solid  fa-standard-definition";
-    default:    return "";
+    case "hd": return "fa-duotone fa-solid  fa-high-definition";
+    case "sd": return "fa-duotone fa-solid  fa-standard-definition";
+    default: return "";
   }
 }
 
@@ -361,8 +345,8 @@ function keyFromHeight(h) {
   h = Number(h) || 0;
   if (h >= 2160) return "4k";
   if (h >= 1080) return "hdr";
-  if (h >= 720)  return "hd";
-  if (h > 0)     return "sd";
+  if (h >= 720) return "hd";
+  if (h > 0) return "sd";
   return "";
 }
 
@@ -370,14 +354,10 @@ function labelFromHeight(h) {
   h = Number(h) || 0;
   if (h >= 2160) return "4K";
   if (h >= 1080) return "1080p";
-  if (h >= 720)  return "720p";
-  if (h > 0)     return h + "p";
+  if (h >= 720) return "720p";
+  if (h > 0) return h + "p";
   return "AUTO";
 }
-
-/* ===========================
-   LOAD STATUS (SPINNER / ERROR) - usa #qualityBadge
-   =========================== */
 
 function showLoadStatus(state, opts = {}) {
   if (!el.qBadge) return;
@@ -415,10 +395,6 @@ function hideLoadStatus(token) {
   }
 }
 
-/* ===========================
-   AUDIO ONLY BADGE (radio icon)
-   =========================== */
-
 function showRadioBadge() {
   if (!el.qBadge) return;
   el.qBadge.style.display = "inline-flex";
@@ -445,13 +421,6 @@ function checkIfAudioOnlyAndShowIcon(token) {
   });
 }
 
-
-
-
-/* ===========================
-   MEDIA PROGRESS (NO EPG) -> barra avanzamento/buffer
-   =========================== */
-
 let mediaBarTimer = null;
 
 function stopMediaBar() {
@@ -467,23 +436,20 @@ function updateMediaProgressBar() {
   const v = el.video;
   const d = v.duration;
 
-  // VOD: currentTime/duration
   if (isFinite(d) && d > 0) {
     const pct = (v.currentTime / d) * 100;
     el.epgFill.style.width = Math.max(0, Math.min(100, pct)) + "%";
     return;
   }
 
-  // LIVE: usa buffer ahead come "indicatore"
   let bufferedAhead = 0;
   try {
     if (v.buffered && v.buffered.length) {
       const end = v.buffered.end(v.buffered.length - 1);
       bufferedAhead = Math.max(0, end - v.currentTime);
     }
-  } catch {}
+  } catch { }
 
-  // 0..20s buffer => 0..100%
   const WINDOW = 20;
   const pct = (Math.min(bufferedAhead, WINDOW) / WINDOW) * 100;
   el.epgFill.style.width = Math.max(0, Math.min(100, pct)) + "%";
@@ -494,13 +460,6 @@ function startMediaBar() {
   updateMediaProgressBar();
   mediaBarTimer = setInterval(updateMediaProgressBar, 250);
 }
-
-
-
-
-/* ===========================
-   DETECTION & LISTENERS
-   =========================== */
 
 function detectQualityFromName(name) {
   const n = (name || "").toUpperCase();
@@ -575,39 +534,62 @@ function attachDashQualityListeners(nameForFallback) {
   dashInst.on(ev.ERROR, () => detectQualityFromName(nameForFallback));
 }
 
-/* ===========================
-   EPG
-   =========================== */
+function normalizeEPGName(input) {
+  if (!input) return "";
 
-function normalizeEPGName(str) {
-  if (!str) return "";
-  return str
-    .replace(/(\.?)(uk|it)$/i, '')
-    .replace(/_/g, ' ')
-    .replace(/([a-z])([A-Z])/g, '$1 $2')
-    .replace(/([A-Za-z])(\d)/g, '$1 $2')
-    .replace(/(\d)([A-Za-z])/g, '$1 $2')
+  let s = String(input).trim();
+  s = s.split("@")[0];
+  s = s.split("?")[0].split("#")[0];
+  s = s.replace(/\[.*?\]|\(.*?\)/g, " ");
+  s = s.replace(/[._\-]+/g, " ");
+  s = s.replace(/[^a-zA-Z0-9\s+]/g, " ");
+
+  s = s
+    .replace(/\s+/g, " ")
+    .trim()
     .toLowerCase()
-    .normalize("NFD").replace(/[\u0300-\u036f]/g, '')
-    .replace(/\[.*?\]|\(.*?\)/g, '')
-    .replace(/\bbbc\s*one(\s*(london|north|south))?\b/g, 'bbc1')
-    .replace(/\bbbc\s*two\b/g, 'bbc2')
-    .replace(/\bbbc\s*three\b/g, 'bbc3')
-    .replace(/\bbbc\s*four\b/g, 'bbc4')
-    .replace(/\bbbc\s*news\b/g, 'bbcnews')
-    .replace(/\bbbc\s*world\s*news\b/g, 'bbcworldnews')
-    .replace(/\bitv\s*one\b/g, 'itv1')
-    .replace(/\bitv\s*([2-4])\b/g, 'itv$1')
-    .replace(/\bchannel\s*four\b/g, 'channel4')
-    .replace(/\b(e4|film4|more4|4seven)\b/g, m => m.replace('4', ' 4'))
-    .replace(/\b(hd|fhd|sd|uhd|plus|extra|direct|premium|now|live|east|west|north|south|central)\b/g, '')
-    .replace(/(rete\s*4|retequattro)/g, 'rete4')
-    .replace(/canale\s*5/g, 'canale5')
-    .replace(/italia\s*1/g, 'italia1')
-    .replace(/tv\s*8/g, 'tv8')
-    .replace(/\bnove\b/g, '9')
-    .replace(/[^a-z0-9]/g, '')
-    .trim();
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+  s = s
+    .replace(/\b\+?\s*1\b/g, " plus1")
+    .replace(/\bplus\s*1\b/g, " plus1");
+
+  s = s.replace(/\b(uhd|fhd|hdr|hd|sd|1080p|720p|480p|2160p)\b/g, " ");
+  s = s.replace(/\b(live|east|west|north|south|central|london|lon|yorks|y and l|wm|ni|wal|scot|se|sw|emid|nwest|sth|westhd|easthd)\b/g, " ");
+  s = s.replace(/\b(uk|it|us|gb|row|emea)\b$/g, "").trim();
+
+  s = s
+    .replace(/\bbbc\s+one\b/g, "bbc1")
+    .replace(/\bbbc\s+two\b/g, "bbc2")
+    .replace(/\bbbc\s+three\b/g, "bbc3")
+    .replace(/\bbbc\s+four\b/g, "bbc4")
+    .replace(/\bbbc\s+news\b/g, "bbcnews")
+    .replace(/\bitv\s+one\b/g, "itv1")
+    .replace(/\bchannel\s+four\b/g, "channel4")
+    .replace(/\bfilm\s*4\b/g, "film4")
+    .replace(/\bmore\s*4\b/g, "more4")
+    .replace(/\b4\s*seven\b/g, "4seven");
+
+  return s.replace(/[^a-z0-9]/g, "");
+}
+
+function epgKeysForChannel({ tvgId = "", name = "" } = {}) {
+  const keys = new Set();
+
+  const baseId = String(tvgId || "").trim();
+  const baseName = String(name || "").trim();
+
+  if (baseId) {
+    keys.add(normalizeEPGName(baseId));
+    keys.add(normalizeEPGName(baseId.split("@")[0]));
+    keys.add(normalizeEPGName(baseId.replace(/(\.?(uk|it|us|gb))\b/i, "")));
+  }
+
+  if (baseName) {
+    keys.add(normalizeEPGName(baseName));
+  }
+
+  return Array.from(keys).filter(Boolean);
 }
 
 function parseXmlDate(s) {
@@ -631,7 +613,8 @@ async function fetchEpg() {
 
     const results = await Promise.allSettled(
       (EPG_URLS || []).map(async (url) => {
-        const res = await fetch(url);
+        const bust = (url.includes("?") ? "&" : "?") + "t=" + Date.now();
+        const res = await fetch(url + bust, { cache: "no-store" });
         if (!res.ok) throw new Error(`HTTP ${res.status} su ${url}`);
         const text = await res.text();
         const xml = new DOMParser().parseFromString(text, "application/xml");
@@ -641,7 +624,10 @@ async function fetchEpg() {
     );
 
     results.forEach(r => {
-      if (r.status !== "fulfilled") return;
+      if (r.status !== "fulfilled") {
+        console.warn("[EPG] load failed:", r.reason);
+        return;
+      }
 
       const xml = r.value;
       const programs = Array.from(xml.getElementsByTagName("programme"));
@@ -651,7 +637,7 @@ async function fetchEpg() {
         if (!channelId) return;
 
         const start = parseXmlDate(p.getAttribute("start"));
-        const stop  = parseXmlDate(p.getAttribute("stop"));
+        const stop = parseXmlDate(p.getAttribute("stop"));
         if (!start || !stop) return;
 
         const title = p.getElementsByTagName("title")[0]?.textContent || "Nessun titolo";
@@ -664,35 +650,42 @@ async function fetchEpg() {
     for (const [k, arr] of epgData.entries()) {
       arr.sort((a, b) => a.start - b.start);
     }
+
+    console.log("✅ EPG caricato. Canali con guida:", epgData.size);
   } catch (e) {
     console.error("Errore EPG:", e);
   }
 }
-function updateEPGUI(channelName) {
+
+function updateEPGUI(channelName, tvgId = "") {
   if (!el.epgNow || !el.epgFill || !el.epgNextList) return;
 
   const overlay = document.querySelector('.epg-overlay');
+  const keys = epgKeysForChannel({ tvgId, name: channelName });
 
-  const id = normalizeEPGName(channelName);
-  const list = epgData.get(id) || [];
+  let list = [];
+
+  for (const k of keys) {
+    const found = epgData.get(k);
+    if (found && found.length) {
+      list = found;
+      break;
+    }
+  }
+
   const now = new Date();
-
   const current = list.find(p => now >= p.start && now < p.stop);
 
-  // ✅ NO EPG -> barra media (verde)
   if (!current) {
-    overlay?.classList.add('media-progress');   // 🟢 verde
+    overlay?.classList.add('media-progress');
     el.epgNow.textContent = channelName || "Nessuna guida disponibile";
-
     el.epgNextList.innerHTML =
       "<p class='epg-next-item'><i class='fa-duotone fa-solid fa-circle-info'></i> Nessuna guida disponibile.</p>";
-
     startMediaBar();
     return;
   }
 
-  // ✅ EPG presente -> barra EPG (normale) e stop media bar
-  overlay?.classList.remove('media-progress'); // 🔵 normale
+  overlay?.classList.remove('media-progress');
   stopMediaBar();
 
   el.epgNow.textContent = current.title;
@@ -723,12 +716,10 @@ function updateEPGUI(channelName) {
   }
 }
 
-/* ===========================
-   PLAYER (HLS, DASH, MPEG-TS)
-   =========================== */
-
-function play(url, name) {
-  url = String(url || "");
+function play(ch) {
+  const url = String(ch?.url || "");
+  const name = String(ch?.name || "");
+  const tvgId = String(ch?.tvgId || "");
   const token = ++_playToken;
 
   const failAndSkip = (msg) => {
@@ -736,34 +727,31 @@ function play(url, name) {
     markDeadAndSkip(msg || "Stream non disponibile");
   };
 
-  // Spinner subito
   showQualityBadge("");
   showLoadStatus("loading", { token, title: `Caricamento: ${name || ""}` });
   updateTabTitle(name);
 
-  // Pulisci player precedenti
-  if (hlsInst) { try { hlsInst.destroy(); } catch {} hlsInst = null; }
-  if (dashInst) { try { dashInst.reset(); } catch {} dashInst = null; }
+  if (hlsInst) { try { hlsInst.destroy(); } catch { } hlsInst = null; }
+  if (dashInst) { try { dashInst.reset(); } catch { } dashInst = null; }
   if (mpegtsInst) {
     try {
       mpegtsInst.pause();
       mpegtsInst.unload();
       mpegtsInst.detachMediaElement();
       mpegtsInst.destroy();
-    } catch {}
+    } catch { }
     mpegtsInst = null;
   }
 
-  // Reset video element
   el.video.pause();
   el.video.removeAttribute("src");
   el.video.load();
+
   stopMediaBar();
-document.querySelector('.epg-overlay')?.classList.remove('media-progress');
-  // 🔥 rileva audio-only (anche se categoria TV)
+  document.querySelector('.epg-overlay')?.classList.remove('media-progress');
+
   checkIfAudioOnlyAndShowIcon(token);
 
-  // Eventi stato
   el.video.onplaying = () => {
     if (token !== _playToken) return;
     hideLoadStatus(token);
@@ -792,16 +780,15 @@ document.querySelector('.epg-overlay')?.classList.remove('media-progress');
     failAndSkip(msg);
   };
 
-  // EPG
   activeChannelName = name;
-  updateEPGUI(name);
+  activeChannelTvgId = tvgId;
+  updateEPGUI(name, tvgId);
 
   clearInterval(epgTimer);
   epgTimer = setInterval(() => {
-    if (activeChannelName) updateEPGUI(activeChannelName);
+    if (activeChannelName) updateEPGUI(activeChannelName, activeChannelTvgId);
   }, 15000);
 
-  // Motore
   if (url.includes(".mpd")) {
     dashInst = dashjs.MediaPlayer().create();
     dashInst.initialize(el.video, url, true);
@@ -814,7 +801,7 @@ document.querySelector('.epg-overlay')?.classList.remove('media-progress');
         showLoadStatus("error", { token, title: msg });
         failAndSkip(msg);
       });
-    } catch {}
+    } catch { }
 
   } else if (url.includes(".m3u8")) {
     if (Hls.isSupported()) {
@@ -825,7 +812,7 @@ document.querySelector('.epg-overlay')?.classList.remove('media-progress');
 
       hlsInst.on(Hls.Events.MANIFEST_PARSED, () => {
         if (token !== _playToken) return;
-        el.video.play().catch(() => {});
+        el.video.play().catch(() => { });
       });
 
       hlsInst.on(Hls.Events.ERROR, (_, data) => {
@@ -840,7 +827,7 @@ document.querySelector('.epg-overlay')?.classList.remove('media-progress');
     } else {
       el.video.src = url;
       detectQualityFromName(name);
-      el.video.play().catch(() => {});
+      el.video.play().catch(() => { });
     }
 
   } else if (url.includes(".ts") || url.includes("type=m3u_plus")) {
@@ -864,36 +851,36 @@ document.querySelector('.epg-overlay')?.classList.remove('media-progress');
           showLoadStatus("error", { token, title: msg });
           failAndSkip(msg);
         });
-      } catch {}
+      } catch { }
 
     } else {
       el.video.src = url;
-      el.video.play().catch(() => {});
+      el.video.play().catch(() => { });
     }
 
   } else {
     el.video.src = url;
     detectQualityFromName(name);
-    el.video.play().catch(() => {});
+    el.video.play().catch(() => { });
   }
 }
 
-/* ===========================
-   ICONA TIPO CANALE
-   =========================== */
-
 function updateChannelTypeIcon(groupName) {
   const icon = document.getElementById("channelTypeIcon");
-  if (!icon) return;
+  const textEl = document.getElementById("channelTypeText"); // ✅ span testo
+  if (!icon && !textEl) return;
 
   const isRadio = String(groupName || "").toLowerCase().includes("radio");
-  icon.className = isRadio ? "fa-solid fa-radio" : "fa-solid fa-tv";
-  icon.style.color = "#ffffff8a";
-}
 
-/* ===========================
-   CONTATORE DINAMICO (Radio vs TV)
-   =========================== */
+  if (icon) {
+    icon.className = isRadio ? "fa-solid fa-radio" : "fa-solid fa-tv";
+    icon.style.color = "#ffffff8a";
+  }
+
+  if (textEl) {
+    textEl.textContent = isRadio ? "Radio" : "TV";
+  }
+}
 
 function updateGroupCount(groupName) {
   const g = String(groupName || "").toLowerCase();
@@ -914,11 +901,8 @@ function updateGroupCount(groupName) {
   if (elCount) elCount.textContent = count;
 }
 
-/* ===========================
-   SISTEMA DI CARICAMENTO IBRIDO (URL + LOCALE)
-   =========================== */
-
 async function init() {
+    updateServerIconState(); 
   applyUiScale();
   updateTabTitle(null);
   initPlayPauseSync();
@@ -936,6 +920,7 @@ async function init() {
 
     console.log("Aggiornamento canali da URL in corso...");
     await refreshAllPlaylists();
+    updateGlobalCounts(); 
 
   } catch (e) {
     console.error("Errore critico durante init:", e);
@@ -951,7 +936,8 @@ async function refreshAllPlaylists() {
     if (!url) continue;
 
     try {
-      const res = await fetch(url);
+      const bust = (url.includes("?") ? "&" : "?") + "t=" + Date.now();
+      const res = await fetch(url + bust, { cache: "no-store" });
       const text = await res.text();
       const lines = text.split('\n');
       let cur = null;
@@ -962,7 +948,8 @@ async function refreshAllPlaylists() {
           const nome = l.split(',').pop().trim();
           const logo = (l.match(/tvg-logo="([^"]*)"/i) || [])[1] || "";
           const group = (l.match(/group-title="([^"]*)"/i) || [])[1] || "Generale";
-          cur = { name: nome, logo, group };
+          const tvgId = (l.match(/tvg-id="([^"]*)"/i) || [])[1] || "";
+          cur = { name: nome, logo, group, tvgId };
         } else if (l.startsWith('http') && cur) {
           cur.url = l;
 
@@ -981,11 +968,12 @@ async function refreshAllPlaylists() {
   if (hasNew) {
     saveToCache();
     renderCats();
+    updateServerIconState();
     console.log("Playlist aggiornate. Canali totali in memoria:", allChannels.length);
   }
+  updateGlobalCounts();
 }
 
-/* ✅ helper: seleziona categoria senza autoplay */
 function selectCategory(cat, opts = {}) {
   const { autoplayFirst = false } = opts;
 
@@ -1042,14 +1030,14 @@ function makeChannelItem(ch) {
 
   div.innerHTML = `
     ${ch.logo
-      ? `<img class="item-img" src="${ch.logo}"
+    ? `<img class="item-img" src="${ch.logo}"
            onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-flex';">`
-      : `<span class="item-icon"><i class="fa-duotone fa-solid fa-clapperboard-play"></i></span>`
-    }
+    : `<span class="item-icon"><i class="fa-duotone fa-solid fa-clapperboard-play"></i></span>`
+  }
     ${ch.logo
-      ? `<span class="item-icon" style="display:none;"><i class="fa-duotone fa-solid fa-clapperboard-play"></i></span>`
-      : ""
-    }
+    ? `<span class="item-icon" style="display:none;"><i class="fa-duotone fa-solid fa-clapperboard-play"></i></span>`
+    : ""
+  }
     <span>${ch.name}</span>
   `;
 
@@ -1064,7 +1052,7 @@ function makeChannelItem(ch) {
     if (l) { l.src = ch.logo; l.style.display = 'block'; }
 
     updateChannelTypeIcon(ch.group);
-    play(ch.url, ch.name);
+    play(ch);
   };
 
   return div;
@@ -1086,10 +1074,6 @@ function renderChansFiltered(cat, term) {
     .filter(c => String(c.name).toLowerCase().includes(term))
     .forEach(ch => el.chans.appendChild(makeChannelItem(ch)));
 }
-
-/* ===========================
-   SEARCH GLOBALE (tutte le categorie)
-   =========================== */
 
 function applyGlobalSearch(termRaw) {
   const term = (termRaw || "").trim().toLowerCase();
@@ -1142,10 +1126,6 @@ if (searchInput) {
   });
 }
 
-/* ===========================
-   UI AUTO HIDE
-   =========================== */
-
 function showUI() {
   if (!el.ui) return;
   el.ui.classList.add('visible');
@@ -1158,10 +1138,6 @@ document.addEventListener('keydown', showUI);
 
 init();
 
-/* ===========================
-   URL, FILE, CACHE
-   =========================== */
-
 async function addCustomUrl() {
   const url = prompt("Inserisci l'URL della playlist M3U:");
   if (!url || !url.startsWith('http')) return;
@@ -1169,7 +1145,7 @@ async function addCustomUrl() {
   let currentLists = [];
   try {
     currentLists = JSON.parse(localStorage.getItem(LOCAL_STORAGE_PLAYLISTS_KEY)) || [];
-  } catch(e) { currentLists = []; }
+  } catch (e) { currentLists = []; }
 
   if (!currentLists.includes(url)) {
     currentLists.push(url);
@@ -1188,7 +1164,8 @@ async function addCustomUrl() {
           const nome = l.split(',').pop().trim();
           const logo = (l.match(/tvg-logo="([^"]*)"/i) || [])[1] || "";
           const group = (l.match(/group-title="([^"]*)"/i) || [])[1] || "Altri";
-          cur = { name: nome, logo, group };
+          const tvgId = (l.match(/tvg-id="([^"]*)"/i) || [])[1] || "";
+          cur = { name: nome, logo, group, tvgId };
         } else if (l.startsWith('http') && cur) {
           cur.url = l;
           if (!allChannels.some(ch => ch.url === cur.url)) {
@@ -1202,9 +1179,11 @@ async function addCustomUrl() {
       if (added > 0) {
         saveToCache();
         renderCats();
+        updateGlobalCounts();
+        updateServerIconState();
         alert(`Aggiunti ${added} nuovi canali! I tuoi canali locali sono al sicuro.`);
       }
-    } catch(err) {
+    } catch (err) {
       alert("Errore nel caricamento dell'URL.");
     }
   } else {
@@ -1229,7 +1208,8 @@ function loadLocalFile(event) {
         const nome = l.split(',').pop().trim();
         const logo = (l.match(/tvg-logo="([^"]*)"/i) || [])[1] || "";
         const group = (l.match(/group-title="([^"]*)"/i) || [])[1] || "Altri";
-        cur = { name: nome, logo, group };
+        const tvgId = (l.match(/tvg-id="([^"]*)"/i) || [])[1] || "";
+        cur = { name: nome, logo, group, tvgId };
       } else if (l.startsWith('http') && cur) {
         cur.url = l;
         localChans.push(cur);
@@ -1243,8 +1223,11 @@ function loadLocalFile(event) {
 
       saveToCache();
       renderCats();
+      updateGlobalCounts();
+      updateServerIconState();
       alert("Caricati " + localChans.length + " canali dal Altri.");
     } else {
+       updateServerIconState();
       alert("Il file non sembra una playlist M3U valida.");
     }
   };
@@ -1281,10 +1264,6 @@ function saveToCache() {
   }
 }
 
-/* ===========================
-   CLOCK (current-date)
-   =========================== */
-
 function updateDateTime() {
   const oraAttuale = new Date();
   const options = { hour: '2-digit', minute: '2-digit', hour12: false };
@@ -1297,10 +1276,6 @@ function updateDateTime() {
 
 updateDateTime();
 setInterval(updateDateTime, 60000);
-
-/* ===========================
-   PLAYER CONTROLS (FIXED)
-   =========================== */
 
 function togglePlay() {
   if (!el.video) return;
@@ -1328,7 +1303,7 @@ function forward() {
 
 function toggleFullScreen() {
   if (!document.fullscreenElement) {
-    document.documentElement.requestFullscreen().catch(() => {});
+    document.documentElement.requestFullscreen().catch(() => { });
   } else {
     if (document.exitFullscreen) document.exitFullscreen();
   }
@@ -1341,16 +1316,12 @@ function setupControlListeners() {
   const btnFS = document.getElementById('fullScreenBtn') || document.querySelector('.fa-expand')?.parentElement;
 
   if (btnPlay) btnPlay.onclick = (e) => { e.stopPropagation(); togglePlay(); };
-  if (btnRW)   btnRW.onclick   = (e) => { e.stopPropagation(); rewind(); };
-  if (btnFF)   btnFF.onclick   = (e) => { e.stopPropagation(); forward(); };
-  if (btnFS)   btnFS.onclick   = (e) => { e.stopPropagation(); toggleFullScreen(); };
+  if (btnRW) btnRW.onclick = (e) => { e.stopPropagation(); rewind(); };
+  if (btnFF) btnFF.onclick = (e) => { e.stopPropagation(); forward(); };
+  if (btnFS) btnFS.onclick = (e) => { e.stopPropagation(); toggleFullScreen(); };
 
   console.log("Listeners Player: Agganciati ✅");
 }
-
-/* ===========================
-   CONTROLLI VOLUME STYLE YT
-   =========================== */
 
 function changeVolume(val) {
   if (!el.video) return;
@@ -1360,8 +1331,8 @@ function changeVolume(val) {
   const muteBtnIcon = document.querySelector('#muteBtn i');
   if (muteBtnIcon) {
     muteBtnIcon.className = volumeValue === 0 ? "fa-duotone fa-solid fa-volume-xmark" :
-                            volumeValue < 0.5 ? "fa-duotone  fa-solid fa-volume-low" :
-                            "fa-duotone  fa-solid fa-volume-high";
+      volumeValue < 0.5 ? "fa-duotone  fa-solid fa-volume-low" :
+        "fa-duotone  fa-solid fa-volume-high";
   }
 }
 
@@ -1394,4 +1365,75 @@ function initVolumeYT() {
       changeVolume(v);
     };
   }
+}
+
+
+
+function updateGlobalCounts() {
+  if (!Array.isArray(allChannels)) return;
+
+  const totalRadio = allChannels.filter(ch =>
+    String(ch.group || "").toLowerCase().includes("radio")
+  ).length;
+
+  const totalTv = allChannels.length - totalRadio;
+  const totalAll = allChannels.length;
+
+  const elTv = document.getElementById("totalTv");
+  const elRadio = document.getElementById("totalRadio");
+  const elAll = document.getElementById("totalAll");
+
+  if (elTv) elTv.textContent = totalTv;
+  if (elRadio) elRadio.textContent = totalRadio;
+  if (elAll) elAll.textContent = totalAll;
+}
+
+
+async function fetchEpgUkTime() {
+  try {
+    const url = "https://raw.githubusercontent.com/jonathansanfilippo/xvb-data/refs/heads/main/data/log/epg";
+    
+    // cache busting
+    const response = await fetch(url + "?t=" + Date.now(), {
+      cache: "no-store"
+    });
+
+    if (!response.ok) {
+      throw new Error("Errore fetch");
+    }
+
+    const time = (await response.text()).trim();
+    document.getElementById("epg-uk-time").textContent = time;
+
+  } catch (error) {
+    console.error(error);
+    document.getElementById("epg-uk-time").textContent = "--:--";
+  }
+}
+
+// prima esecuzione immediata
+fetchEpgUkTime();
+
+// auto refresh ogni 60 secondi
+setInterval(fetchEpgUkTime, 60000);
+
+
+function updateServerIconState() {
+  const icon = document.getElementById("serverListIcon");
+  if (!icon) return;
+
+  let custom = [];
+  try {
+    const stored = localStorage.getItem(LOCAL_STORAGE_PLAYLISTS_KEY);
+    custom = stored ? JSON.parse(stored) : [];
+  } catch {
+    custom = [];
+  }
+
+  const hasAnyPlaylist = Array.isArray(custom) && custom.length > 0;
+  const hasAnyChannels  = Array.isArray(allChannels) && allChannels.length > 0;
+
+  // fa-fade SOLO se non hai niente (né liste né canali)
+  if (!hasAnyPlaylist && !hasAnyChannels) icon.classList.add("fa-fade");
+  else icon.classList.remove("fa-fade");
 }
