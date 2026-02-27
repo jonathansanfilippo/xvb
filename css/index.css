@@ -82,7 +82,7 @@ body{
 a{ text-decoration: none !important; color: inherit; }
 a:focus-visible{ outline: none; box-shadow: var(--focus); border-radius: 14px; }
 
-img, video{ max-width:100%; display:block; }
+img, video{ max-width:133%; display:block; }
 
 .container{
   width: min(var(--container), calc(100% - 40px));
@@ -264,9 +264,9 @@ h1{
 /* Preview (no cut on right + premium) */
 .hero__media{ min-width: 0; }
 .img-preview{
-  width: 100%;
+  
   border-radius: 10px;
-  box-shadow: var(--shadow-2);
+  
 }
 
 /* =========================================================
