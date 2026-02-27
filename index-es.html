@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="es" id="top">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>XVB – Extended Video Broadcasting Core</title>
+  <meta name="description" content="Motor de streaming de vídeo ligero basado en la web para IPTV y transmisiones en vivo." />
+  <link rel="icon" type="image/png" href="assets/icon.jpg">
+  <link rel="stylesheet" href="css/index.css" />
+  <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v7.2.0/css/all.css">
+</head>
+
+<body>
+  <header class="header">
+    <div class="container header__top">
+      <a class="brand" href="index-es.html" aria-label="XVB Inicio">
+        <img class="brand__logo" src="assets/icon.jpg" alt="Logo XVB" />
+        <span class="brand__name">Extended Video Broadcasting</span>
+      </a>
+
+      <div class="header__actions">
+       <div class="flags" aria-label="Language">
+          <a class="flag-link" href="index.html" title="English" aria-label="English">
+            <img src="https://raw.githubusercontent.com/lipis/flag-icons/refs/heads/main/flags/4x3/gb.svg" alt="English">
+          </a>
+          <a class="flag-link" href="index-it.html" title="Italiano" aria-label="Italiano">
+            <img src="https://raw.githubusercontent.com/lipis/flag-icons/refs/heads/main/flags/4x3/it.svg" alt="Italiano">
+          </a>
+          <a class="flag-link" href="index-fr.html" title="Français" aria-label="Français">
+            <img src="https://raw.githubusercontent.com/lipis/flag-icons/refs/heads/main/flags/4x3/fr.svg" alt="Français">
+          </a>
+          <a class="flag-link" href="index-es.html" title="Español" aria-label="Español">
+            <img src="https://raw.githubusercontent.com/lipis/flag-icons/refs/heads/main/flags/4x3/es.svg" alt="Español">
+          </a>
+          <a class="flag-link" href="index-zh.html" title="中文" aria-label="中文">
+            <img src="https://raw.githubusercontent.com/lipis/flag-icons/refs/heads/main/flags/4x3/cn.svg" alt="中文">
+          </a>
+          <a class="flag-link" href="index-jp.html" title="日本語" aria-label="日本語">
+            <img src="https://raw.githubusercontent.com/lipis/flag-icons/refs/heads/main/flags/4x3/jp.svg" alt="日本語">
+          </a>
+        </div>
+
+        <a class="icon-link" href="https://github.com/jonathansanfilippo/xvb" target="_blank" rel="noreferrer" aria-label="GitHub">
+          <i class="fa-brands fa-github"></i>
+        </a>
+
+        <a class="btn btn--primary" href="xvb.html">Lanzar Reproductor</a>
+      </div>
+    </div>
+
+    <div class="subnav">
+      <div class="container subnav__inner" aria-label="Navegación">
+        <a href="#overview">Resumen</a>
+        <a href="#streaming">Streaming</a>
+        <a href="#guide">Guía</a>
+        <a href="#features">Funciones</a>
+        <a href="#playlist">Playlist</a>
+        <a href="#limitations">Limitaciones</a>
+        <a href="#legal">Legal</a>
+        <a href="#architecture">Arquitectura</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container hero__grid">
+        <div class="hero__content">
+          <p class="kicker">Núcleo de reproducción</p>
+          <h1>IPTV y streaming en vivo confiable.</h1>
+          <p class="hero__lead">
+            XVB es un motor de streaming ligero para navegadores diseñado para IPTV y fuentes en vivo.
+            Se enfoca en la estabilidad de reproducción, amplia compatibilidad de formatos, inicio rápido y
+            una interfaz fluida que responde incluso en sesiones prolongadas.
+          </p>
+
+          <div class="hero__actions">
+            <a class="btn btn--primary" href="xvb.html">Abrir Reproductor</a>
+            <a class="btn btn--outline" href="#overview">Saber más</a>
+          </div>
+
+          <div class="pill-row" aria-label="Formatos soportados">
+            <span class="pill">HLS</span>
+            <span class="pill">MPEG-DASH</span>
+            <span class="pill">MPEG-TS</span>
+            <span class="pill">MP4</span>
+            <span class="pill">M3U/M3U8</span>
+          </div>
+        </div>
+
+        <div class="hero__media">
+          <img src="assets/preview.png" alt="Vista previa de la interfaz XVB" class="img-preview" />
+        </div>
+      </div>
+    </section>
+
+    <section id="overview" class="section">
+      <div class="container">
+        <div class="grid-2">
+          <div class="card">
+            <h2 class="section-title">¿Qué es XVB?</h2>
+            <p class="muted">
+              XVB (Extended Video Broadcasting) es un núcleo de reproducción web que se ejecuta íntegramente en el cliente.
+              Está diseñado para gestionar IPTV y fuentes de transmisión directamente en el navegador, con
+              especial énfasis en la fiabilidad, compatibilidad y rendimiento.
+            </p>
+            <div class="spacer-16"></div>
+            <p class="muted">
+              Este proyecto no es una "plataforma backend de IPTV" — es un motor de reproducción especializado.
+              Tú aportas tus fuentes (playlists, flujos o archivos); XVB se encarga de la reproducción.
+            </p>
+          </div>
+
+          <div class="card">
+            <h2 class="section-title">Por qué es importante.</h2>
+            <ul class="check-list">
+              <li>Reproducción estable de larga duración (en vivo o VOD)</li>
+              <li>Inicialización y cambio de canales ultra rápidos</li>
+              <li>Compatible con los formatos de playlist IPTV comunes</li>
+              <li>Separación clara entre el motor de reproducción y la interfaz</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="streaming" class="section section--alt">
+      <div class="container">
+        <div class="section__head center">
+          <h2 class="section-title">Soporte de streaming.</h2>
+          <p class="muted">
+            Diseñado para entornos IPTV y una reproducción en vivo resiliente en redes inestables.
+          </p>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <h3 class="card-title">Protocolos y playlists</h3>
+            <p class="muted">
+              XVB soporta múltiples tecnologías de streaming utilizadas habitualmente:
+            </p>
+            <div class="spacer-16"></div>
+            <ul class="spec-list">
+              <li><strong>HLS</strong> (HTTP Live Streaming, .m3u8)</li>
+              <li><strong>MPEG-DASH</strong> (.mpd)</li>
+              <li><strong>MPEG-TS</strong> flujos en directo (.ts)</li>
+              <li><strong>M3U / M3U8</strong> playlists</li>
+              <li>Flujos estándar <strong>MP4</strong></li>
+            </ul>
+          </div>
+
+          <div class="card">
+            <h3 class="card-title">Formatos de medios reproducibles</h3>
+            <p class="muted">
+              Según el soporte del navegador, XVB puede reproducir los siguientes formatos:
+            </p>
+            <div class="spacer-16"></div>
+            <ul class="spec-list">
+              <li><strong>Vídeo:</strong> m3u8, mp4, webm, ogv, ts</li>
+              <li><strong>Audio:</strong> mp3, aac, m4a, ogg, opus, wav, flac</li>
+            </ul>
+            <div class="spacer-16"></div>
+            <p class="muted">
+              La disponibilidad de los códecs puede variar según el navegador y el dispositivo.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="guide" class="section">
+      <div class="container">
+        <div class="grid-2">
+          <div class="card">
+            <p class="kicker">Guía rápida</p>
+            <h2 class="section-title">Añadir playlists a XVB.</h2>
+            <p class="muted">
+              Este corto vídeo muestra el proceso: añade una URL M3U, carga un archivo local,
+              explora las categorías y lanza la reproducción.
+            </p>
+            <div class="spacer-16"></div>
+            <a class="btn btn--primary" href="xvb.html">Abrir Reproductor</a>
+          </div>
+
+          <div class="card">
+            <div class="video-card">
+              <video src="assets/guide.mp4" controls playsinline preload="metadata"></video>
+            </div>
+            <p class="video-note">Cómo añadir playlists y reproducir contenido.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="ui-guide" class="section section--alt" style="background-color: #0a121e; color: #e2e8f0; padding: 60px 0;">
+      <div class="container">
+        <div class="section__head center">
+          <p class="kicker" style="color: #38bdf8;">Manual de Usuario</p>
+          <h2 class="section-title" style="color: #fff;">Comprendiendo la Interfaz</h2>
+          <p class="muted" style="max-width: 800px; margin: 0 auto; color: #94a3b8;">
+            XVB cuenta con una barra de herramientas minimalista pero potente, diseñada para la velocidad y el monitoreo en tiempo real. 
+            Aquí tienes el detalle de cada elemento de tu tablero.
+          </p>
+        </div>
+
+        <div class="grid-3" style="margin-top: 40px;">
+          
+          <div class="card" style="background: #111b2d; border: 1px solid #1e293b;">
+            <h3 style="color: #38bdf8; font-size: 1.1rem;"><i class="fa-duotone fa-chart-simple"></i> Métricas Live</h3>
+            <ul style="list-style: none; padding: 0; font-size: 0.95rem; line-height: 2;">
+              <li><i class="fa-duotone fa-solid fa-clapperboard-play" style="width: 50px; font-size:25px;"></i> <strong>Contador de Canales:</strong> Muestra el número total de flujos reproducibles cargados actualmente desde tus listas activas.</li>
+              <li><i class="fa-duotone fa-solid fa-clock-rotate-left" style="width: 50px; font-size:25px;"></i> <strong>Estado EPG:</strong> Marca de tiempo en tiempo real de la última actualización de la Guía Electrónica de Programas (fuentes de Italia y Reino Unido).</li>
+              <li><i class="fa-duotone fa-solid fa-eye" style="width: 50px; font-size:25px;"></i> <strong>Usuarios Online:</strong> Indica cuántos usuarios están conectados actualmente al ecosistema XVB en todo el mundo.</li>
+            </ul>
+          </div>
+
+          <div class="card" style="background: #111b2d; border: 1px solid #1e293b;">
+            <h3 style="color: #38bdf8; font-size: 1.1rem;"><i class="fa-duotone fa-magnifying-glass"></i> Navegación</h3>
+            <ul style="list-style: none; padding: 0; font-size: 0.95rem; line-height: 2;">
+              <li><i class="fa-duotone fa-solid fa-magnifying-glass" style="width: 50px; font-size:25px;"></i> <strong>Búsqueda Inteligente:</strong> Filtrado instantáneo. Empieza a escribir el nombre de un canal para encontrarlo inmediatamente sin desplazarte.</li>
+              <li><i class="fa-duotone fa-solid fa-cloud-arrow-down" style="width: 50px; font-size:25px;"></i> <strong>Nube de Muestras:</strong> Si no hay listas, haz clic aquí para cargar una lista técnica de prueba (<strong>MP4, AAC, MP3, OGG, MPD, TS</strong> y <strong>HLS</strong>).</li>
+            </ul>
+          </div>
+
+          <div class="card" style="background: #111b2d; border: 1px solid #1e293b;">
+            <h3 style="color: #38bdf8; font-size: 1.1rem;"><i class="fa-duotone fa-folder-gear"></i> Gestión de Listas</h3>
+            <ul style="list-style: none; padding: 0; font-size: 0.95rem; line-height: 2;">
+              <li><i class="fa-duotone fa-solid fa-file-plus" style="width: 50px; font-size:25px;"></i> <strong>Añadir URL Remota:</strong> Importa enlaces M3U directos. Nota: este método se enfoca en enlaces estáticos directos para un rendimiento máximo.</li>
+              <li><i class="fa-duotone fa-solid fa-folder-plus" style="width: 50px; font-size:25px;"></i> <strong>Importación Local:</strong> Explora tu dispositivo para cargar archivos <code>.m3u</code> o <code>.m3u8</code> guardados localmente.</li>
+              <li><i class="fa-duotone fa-solid fa-trash-can" style="width: 50px; font-size:25px; color: #ff4d4d;"></i> <strong>Limpiar Caché:</strong> Borra al instante todas las listas almacenadas y los datos de la caché local del navegador.</li>
+            </ul>
+          </div>
+
+        </div>
+
+        <div style="margin-top: 30px; text-align: center; background: rgba(56, 189, 248, 0.05); padding: 20px; border-radius: 10px; border: 1px solid rgba(56, 189, 248, 0.2);">
+          <p style="margin: 0; font-size: 0.9rem; color: #cbd5e1;">
+            <i class="fa-duotone fa-solid fa-circle-info" style="color: #38bdf8;"></i> 
+            <strong>Consejo Pro:</strong> Usa el botón <strong>Limpiar Caché</strong> si experimentas problemas tras actualizar un archivo local. XVB guarda los datos en el cliente para un inicio ultra rápido.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section id="features" class="section section--alt">
+      <div class="container">
+        <div class="section__head">
+          <h2 class="section-title">Funciones de reproducción.</h2>
+          <p class="muted">
+            Características a nivel de motor para la estabilidad y reactividad del directo.
+          </p>
+        </div>
+
+        <div class="grid-3">
+          <div class="feature">
+            <i class="fa-duotone fa-signal-bars"></i>
+            <h4>Bitrate adaptativo</h4>
+            <p>Cambia automáticamente la calidad según las variantes del flujo.</p>
+          </div>
+
+          <div class="feature">
+            <i class="fa-duotone fa-rotate"></i>
+            <h4>Cambio en tiempo real</h4>
+            <p>Cambia de fuente rápidamente manteniendo la interfaz fluida.</p>
+          </div>
+
+          <div class="feature">
+            <i class="fa-duotone fa-shield-virus"></i>
+            <h4>Recuperación de errores</h4>
+            <p>Detecta errores en el flujo e intenta recuperarse para una visión continua.</p>
+          </div>
+
+          <div class="feature">
+            <i class="fa-duotone fa-expand"></i>
+            <h4>Controles nativos</h4>
+            <p>Pantalla completa, silencio y búsqueda temporal cuando el flujo lo permite.</p>
+          </div>
+
+          <div class="feature">
+            <i class="fa-duotone fa-clock-rotate-left"></i>
+            <h4>Estabilidad en vivo</h4>
+            <p>Optimizado para sesiones largas en canales de transmisión en vivo.</p>
+          </div>
+
+          <div class="feature">
+            <i class="fa-duotone fa-layer-group"></i>
+            <h4>Núcleo modular</h4>
+            <p>Integración limpia: el motor y la interfaz permanecen separables.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="playlist" class="section">
+      <div class="container">
+        <div class="grid-2">
+          <div class="card">
+            <p class="kicker">Playlists</p>
+            <h2 class="section-title">Crea tu propia playlist M3U.</h2>
+            <p class="muted">
+              XVB carga playlists desde una URL o un archivo local. El formato estándar es
+              <strong>M3U</strong> / <strong>M3U8</strong>, con metadatos (nombre, logo, grupo)
+              seguidos de la URL del flujo.
+            </p>
+            <div class="spacer-16"></div>
+            <p class="muted">
+              Consejo: utiliza <strong>group-title</strong> para las categorías y
+              <strong>tvg-logo</strong> para una interfaz más visual.
+            </p>
+          </div>
+
+          <div class="card">
+            <h3 class="card-title">Ejemplo M3U</h3>
+            <p class="muted" style="margin-bottom:12px;">
+              Guarda como <strong>mi-playlist.m3u</strong> (UTF-8).
+            </p>
+
+            <pre class="code-block"><code>#EXTM3U
+
+#EXTINF:-1 tvg-name="Canal Demo 1" tvg-logo="https://example.com/logo1.png" tvg-id="demo.canal.1" group-title="Noticias",Canal Demo 1
+https://example.com/stream/canal1.m3u8
+
+#EXTINF:-1 tvg-name="Radio Demo" tvg-logo="https://example.com/radio.png" tvg-id="demo.radio" group-title="Radio",Radio Demo
+https://example.com/audio/radio.mp3
+
+#EXTINF:-1 tvg-name="VOD Demo" tvg-logo="https://example.com/vod.png" group-title="Bajo demanda",VOD Demo
+https://example.com/video/demo.mp4
+</code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="limitations" class="section">
+      <div class="container">
+        <div class="card">
+          <p class="kicker">Notas técnicas</p>
+          <h2 class="section-title">Limitaciones del navegador.</h2>
+          <p class="muted">
+            XVB está sujeto a las reglas de seguridad web estándar: CORS (los servidores deben autorizar las peticiones),
+            HTTP/HTTPS (los flujos no seguros se bloquean en sitios HTTPS) y la compatibilidad de códecs.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section id="legal" class="section section--alt">
+      <div class="container">
+        <div class="card">
+          <p class="kicker">Uso responsable</p>
+          <h2 class="section-title">Usa XVB con fuentes autorizadas.</h2>
+          <p class="muted">
+            XVB es una herramienta neutra: no proporciona contenido. Eres responsable de las fuentes cargadas.
+            Evita la piratería y utiliza únicamente flujos de los que tengas derechos de acceso.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section id="architecture" class="section">
+      <div class="container center">
+        <h2 class="section-title">Arquitectura.</h2>
+        <p class="muted">Integramente en el cliente. Basado en HLS.js, DASH.js y las API nativas de HTML5.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer__inner">
+      <div class="footer__copy">
+        <strong>XVB</strong>
+        <div class="muted">Extended Video Broadcasting © 2026</div>
+      </div>
+      <a class="back-to-top" href="#top">
+        Volver arriba <i class="fa-light fa-chevron-up"></i>
+      </a>
+    </div>
+  </footer>
+</body>
+</html>

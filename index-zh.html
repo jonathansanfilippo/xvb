@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="zh" id="top">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>XVB – Extended Video Broadcasting Core</title>
+  <meta name="description" content="基于Web的轻量级视频流引擎，适用于IPTV和直播。" />
+  <link rel="icon" type="image/png" href="assets/icon.jpg">
+  <link rel="stylesheet" href="css/index.css" />
+  <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v7.2.0/css/all.css">
+</head>
+
+<body>
+  <header class="header">
+    <div class="container header__top">
+      <a class="brand" href="index-zh.html" aria-label="XVB 首页">
+        <img class="brand__logo" src="assets/icon.jpg" alt="XVB Logo" />
+        <span class="brand__name">Extended Video Broadcasting</span>
+      </a>
+
+      <div class="header__actions">
+       <div class="flags" aria-label="Language">
+          <a class="flag-link" href="index.html" title="English" aria-label="English">
+            <img src="https://raw.githubusercontent.com/lipis/flag-icons/refs/heads/main/flags/4x3/gb.svg" alt="English">
+          </a>
+          <a class="flag-link" href="index-it.html" title="Italiano" aria-label="Italiano">
+            <img src="https://raw.githubusercontent.com/lipis/flag-icons/refs/heads/main/flags/4x3/it.svg" alt="Italiano">
+          </a>
+          <a class="flag-link" href="index-fr.html" title="Français" aria-label="Français">
+            <img src="https://raw.githubusercontent.com/lipis/flag-icons/refs/heads/main/flags/4x3/fr.svg" alt="Français">
+          </a>
+          <a class="flag-link" href="index-es.html" title="Español" aria-label="Español">
+            <img src="https://raw.githubusercontent.com/lipis/flag-icons/refs/heads/main/flags/4x3/es.svg" alt="Español">
+          </a>
+          <a class="flag-link" href="index-zh.html" title="中文" aria-label="中文">
+            <img src="https://raw.githubusercontent.com/lipis/flag-icons/refs/heads/main/flags/4x3/cn.svg" alt="中文">
+          </a>
+          <a class="flag-link" href="index-jp.html" title="日本語" aria-label="日本語">
+            <img src="https://raw.githubusercontent.com/lipis/flag-icons/refs/heads/main/flags/4x3/jp.svg" alt="日本語">
+          </a>
+        </div>
+
+        <a class="icon-link" href="https://github.com/jonathansanfilippo/xvb" target="_blank" rel="noreferrer" aria-label="GitHub">
+          <i class="fa-brands fa-github"></i>
+        </a>
+
+        <a class="btn btn--primary" href="xvb.html">启动播放器</a>
+      </div>
+    </div>
+
+    <div class="subnav">
+      <div class="container subnav__inner" aria-label="导航">
+        <a href="#overview">概览</a>
+        <a href="#streaming">流媒体</a>
+        <a href="#guide">指南</a>
+        <a href="#features">功能</a>
+        <a href="#playlist">播放列表</a>
+        <a href="#limitations">限制说明</a>
+        <a href="#legal">法律</a>
+        <a href="#architecture">架构</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container hero__grid">
+        <div class="hero__content">
+          <p class="kicker">播放核心</p>
+          <h1>可靠的 IPTV 和直播流媒体。</h1>
+          <p class="hero__lead">
+            XVB 是一款专为 IPTV 和直播源设计的浏览器轻量级流媒体引擎。
+            它专注于播放稳定性、广泛的格式兼容性、快速启动以及在长时间运行中保持流畅的用户界面。
+          </p>
+
+          <div class="hero__actions">
+            <a class="btn btn--primary" href="xvb.html">打开播放器</a>
+            <a class="btn btn--outline" href="#overview">了解更多</a>
+          </div>
+
+          <div class="pill-row" aria-label="支持格式">
+            <span class="pill">HLS</span>
+            <span class="pill">MPEG-DASH</span>
+            <span class="pill">MPEG-TS</span>
+            <span class="pill">MP4</span>
+            <span class="pill">M3U/M3U8</span>
+          </div>
+        </div>
+
+        <div class="hero__media">
+          <img src="assets/preview.png" alt="XVB 界面预览" class="img-preview" />
+        </div>
+      </div>
+    </section>
+
+    <section id="overview" class="section">
+      <div class="container">
+        <div class="grid-2">
+          <div class="card">
+            <h2 class="section-title">什么是 XVB？</h2>
+            <p class="muted">
+              XVB (Extended Video Broadcasting) 是一个完全在客户端运行的 Web 播放核心。
+              它旨在直接在浏览器中处理 IPTV 和广播级视频源，强调可靠性、兼容性和性能。
+            </p>
+            <div class="spacer-16"></div>
+            <p class="muted">
+              本项目不是“IPTV 后端平台”——它是一个专注的播放引擎。
+              您提供来源（播放列表、流或文件），XVB 负责播放。
+            </p>
+          </div>
+
+          <div class="card">
+            <h2 class="section-title">为什么选择它。</h2>
+            <ul class="check-list">
+              <li>长时间稳定的播放（直播或点播）</li>
+              <li>极速的初始化和频道切换</li>
+              <li>兼容常见的 IPTV 播放列表格式</li>
+              <li>播放引擎与界面的清晰分离</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="streaming" class="section section--alt">
+      <div class="container">
+        <div class="section__head center">
+          <h2 class="section-title">流媒体支持。</h2>
+          <p class="muted">
+            专为 IPTV 环境设计，在不稳定的网络环境下提供极具韧性的直播播放。
+          </p>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <h3 class="card-title">协议与播放列表</h3>
+            <p class="muted">
+              XVB 支持多种常用的流媒体技术：
+            </p>
+            <div class="spacer-16"></div>
+            <ul class="spec-list">
+              <li><strong>HLS</strong> (HTTP Live Streaming, .m3u8)</li>
+              <li><strong>MPEG-DASH</strong> (.mpd)</li>
+              <li><strong>MPEG-TS</strong> 直播流 (.ts)</li>
+              <li><strong>M3U / M3U8</strong> 播放列表</li>
+              <li>标准 <strong>MP4</strong> 流</li>
+            </ul>
+          </div>
+
+          <div class="card">
+            <h3 class="card-title">可播放媒体格式</h3>
+            <p class="muted">
+              根据浏览器的支持情况，XVB 可以播放以下格式：
+            </p>
+            <div class="spacer-16"></div>
+            <ul class="spec-list">
+              <li><strong>视频：</strong> m3u8, mp4, webm, ogv, ts</li>
+              <li><strong>音频：</strong> mp3, aac, m4a, ogg, opus, wav, flac</li>
+            </ul>
+            <div class="spacer-16"></div>
+            <p class="muted">
+              解码器的可用性可能因浏览器和设备而异。
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="guide" class="section">
+      <div class="container">
+        <div class="grid-2">
+          <div class="card">
+            <p class="kicker">快速指南</p>
+            <h2 class="section-title">向 XVB 添加播放列表。</h2>
+            <p class="muted">
+              这段短视频展示了操作流程：添加 M3U URL，加载本地文件，浏览分类并开始播放。
+            </p>
+            <div class="spacer-16"></div>
+            <a class="btn btn--primary" href="xvb.html">打开播放器</a>
+          </div>
+
+          <div class="card">
+            <div class="video-card">
+              <video src="assets/guide.mp4" controls playsinline preload="metadata"></video>
+            </div>
+            <p class="video-note">如何添加播放列表并播放内容。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="ui-guide" class="section section--alt" style="background-color: #0a121e; color: #e2e8f0; padding: 60px 0;">
+      <div class="container">
+        <div class="section__head center">
+          <p class="kicker" style="color: #38bdf8;">用户手册</p>
+          <h2 class="section-title" style="color: #fff;">了解界面</h2>
+          <p class="muted" style="max-width: 800px; margin: 0 auto; color: #94a3b8;">
+            XVB 拥有极简且强大的工具栏，专为速度和实时监控而设计。
+            以下是仪表板中每个元素的详细说明。
+          </p>
+        </div>
+
+        <div class="grid-3" style="margin-top: 40px;">
+          
+          <div class="card" style="background: #111b2d; border: 1px solid #1e293b;">
+            <h3 style="color: #38bdf8; font-size: 1.1rem;"><i class="fa-duotone fa-chart-simple"></i> 实时指标</h3>
+            <ul style="list-style: none; padding: 0; font-size: 0.95rem; line-height: 2;">
+              <li><i class="fa-duotone fa-solid fa-clapperboard-play" style="width: 50px; font-size:25px;"></i> <strong>频道计数器：</strong> 显示当前从活动播放列表中加载的可播放流总数。</li>
+              <li><i class="fa-duotone fa-solid fa-clock-rotate-left" style="width: 50px; font-size:25px;"></i> <strong>EPG 状态：</strong> 电子节目指南最后更新的实时时间戳（意大利和英国源）。</li>
+              <li><i class="fa-duotone fa-solid fa-eye" style="width: 50px; font-size:25px;"></i> <strong>在线用户：</strong> 显示当前全球连接到 XVB 生态系统的用户数量。</li>
+            </ul>
+          </div>
+
+          <div class="card" style="background: #111b2d; border: 1px solid #1e293b;">
+            <h3 style="color: #38bdf8; font-size: 1.1rem;"><i class="fa-duotone fa-magnifying-glass"></i> 导航系统</h3>
+            <ul style="list-style: none; padding: 0; font-size: 0.95rem; line-height: 2;">
+              <li><i class="fa-duotone fa-solid fa-magnifying-glass" style="width: 50px; font-size:25px;"></i> <strong>智能搜索：</strong> 即时过滤。开始输入频道名称即可立即找到它，无需滚动。</li>
+              <li><i class="fa-duotone fa-solid fa-cloud-arrow-down" style="width: 50px; font-size:25px;"></i> <strong>示例云：</strong> 如果没有列表，点击此处加载技术示例列表以测试 <strong>MP4, AAC, MP3, OGG, MPD, TS</strong> 和 <strong>HLS</strong>。</li>
+            </ul>
+          </div>
+
+          <div class="card" style="background: #111b2d; border: 1px solid #1e293b;">
+            <h3 style="color: #38bdf8; font-size: 1.1rem;"><i class="fa-duotone fa-folder-gear"></i> 播放列表管理</h3>
+            <ul style="list-style: none; padding: 0; font-size: 0.95rem; line-height: 2;">
+              <li><i class="fa-duotone fa-solid fa-file-plus" style="width: 50px; font-size:25px;"></i> <strong>添加远程 URL：</strong> 导入直接的 M3U 链接。注：此方法针对静态直接链接以获得最高性能。</li>
+              <li><i class="fa-duotone fa-solid fa-folder-plus" style="width: 50px; font-size:25px;"></i> <strong>本地导入：</strong> 浏览您的设备并上传存储在本地的 <code>.m3u</code> 或 <code>.m3u8</code> 文件。</li>
+              <li><i class="fa-duotone fa-solid fa-trash-can" style="width: 50px; font-size:25px; color: #ff4d4d;"></i> <strong>清除缓存：</strong> 立即擦除浏览器本地缓存中存储的所有播放列表和数据。</li>
+            </ul>
+          </div>
+
+        </div>
+
+        <div style="margin-top: 30px; text-align: center; background: rgba(56, 189, 248, 0.05); padding: 20px; border-radius: 10px; border: 1px solid rgba(56, 189, 248, 0.2);">
+          <p style="margin: 0; font-size: 0.9rem; color: #cbd5e1;">
+            <i class="fa-duotone fa-solid fa-circle-info" style="color: #38bdf8;"></i> 
+            <strong>专家提示：</strong> 如果更新本地文件后遇到加载故障，请使用 <strong>清除缓存</strong> 按钮。XVB 将数据存储在客户端以实现极速启动。
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section id="features" class="section section--alt">
+      <div class="container">
+        <div class="section__head">
+          <h2 class="section-title">播放功能。</h2>
+          <p class="muted">
+            引擎级别的功能，确保直播的稳定性和响应性。
+          </p>
+        </div>
+
+        <div class="grid-3">
+          <div class="feature">
+            <i class="fa-duotone fa-signal-bars"></i>
+            <h4>自适应比特率</h4>
+            <p>根据流媒体变体自动切换质量。</p>
+          </div>
+
+          <div class="feature">
+            <i class="fa-duotone fa-rotate"></i>
+            <h4>实时切换</h4>
+            <p>快速切换信源，同时保持界面响应。</p>
+          </div>
+
+          <div class="feature">
+            <i class="fa-duotone fa-shield-virus"></i>
+            <h4>错误恢复</h4>
+            <p>检测流错误并尝试自动恢复，以实现持续观看。</p>
+          </div>
+
+          <div class="feature">
+            <i class="fa-duotone fa-expand"></i>
+            <h4>原生控制</h4>
+            <p>在流支持的情况下提供全屏、静音和进度搜索。</p>
+          </div>
+
+          <div class="feature">
+            <i class="fa-duotone fa-clock-rotate-left"></i>
+            <h4>直播稳定性</h4>
+            <p>针对直播频道的长时间播放进行了优化。</p>
+          </div>
+
+          <div class="feature">
+            <i class="fa-duotone fa-layer-group"></i>
+            <h4>模块化核心</h4>
+            <p>纯净集成：引擎与界面保持可分离性。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="playlist" class="section">
+      <div class="container">
+        <div class="grid-2">
+          <div class="card">
+            <p class="kicker">播放列表</p>
+            <h2 class="section-title">创建您自己的 M3U 列表。</h2>
+            <p class="muted">
+              XVB 从 URL 或本地文件加载播放列表。标准格式为 
+              <strong>M3U</strong> / <strong>M3U8</strong>，包含元数据（名称、Logo、分组）
+              后接流媒体 URL。
+            </p>
+            <div class="spacer-16"></div>
+            <p class="muted">
+              提示：使用 <strong>group-title</strong> 进行分类，
+              使用 <strong>tvg-logo</strong> 以获得更丰富的视觉界面。
+            </p>
+          </div>
+
+          <div class="card">
+            <h3 class="card-title">M3U 示例</h3>
+            <p class="muted" style="margin-bottom:12px;">
+              保存为 <strong>my-playlist.m3u</strong> (UTF-8 编码)。
+            </p>
+
+            <pre class="code-block"><code>#EXTM3U
+
+#EXTINF:-1 tvg-name="演示频道 1" tvg-logo="https://example.com/logo1.png" tvg-id="demo.channel.1" group-title="新闻",演示频道 1
+https://example.com/stream/channel1.m3u8
+
+#EXTINF:-1 tvg-name="演示电台" tvg-logo="https://example.com/radio.png" tvg-id="demo.radio" group-title="电台",演示电台
+https://example.com/audio/radio.mp3
+
+#EXTINF:-1 tvg-name="演示点播" tvg-logo="https://example.com/vod.png" group-title="点播内容",演示点播
+https://example.com/video/demo.mp4
+</code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="limitations" class="section">
+      <div class="container">
+        <div class="card">
+          <p class="kicker">技术笔记</p>
+          <h2 class="section-title">浏览器限制。</h2>
+          <p class="muted">
+            XVB 受标准 Web 安全规则约束：CORS（服务器必须允许请求）、
+            HTTP/HTTPS（在 HTTPS 网站上会拦截非安全流）以及解码器兼容性。
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section id="legal" class="section section--alt">
+      <div class="container">
+        <div class="card">
+          <p class="kicker">责任声明</p>
+          <h2 class="section-title">请使用合法授权的信源。</h2>
+          <p class="muted">
+            XVB 是一个中立工具：它不提供任何内容。您对加载的信源负全部责任。
+            请遵守版权法，仅使用您拥有访问权限的流媒体。
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section id="architecture" class="section">
+      <div class="container center">
+        <h2 class="section-title">架构。</h2>
+        <p class="muted">全客户端运行。基于 HLS.js、DASH.js 和原生 HTML5 API。</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer__inner">
+      <div class="footer__copy">
+        <strong>XVB</strong>
+        <div class="muted">Extended Video Broadcasting © 2026</div>
+      </div>
+      <a class="back-to-top" href="#top">
+        回到顶部 <i class="fa-light fa-chevron-up"></i>
+      </a>
+    </div>
+  </footer>
+</body>
+</html>

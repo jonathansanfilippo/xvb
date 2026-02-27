@@ -1,0 +1,124 @@
+/* =====================================
+   RESPONSIVE <= 1100px
+   Versione ULTRA COMPATTA
+   ===================================== */
+
+@media (max-width:1100px){
+
+  /* ===== TOP BAR ===== */
+  .video-controls-hint{
+    padding: 4px 16px;
+    font-size: 11px;
+    gap: 8px;
+  }
+
+  .video-controls-hint i{
+    font-size: 13px !important;
+  }
+
+  /* ===== SIDEBAR ===== */
+  .sidebar{
+    top: 38px;     /* top bar più bassa */
+    bottom: 110px; /* bottom panel più piccolo */
+  }
+
+  /* ===== BOTTOM PANEL ===== */
+  .epg-overlay{
+    bottom: 0;
+  }
+
+  .epg-card{
+    padding: 10px 24px;
+  }
+
+  .epg-content{
+    gap: 10px;
+  }
+
+  .activeName{
+    font-size: 17px;
+    margin-bottom: 2px;
+  }
+
+  #epgNowText{
+    font-size: 13px;
+  }
+
+  .date-display{
+    font-size: 12px;
+  }
+
+  /* ===== Progress Bar ===== */
+  .progress-bar{
+    height: 2px;
+    margin-top: 6px;
+  }
+
+  /* ===== PLAYER CONTROLS ===== */
+  .player-controls{
+    gap: 14px;
+    margin-top: 6px;
+  }
+
+  .player-controls button.icon-btn{
+    font-size: 16px;
+  }
+
+  .player-controls i{
+    font-size: 16px !important;
+  }
+
+  /* ===== Quality Badge ===== */
+  .quality-badge i{
+    font-size: 13px !important;
+  }
+/* ===== RIDIMENSIONA EPG "A SEGUIRE" ===== */
+
+.epg-next{
+  flex: 0 1 320px;     /* riduce larghezza colonna */
+  min-width: 200px;    /* evita che sia enorme */
+  padding-left: 18px;  /* meno spazio */
+}
+
+.label2{
+  font-size: 12px;     /* titolo A SEGUIRE più piccolo */
+  letter-spacing: 1px;
+}
+
+.epg-next-item{
+  font-size: 12px;     /* testi programmi più piccoli */
+  margin: 6px 0;
+}
+
+.epg-next-item span{
+  font-size: 11px;     /* orari più piccoli */
+}
+}
+
+
+
+
+
+/* =====================================
+   RESPONSIVE <= 820px
+   Nasconde bottom panel + cerca
+   ===================================== */
+
+@media (max-width:820px){
+
+  /* Nasconde pannello inferiore */
+  .epg-overlay{
+    display: none !important;
+  }
+
+  /* Sidebar ora possono scendere fino in fondo */
+  .sidebar{
+    bottom: 0 !important;
+  }
+
+  /* Nasconde campo cerca */
+  .channel-search{
+    display: none !important;
+  }
+
+}
