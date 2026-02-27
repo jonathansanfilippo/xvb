@@ -13,12 +13,12 @@
   }
 
   .video-controls-hint i{
-    font-size: 20px !important;
+    font-size: 50px !important;
   }
 
   /* ===== SIDEBAR ===== */
   .sidebar{
-    top: 38px;     /* top bar più bassa */
+    top: 100px;     /* top bar più bassa */
     bottom: 110px; /* bottom panel più piccolo */
 
   }
@@ -117,9 +117,8 @@
   }
 
   .video-controls-hint i{
-    font-size: 20px !important;
+    font-size: 26px !important;
   }
-
   /* Nasconde pannello inferiore */
   .epg-overlay{
     display: none !important;
@@ -127,6 +126,7 @@
 
   /* Sidebar ora possono scendere fino in fondo */
   .sidebar{
+    top:80px;
     bottom: 0 !important;
     width: 50% !important;
    
