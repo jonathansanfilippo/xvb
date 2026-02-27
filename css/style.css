@@ -274,12 +274,13 @@ font-weight: 700;
   padding: 8px 12px;
   cursor: pointer;
   border-radius: 2px;
-  margin-bottom: 6px;
+  margin-bottom: 2px;
   display: flex;
   align-items: center;
   transition: 0.25s ease;
   color: #fff;
-  font-weight: 500;
+  font-weight: 900;
+  font-size: 20px;
 }
 
 .item:hover {
@@ -303,8 +304,8 @@ font-weight: 700;
 }
 
 .item-img {
-  width: 28px;
-  height: 28px;
+  width: 60px;
+  height: 60px;
   object-fit: contain;
   margin-right: 12px;
 }
