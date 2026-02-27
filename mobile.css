@@ -12,31 +12,35 @@ body, html {
     height: 100%;
     width: 100%;
     overflow: hidden;
-    background-color: #003c77; /* Colore App */
+    background-color: #003c77;
     font-family: 'Inter', sans-serif;
     display: flex;
     flex-direction: column;
 }
 
-/* 1. VIDEO PLAYER (TOP) - CONTROLLI NATIVI */
+/* 1. VIDEO PLAYER (TOP) - FIX DIMENSIONI */
+/* Ho ripreso la logica del tuo vecchio .player-container */
 .video-container {
     width: 100%;
-    background: transparent;
+    background-color: black; /* Come nel vecchio progetto */
     flex-shrink: 0;
 }
 
 #videoPlayer {
-    width: 100%;
-    display: block;
+    width: 100%; 
+    height: auto;
+    max-height: 35vh; /* Limita l'altezza per non spingere tutto fuori */
     margin: auto; 
-    
+    display: block; 
+    aspect-ratio: 16 / 9;
+    object-fit: contain;
 }
 
-/* 2. AREA CENTRALE */
+/* 2. AREA CENTRALE (SIDEBARS) */
 .ui-wrapper {
     flex: 1;
     display: flex;
-    overflow: hidden;
+    overflow: hidden; /* Fondamentale per bloccare lo scroll della pagina */
     background: #003c77;
 }
 
@@ -73,53 +77,54 @@ body, html {
     text-transform: uppercase;
     padding: 15px !important;
     text-align: center;
-    letter-spacing: 1px;
 }
 
-/* LISTE SCROLLABILI */
+/* LISTE SCROLLABILI (Niente barre visibili) */
 .sidebar-chans-scroll, 
 .sidebar-cats-scroll {
     flex: 1;
     overflow-y: auto;
     padding: 10px 0;
     -webkit-overflow-scrolling: touch;
+    /* Nasconde barre scorrimento */
+    scrollbar-width: none;
+}
+
+.sidebar-chans-scroll::-webkit-scrollbar,
+.sidebar-cats-scroll::-webkit-scrollbar {
+    display: none;
 }
 
 /* 4. CANALI (Logo a Sinistra, Testo a Destra) */
 #channelContainer div {
-    margin: 10px 8px;
+    margin: 8px 6px;
     padding: 12px;
     background: rgba(255,255,255,0.08);
     border-radius: 8px;
     display: flex !important;
-    flex-direction: row !important; /* Logo e testo sulla stessa riga */
+    flex-direction: row !important;
     align-items: center;
-    gap: 12px;
-    border: 1px solid rgba(255,255,255,0.05);
+    gap: 10px;
 }
 
-/* REGOLA LOGHI PICCOLI */
 #channelContainer div img {
     width: 40px !important;
     height: 30px !important;
     object-fit: contain;
     flex-shrink: 0;
-    border-radius: 4px;
-    
 }
 
-/* TESTO CANALI */
-#channelContainer div span, 
-#channelContainer div {
+#channelContainer div span {
     color: #fff;
     font-size: 14px;
-    font-weight: 500;
-    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-/* 5. CATEGORIE (Bottoni puliti) */
+/* 5. CATEGORIE */
 #categoryContainer div {
-    margin: 8px 10px;
+    margin: 6px 10px;
     padding: 15px 10px;
     background: rgba(0,0,0,0.2);
     border-radius: 8px;
@@ -130,16 +135,15 @@ body, html {
     border: 1px solid rgba(255,255,255,0.1);
 }
 
-/* 6. FOOTER FISSO */
+/* 6. FOOTER MOBILE */
 .mobile-footer {
-    height: 75px;
+    height: 70px;
     background: #003c77;
     display: flex;
     justify-content: space-around;
     align-items: center;
     padding-bottom: env(safe-area-inset-bottom);
     border-top: 1px solid rgba(255,255,255,0.2);
-    flex-shrink: 0;
 }
 
 .footer-item {
@@ -148,40 +152,9 @@ body, html {
     flex-direction: column;
     align-items: center;
     color: #fff;
-    text-decoration: none;
-    opacity: 0.8;
 }
 
-.footer-item i { font-size: 22px; }
-.footer-item span { font-size: 10px; margin-top: 5px; font-weight: 600; }
-
-/* KILLER SWITCH */
-.epg-overlay, .video-controls-hint, .player-controls, .volume-container, .playlist-actions {
+/* NASCONDI TUTTO IL RESTO */
+.epg-overlay, .video-controls-hint, .player-controls, .volume-container {
     display: none !important;
-}
-
-
-/* NASCONDE LE BARRE DI SCORRIMENTO (SCROLLBARS) */
-
-/* Per Chrome, Safari, Edge e Opera */
-.sidebar-chans-scroll::-webkit-scrollbar,
-.sidebar-cats-scroll::-webkit-scrollbar,
-body::-webkit-scrollbar {
-    display: none !important;
-    width: 0 !important;
-    height: 0 !important;
-}
-
-/* Per Firefox */
-.sidebar-chans-scroll,
-.sidebar-cats-scroll {
-    scrollbar-width: none !important; /* Nasconde la barra */
-    -ms-overflow-style: none;         /* Per Internet Explorer/Edge vecchio */
-}
-
-/* Assicuriamoci che il contenitore permetta comunque il movimento */
-.sidebar-chans-scroll, 
-.sidebar-cats-scroll {
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch; /* Scroll fluido e naturale su iOS */
 }
