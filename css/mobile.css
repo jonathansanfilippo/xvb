@@ -158,3 +158,43 @@ body, html {
 .epg-overlay, .video-controls-hint, .player-controls, .volume-container {
     display: none !important;
 }
+
+
+.main-header {
+  background: #002b55; /* Blu più scuro per staccare dal body */
+  padding: 8px 15px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 40px;
+  flex-shrink: 0;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.logo-area {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: #fff;
+  opacity:0.8;
+}
+
+.site-logo {
+  height: 22px;
+  width: auto;
+}
+
+.site-title {
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.logomobile {
+  font-size: 16px;
+  background: rgba(255,255,255,0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: #fff;
+}
+
