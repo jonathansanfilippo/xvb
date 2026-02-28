@@ -46,7 +46,7 @@
           <div class="epg-content">
             <div class="epg-now">
               <!-- <span class="label1">NOW ON <span style="color:#FFFFFF91;" id="activeName"></span></span> -->
-              <span class="activeName" id="activeName"></span><br>
+              <img id="activeLogo" src="" style="display:none; width:100px; height:60px; object-fit:contain;"><br>
 
               <span id="current-date" class="date-display"></span><span> - </span>
               <span id="epgNowText">Add an M3U playlist, paste a direct URL, or browse a local file.</span>
@@ -105,6 +105,11 @@
         </a>
 
         <span class="hint-sep"></span>
+           <span class="hint-btn">
+          <i style="font-size: 18px; margin-right: -6px; " class="fa-duotone fa-solid fa-circle-location-arrow"></i>
+          </span> 
+          <span class="ip" id="userIpText"></span>
+          <span class="hint-sep"></span>
 
         <span style="color: inherit; opacity:0.9; font-weight: 900;">
           <span>
@@ -161,6 +166,8 @@
                class="fa-duotone fa-solid fa-trash"></i>
           </span>
 
+          
+       
           <!--
           <span class="hint-btn"
                 onclick="window.open('https://github.com/jonathansanfilippo/xvb', '_blank');"
