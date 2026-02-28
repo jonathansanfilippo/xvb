@@ -366,7 +366,7 @@ function showLoadStatus(state, opts = {}) {
   if (state === "error") {
     el.qBadge.setAttribute("data-q", "error");
     el.qBadge.title = opts.title || "Error";
-    el.qBadge.innerHTML = `<i class="fa-duotone fa-solid fa-triangle-exclamation" aria-hidden="true"></i>`;
+    el.qBadge.innerHTML = `<i class="fa-regular fa-solid fa-triangle-exclamation" aria-hidden="true"></i>`;
     return;
   }
 }
@@ -389,7 +389,7 @@ function showRadioBadge() {
   el.qBadge.style.display = "inline-flex";
   el.qBadge.setAttribute("data-q", "radio");
   el.qBadge.title = "Audio";
-  el.qBadge.innerHTML = `<i style="font-size:28px;" class="fa-regular fa-audio-description" aria-hidden="true"></i>`;
+  el.qBadge.innerHTML = `<i style="font-size:28px;" class="fa-duotone fa-solid fa-radio" aria-hidden="true"></i>`;
 }
 
 function checkIfAudioOnlyAndShowIcon(token) {
@@ -669,7 +669,7 @@ function updateEPGUI(channelName, tvgId = "") {
 
   if (!current) {
     overlay?.classList.add('media-progress');
-    el.epgNow.textContent = channelName || "No guide available";
+    el.epgNow.textContent = "No guide available";
     el.epgNextList.innerHTML =
       "<p class='epg-next-item'><i class='fa-duotone fa-solid fa-circle-info'></i> No guide available.</p>";
     startMediaBar();
@@ -902,6 +902,7 @@ async function init() {
   initSidebarClock();
   initOnlineUsers();
   await fetchEpg();
+  fetchUserIP();
 
   try {
     const cachedChans = localStorage.getItem(LOCAL_STORAGE_CHANNELS_KEY);
@@ -1437,4 +1438,32 @@ function updateServerIconState() {
   // Fade ONLY when you have nothing (no playlists, no channels)
   if (!hasAnyPlaylist && !hasAnyChannels) icon.classList.add("fa-fade");
   else icon.classList.remove("fa-fade");
+}
+
+
+
+
+async function fetchUserIP() {
+    const ipDisplay = document.getElementById('userIpText');
+    try {
+        // 1) Forza l'IP a essere solo IPv4 (quello corto 1.2.3.4)
+        const ipRes = await fetch('https://api.ipify.org?format=json');
+        const ipData = await ipRes.json();
+        const ipv4 = ipData.ip;
+
+        // 2) Prende il Country (IT, GB, etc.) usando l'IP appena trovato
+        const geoRes = await fetch(`https://ipapi.co/${ipv4}/json/`);
+        const geoData = await geoRes.json();
+        const country = geoData.country_code || "??";
+
+        console.log("Short IP:", ipv4, "Country:", country);
+
+        if (ipDisplay) {
+            // Risultato: "IT - 1.2.3.4" (Pulito e corto)
+            ipDisplay.textContent = `${country} `;
+        }
+    } catch (err) {
+        console.error("Failed to fetch IP/Country:", err);
+        if (ipDisplay) ipDisplay.textContent = "Unavailable";
+    }
 }
