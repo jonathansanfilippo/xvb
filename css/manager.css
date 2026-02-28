@@ -12,6 +12,7 @@
   --r1: 22px;
   --r2: 16px;
   --footer:#f6f6f6;
+  --warning:#ff9321;
 }
 
 /* Dark theme */
@@ -25,6 +26,7 @@
     --accent: #5fb3ff;
     --danger: #ff6b6b;
     --footer:#131314;
+    --warning:#ffb76b;
   }
 }
 
@@ -172,6 +174,10 @@ body{
 }
 .iconbtn.danger i{
   color: var(--danger);
+}
+
+.iconbtn.warning i{
+  color:var(--warning);
 }
 
 /* ✅ in dark mode ancora più “pop” */
