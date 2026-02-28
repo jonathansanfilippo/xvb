@@ -1443,27 +1443,35 @@ function updateServerIconState() {
 
 
 
-async function fetchUserIP() {
+function fetchUserIP() {
     const ipDisplay = document.getElementById('userIpText');
-    try {
-        // 1) Forza l'IP a essere solo IPv4 (quello corto 1.2.3.4)
-        const ipRes = await fetch('https://api.ipify.org?format=json');
-        const ipData = await ipRes.json();
-        const ipv4 = ipData.ip;
-
-        // 2) Prende il Country (IT, GB, etc.) usando l'IP appena trovato
-        const geoRes = await fetch(`https://ipapi.co/${ipv4}/json/`);
-        const geoData = await geoRes.json();
-        const country = geoData.country_code || "??";
-
-        console.log("Short IP:", ipv4, "Country:", country);
-
+    
+    // Creiamo una funzione globale che ipinfo chiamerà appena risponde
+    window.ipInfoCallback = function(data) {
+        const country = data.country || "??";
+        const ip = data.ip || "0.0.0.0";
+        
+        console.log("Lampone Legacy Data:", country, ip);
+        
         if (ipDisplay) {
-            // Risultato: "IT - 1.2.3.4" (Pulito e corto)
-            ipDisplay.textContent = `${country} `;
+            ipDisplay.textContent = `${country} - ${ip}`;
         }
-    } catch (err) {
-        console.error("Failed to fetch IP/Country:", err);
+        
+        // Pulizia: rimuoviamo lo script dopo l'uso
+        const oldScript = document.getElementById('ipinfo-script');
+        if (oldScript) oldScript.remove();
+    };
+
+    // Creiamo lo script per chiamare ipinfo via JSONP (bypass CORS)
+    const script = document.createElement('script');
+    script.id = 'ipinfo-script';
+    // Nota: aggiungiamo ?callback=ipInfoCallback per attivare il bypass
+    script.src = 'https://ipinfo.io/json?callback=ipInfoCallback';
+    
+    script.onerror = function() {
+        console.error("Failed to load IP info");
         if (ipDisplay) ipDisplay.textContent = "Unavailable";
-    }
+    };
+
+    document.body.appendChild(script);
 }
