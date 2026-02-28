@@ -1475,3 +1475,52 @@ function fetchUserIP() {
 
     document.body.appendChild(script);
 }
+
+
+
+/* ---------- Navigazione Canali con Frecce Su/Giù ---------- */
+
+document.addEventListener('keydown', (e) => {
+    // Evitiamo di cambiare canale se l'utente sta scrivendo nella barra di ricerca
+    if (document.activeElement.tagName === 'INPUT') return;
+
+    if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        playPreviousChannel();
+    } else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        playNextChannel();
+    }
+});
+
+function playNextChannel() {
+    const items = Array.from(document.querySelectorAll('#channelContainer .item'));
+    if (!items.length) return;
+
+    const active = document.querySelector('#channelContainer .item.active');
+    let nextIdx = 0;
+
+    if (active) {
+        nextIdx = items.indexOf(active) + 1;
+        if (nextIdx >= items.length) nextIdx = 0; // Torna al primo
+    }
+    
+    items[nextIdx].click();
+    items[nextIdx].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function playPreviousChannel() {
+    const items = Array.from(document.querySelectorAll('#channelContainer .item'));
+    if (!items.length) return;
+
+    const active = document.querySelector('#channelContainer .item.active');
+    let prevIdx = items.length - 1;
+
+    if (active) {
+        prevIdx = items.indexOf(active) - 1;
+        if (prevIdx < 0) prevIdx = items.length - 1; // Torna all'ultimo
+    }
+
+    items[prevIdx].click();
+    items[prevIdx].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
