@@ -83,7 +83,7 @@ function renderSaved() {
     li.className = "item";
 
     const del = document.createElement("button");
-    del.className = "iconbtn danger";
+    del.className = "iconbtn warning";
     del.innerHTML = '<i class="fa-duotone fa-solid fa-trash"></i>';
     del.onclick = () => {
       if (!confirm(`Delete "${it.name}"?`)) return;
