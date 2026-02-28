@@ -15,7 +15,7 @@ const SERVER_PLAYLISTS = [
     url: "https://raw.githubusercontent.com/iptv-org/iptv/refs/heads/master/streams/it_rakuten.m3u"
   },
   {
-    name: "UK",
+    name: "XVB - UK",
     url: "https://raw.githubusercontent.com/jonathansanfilippo/xvb-data/refs/heads/main/data/lists/xvb-uk.m3u"
   }
 ];
