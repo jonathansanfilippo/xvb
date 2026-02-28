@@ -5,7 +5,7 @@ const DEFAULT_PLAYLISTS = [
   " "
 ];
 
-const SERVER_PLAYLIST_URL = "https://raw.githubusercontent.com/jonathansanfilippo/xvb-data/refs/heads/main/data/lists/samplevideos.m3u";
+const SERVER_PLAYLIST_URL = "https://raw.githubusercontent.com/jonathansanfilippo/xvb-data/refs/heads/main/data/lists/xvb-it.m3u";
 
 async function addServerPlaylist() {
   try {
