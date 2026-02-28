@@ -1,5 +1,5 @@
 
-![XVB Logo](assets/icon.jpg)
+![XVB Logo](assets/preview.png)
 
 # XVB – Extended Video Broadcasting
 
