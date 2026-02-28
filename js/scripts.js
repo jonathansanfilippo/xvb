@@ -1,6 +1,140 @@
 const LOCAL_STORAGE_PLAYLISTS_KEY = 'dvb-K@8$dL%3vZ&nB1xR*';
 const LOCAL_STORAGE_CHANNELS_KEY = 'dvb-m^7Y!zR4*P8&kQ3@h';
 
+
+/* ===========================
+   Playlist storage v2 (individual items)
+   - index:  xvb.playlists.index.v2  -> [{id,type,name,url?,createdAt}]
+   - item:   xvb.playlists.item.v2.<id> -> {id,type,name,url? , m3uText?}
+   This keeps backward compatibility by migrating the old array key:
+     dvb-K@8$dL%3vZ&nB1xR*  (LOCAL_STORAGE_PLAYLISTS_KEY)
+   =========================== */
+const PLAYLIST_INDEX_KEY_V2 = "xvb.playlists.index.v2";
+const PLAYLIST_ITEM_PREFIX_V2 = "xvb.playlists.item.v2.";
+const PLAYLIST_MIGRATED_FLAG_V2 = "xvb.playlists.migrated.v2";
+
+function _pl2_makeId() {
+  return "pl_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 8);
+}
+function _pl2_itemKey(id) { return PLAYLIST_ITEM_PREFIX_V2 + id; }
+
+function _pl2_getIndex() {
+  try {
+    const raw = localStorage.getItem(PLAYLIST_INDEX_KEY_V2);
+    const arr = raw ? JSON.parse(raw) : [];
+    return Array.isArray(arr) ? arr : [];
+  } catch { return []; }
+}
+function _pl2_setIndex(arr) {
+  localStorage.setItem(PLAYLIST_INDEX_KEY_V2, JSON.stringify(arr || []));
+}
+function _pl2_writeItem(id, data) {
+  localStorage.setItem(_pl2_itemKey(id), JSON.stringify(data));
+}
+function _pl2_readItem(id) {
+  try {
+    const raw = localStorage.getItem(_pl2_itemKey(id));
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+}
+function _pl2_guessNameFromUrl(url) {
+  try {
+    const clean = (url || "").split("#")[0].split("?")[0];
+    const last = clean.split("/").filter(Boolean).pop();
+    return last || clean || "playlist.m3u";
+  } catch { return "playlist.m3u"; }
+}
+
+function _pl2_migrateOldArrayIfNeeded() {
+  try {
+    if (localStorage.getItem(PLAYLIST_MIGRATED_FLAG_V2) === "1") return;
+
+    const oldRaw = localStorage.getItem(LOCAL_STORAGE_PLAYLISTS_KEY);
+    if (!oldRaw) {
+      localStorage.setItem(PLAYLIST_MIGRATED_FLAG_V2, "1");
+      return;
+    }
+
+    let oldArr = [];
+    try { oldArr = JSON.parse(oldRaw) || []; } catch { oldArr = []; }
+    if (!Array.isArray(oldArr) || oldArr.length === 0) {
+      localStorage.setItem(PLAYLIST_MIGRATED_FLAG_V2, "1");
+      return;
+    }
+
+    const idx = _pl2_getIndex();
+    const existingUrls = new Set(idx.filter(x => x && x.type === "url").map(x => x.url));
+
+    oldArr.forEach((url) => {
+      url = (url || "").trim();
+      if (!url || !url.startsWith("http")) return;
+      if (existingUrls.has(url)) return;
+
+      const id = _pl2_makeId();
+      const name = _pl2_guessNameFromUrl(url);
+      idx.push({ id, type: "url", name, url, createdAt: Date.now() });
+      _pl2_writeItem(id, { id, type: "url", name, url });
+      existingUrls.add(url);
+    });
+
+    _pl2_setIndex(idx);
+    localStorage.setItem(PLAYLIST_MIGRATED_FLAG_V2, "1");
+  } catch {
+    // ignore
+  }
+}
+
+function pl2_listIndex() {
+  _pl2_migrateOldArrayIfNeeded();
+  return _pl2_getIndex();
+}
+
+function pl2_addUrl(url) {
+  _pl2_migrateOldArrayIfNeeded();
+  url = (url || "").trim();
+  if (!url.startsWith("http")) return { ok:false, msg:"Invalid URL" };
+
+  const idx = _pl2_getIndex();
+  if (idx.some(x => x && x.type === "url" && x.url === url)) return { ok:false, msg:"Already added" };
+
+  const id = _pl2_makeId();
+  const name = _pl2_guessNameFromUrl(url);
+  idx.push({ id, type:"url", name, url, createdAt: Date.now() });
+  _pl2_setIndex(idx);
+  _pl2_writeItem(id, { id, type:"url", name, url });
+
+  return { ok:true, id };
+}
+
+function pl2_addLocal(name, m3uText) {
+  _pl2_migrateOldArrayIfNeeded();
+  if (!m3uText || typeof m3uText !== "string") return { ok:false, msg:"Empty file" };
+
+  const id = _pl2_makeId();
+  const idx = _pl2_getIndex();
+  idx.push({ id, type:"local", name: name || "local.m3u", createdAt: Date.now() });
+  _pl2_setIndex(idx);
+  _pl2_writeItem(id, { id, type:"local", name: name || "local.m3u", m3uText });
+
+  return { ok:true, id };
+}
+
+function pl2_remove(id) {
+  _pl2_migrateOldArrayIfNeeded();
+  const idx = _pl2_getIndex().filter(x => x && x.id !== id);
+  _pl2_setIndex(idx);
+  localStorage.removeItem(_pl2_itemKey(id));
+}
+
+function pl2_clearAll() {
+  const idx = _pl2_getIndex();
+  idx.forEach(x => x && x.id && localStorage.removeItem(_pl2_itemKey(x.id)));
+  localStorage.removeItem(PLAYLIST_INDEX_KEY_V2);
+  localStorage.removeItem(PLAYLIST_MIGRATED_FLAG_V2);
+  // keep legacy removal here too
+  localStorage.removeItem(LOCAL_STORAGE_PLAYLISTS_KEY);
+}
+
 const DEFAULT_PLAYLISTS = [
   " "
 ];
@@ -9,27 +143,16 @@ const SERVER_PLAYLIST_URL = "https://raw.githubusercontent.com/jonathansanfilipp
 
 async function addServerPlaylist() {
   try {
-    // 1) Save URL into custom playlists
-    let currentLists = [];
-    try {
-      currentLists = JSON.parse(localStorage.getItem(LOCAL_STORAGE_PLAYLISTS_KEY)) || [];
-    } catch (e) {
-      currentLists = [];
-    }
+    // Save URL into v2 playlists (individual item)
+    pl2_addUrl(SERVER_PLAYLIST_URL);
 
-    if (!currentLists.includes(SERVER_PLAYLIST_URL)) {
-      currentLists.push(SERVER_PLAYLIST_URL);
-      localStorage.setItem(LOCAL_STORAGE_PLAYLISTS_KEY, JSON.stringify(currentLists));
-    }
-
-    // 2) Update PLAYLIST_URLS in RAM
+    // Update PLAYLIST_URLS in RAM
     PLAYLIST_URLS = getAllPlaylistUrls();
 
-    // 3) Refresh (use your existing function)
+    // Refresh
     await refreshAllPlaylists();
     updateServerIconState();
 
-    // Optional feedback
     alert("Server playlist loaded ✅");
   } catch (err) {
     console.error(err);
@@ -38,15 +161,44 @@ async function addServerPlaylist() {
 }
 
 function getAllPlaylistUrls() {
-  let custom = [];
+  // v2 migration (from legacy array) happens here
+  _pl2_migrateOldArrayIfNeeded();
+
+  // 1) Default playlists (if any)
+  const defaults = (DEFAULT_PLAYLISTS || []).map(x => (x || "").trim()).filter(Boolean);
+
+  // 2) URLs from v2 index
+  const idx = pl2_listIndex();
+  const v2Urls = idx
+    .filter(x => x && x.type === "url" && typeof x.url === "string")
+    .map(x => x.url.trim())
+    .filter(Boolean);
+
+  // 3) Fallback: legacy array (in case migration is disabled for some reason)
+  let legacy = [];
   try {
     const stored = localStorage.getItem(LOCAL_STORAGE_PLAYLISTS_KEY);
-    custom = stored ? JSON.parse(stored) : [];
-  } catch (e) {
-    console.error("Error reading custom playlists:", e);
-    custom = [];
-  }
-  return [...new Set([...DEFAULT_PLAYLISTS, ...custom])];
+    legacy = stored ? JSON.parse(stored) : [];
+  } catch { legacy = []; }
+  legacy = (Array.isArray(legacy) ? legacy : []).map(x => (x || "").trim()).filter(Boolean);
+
+  return [...new Set([...defaults, ...v2Urls, ...legacy])];
+}
+
+
+function getAllLocalPlaylistsText() {
+  _pl2_migrateOldArrayIfNeeded();
+  const idx = pl2_listIndex();
+  const locals = [];
+  idx.forEach(it => {
+    if (it && it.type === "local" && it.id) {
+      const data = _pl2_readItem(it.id);
+      if (data && typeof data.m3uText === "string" && data.m3uText.trim()) {
+        locals.push({ name: it.name || data.name || "local.m3u", text: data.m3uText });
+      }
+    }
+  });
+  return locals;
 }
 
 let PLAYLIST_URLS = getAllPlaylistUrls();
@@ -167,9 +319,7 @@ function updateTabTitle(channelName) {
     document.title = DEFAULT_TITLE;
     return;
   }
-  const titleClean = channelName.replace(/<[^>]*>/g, '').trim();
-
-  document.title = `${titleClean} • ${DEFAULT_TITLE}`;
+  document.title = `${channelName} • ${DEFAULT_TITLE}`;
 }
 
 function setPlayPauseIcon(isPlaying) {
@@ -896,7 +1046,54 @@ function updateGroupCount(groupName) {
   if (elCount) elCount.textContent = count;
 }
 
+
+function injectPlaylistManagerButton() {
+  try {
+    const actions = document.querySelector(".playlist-actions");
+    if (!actions) return;
+    if (document.getElementById("openManagerBtn")) return;
+
+    const span = document.createElement("span");
+    span.className = "hint-btn";
+    span.id = "openManagerBtn";
+    span.title = "Playlist manager";
+    span.style.cursor = "pointer";
+    span.innerHTML = `
+      <i style="font-size: 18px; cursor: pointer; margin-right: 3px;"
+         class="fa-duotone fa-solid fa-list-check"></i>
+    `;
+    span.onclick = () => window.open("manager.html", "_blank");
+    actions.appendChild(span);
+  } catch (e) {
+    console.warn("Unable to inject manager button", e);
+  }
+}
+
+function initPlaylistBroadcastListener() {
+  try {
+    if (!("BroadcastChannel" in window)) return;
+    const bc = new BroadcastChannel("xvb_playlists_v2");
+    bc.onmessage = async (ev) => {
+      if (!ev || !ev.data || ev.data.type !== "changed") return;
+      // playlists changed in manager -> rebuild channels
+      try {
+        localStorage.removeItem(LOCAL_STORAGE_CHANNELS_KEY);
+        allChannels = [];
+        await refreshAllPlaylists();
+        updateGlobalCounts();
+        updateServerIconState();
+      } catch (e) {
+        console.warn("Refresh after playlist change failed", e);
+      }
+    };
+  } catch (e) {
+    // ignore
+  }
+}
+
 async function init() {
+  injectPlaylistManagerButton();
+  initPlaylistBroadcastListener();
   updateServerIconState();
   applyUiScale();
   updateTabTitle(null);
@@ -927,11 +1124,16 @@ async function init() {
 
 async function refreshAllPlaylists() {
   const finalUrlsToLoad = getAllPlaylistUrls();
+  const localPlaylists = getAllLocalPlaylistsText();
   let hasNew = false;
 
+  // --- Load remote URL playlists ---
   for (let url of finalUrlsToLoad) {
     url = (url || "").trim();
     if (!url) continue;
+
+    // Estraiamo il nome del file dall'URL (es: "xvb-it")
+    const fallbackCategory = _pl2_guessNameFromUrl(url).replace(/\.m3u8?$/i, '');
 
     try {
       const bust = (url.includes("?") ? "&" : "?") + "t=" + Date.now();
@@ -945,12 +1147,12 @@ async function refreshAllPlaylists() {
         if (l.startsWith('#EXTINF:')) {
           const name = l.split(',').pop().trim();
           const logo = (l.match(/tvg-logo="([^"]*)"/i) || [])[1] || "";
-          const group = (l.match(/group-title="([^"]*)"/i) || [])[1] || "General";
+          // Fallback al nome del file se group-title è vuoto
+          const group = (l.match(/group-title="([^"]*)"/i) || [])[1] || fallbackCategory;
           const tvgId = (l.match(/tvg-id="([^"]*)"/i) || [])[1] || "";
           cur = { name, logo, group, tvgId };
         } else if (l.startsWith('http') && cur) {
           cur.url = l;
-
           if (!allChannels.some(ch => ch.url === cur.url)) {
             allChannels.push(cur);
             hasNew = true;
@@ -963,15 +1165,43 @@ async function refreshAllPlaylists() {
     }
   }
 
+  // --- Load local playlists saved in browser (v2) ---
+  for (const pl of localPlaylists) {
+    const fallbackCategory = (pl.name || "Local").replace(/\.m3u8?$/i, '');
+
+    try {
+      const lines = (pl.text || "").split('\n');
+      let cur = null;
+
+      lines.forEach(l => {
+        l = (l || "").trim();
+        if (l.startsWith('#EXTINF:')) {
+          const name = l.split(',').pop().trim();
+          const logo = (l.match(/tvg-logo="([^"]*)"/i) || [])[1] || "";
+          const group = (l.match(/group-title="([^"]*)"/i) || [])[1] || fallbackCategory;
+          const tvgId = (l.match(/tvg-id="([^"]*)"/i) || [])[1] || "";
+          cur = { name, logo, group, tvgId };
+        } else if (l.startsWith('http') && cur) {
+          cur.url = l;
+          if (!allChannels.some(ch => ch.url === cur.url)) {
+            allChannels.push(cur);
+            hasNew = true;
+          }
+          cur = null;
+        }
+      });
+    } catch (e) {
+      console.warn("Unable to parse local playlist:", pl && pl.name);
+    }
+  }
+
   if (hasNew) {
     saveToCache();
     renderCats();
+    updateGlobalCounts();
     updateServerIconState();
-    console.log("Playlists updated. Total channels in cache:", allChannels.length);
   }
-  updateGlobalCounts();
 }
-
 /* ---------- UI rendering ---------- */
 
 function selectCategory(cat, opts = {}) {
@@ -1049,7 +1279,18 @@ function makeChannelItem(ch) {
     const n = document.getElementById('activeName');
     const l = document.getElementById('activeLogo');
     if (n) n.textContent = ch.name;
-    if (l) { l.src = ch.logo; l.style.display = 'block'; }
+    if (l) {
+  const fallback = document.getElementById("activeLogoFallback");
+
+  if (ch.logo) {
+    l.src = ch.logo;
+    l.style.display = "block";
+    if (fallback) fallback.style.display = "none";
+  } else {
+    l.style.display = "none";
+    if (fallback) fallback.style.display = "block";
+  }
+}
 
     updateChannelTypeIcon(ch.group);
     play(ch);
@@ -1144,55 +1385,51 @@ async function addCustomUrl() {
   const url = prompt("Enter the M3U playlist URL:");
   if (!url || !url.startsWith('http')) return;
 
-  let currentLists = [];
+  const resAdd = pl2_addUrl(url);
+  if (!resAdd.ok) {
+    alert(resAdd.msg || "This playlist is already added.");
+    return;
+  }
+
+  const fallbackCategory = _pl2_guessNameFromUrl(url).replace(/\.m3u8?$/i, '');
+  PLAYLIST_URLS = getAllPlaylistUrls();
+
   try {
-    currentLists = JSON.parse(localStorage.getItem(LOCAL_STORAGE_PLAYLISTS_KEY)) || [];
-  } catch (e) { currentLists = []; }
+    const res = await fetch(url);
+    const text = await res.text();
+    const lines = text.split('\n');
+    let cur = null;
+    let added = 0;
 
-  if (!currentLists.includes(url)) {
-    currentLists.push(url);
-    localStorage.setItem(LOCAL_STORAGE_PLAYLISTS_KEY, JSON.stringify(currentLists));
-
-    try {
-      const res = await fetch(url);
-      const text = await res.text();
-      const lines = text.split('\n');
-      let cur = null;
-      let added = 0;
-
-      lines.forEach(l => {
-        l = l.trim();
-        if (l.startsWith('#EXTINF:')) {
-          const name = l.split(',').pop().trim();
-          const logo = (l.match(/tvg-logo="([^"]*)"/i) || [])[1] || "";
-          const group = (l.match(/group-title="([^"]*)"/i) || [])[1] || "Other";
-          const tvgId = (l.match(/tvg-id="([^"]*)"/i) || [])[1] || "";
-          cur = { name, logo, group, tvgId };
-        } else if (l.startsWith('http') && cur) {
-          cur.url = l;
-          if (!allChannels.some(ch => ch.url === cur.url)) {
-            allChannels.push(cur);
-            added++;
-          }
-          cur = null;
+    lines.forEach(l => {
+      l = l.trim();
+      if (l.startsWith('#EXTINF:')) {
+        const name = l.split(',').pop().trim();
+        const logo = (l.match(/tvg-logo="([^"]*)"/i) || [])[1] || "";
+        const group = (l.match(/group-title="([^"]*)"/i) || [])[1] || fallbackCategory;
+        const tvgId = (l.match(/tvg-id="([^"]*)"/i) || [])[1] || "";
+        cur = { name, logo, group, tvgId };
+      } else if (l.startsWith('http') && cur) {
+        cur.url = l;
+        if (!allChannels.some(ch => ch.url === cur.url)) {
+          allChannels.push(cur);
+          added++;
         }
-      });
-
-      if (added > 0) {
-        saveToCache();
-        renderCats();
-        updateGlobalCounts();
-        updateServerIconState();
-        alert(`Added ${added} new channels! Your local channels are safe.`);
+        cur = null;
       }
-    } catch (err) {
-      alert("Error loading the URL.");
+    });
+
+    if (added > 0) {
+      saveToCache();
+      renderCats();
+      updateGlobalCounts();
+      updateServerIconState();
+      alert(`Added ${added} new channels!`);
     }
-  } else {
-    alert("This playlist is already added.");
+  } catch (err) {
+    alert("Error loading the URL.");
   }
 }
-
 /* ---------- Load local file ---------- */
 
 function loadLocalFile(event) {
@@ -1202,6 +1439,10 @@ function loadLocalFile(event) {
   const reader = new FileReader();
   reader.onload = (e) => {
     const text = e.target.result;
+
+    // Save this file into v2 playlists so it can be managed individually
+    pl2_addLocal(file.name, text);
+
     const lines = text.split('\n');
     let cur = null;
     let localChans = [];
@@ -1237,14 +1478,13 @@ function loadLocalFile(event) {
   };
   reader.readAsText(file);
 }
-
 /* ---------- Clear cache ---------- */
 
 function clearCache() {
   let customCount = 0;
   try {
-    const customData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_PLAYLISTS_KEY) || "[]");
-    customCount = customData.length;
+    // count v2 items (url + local)
+    customCount = pl2_listIndex().length;
   } catch (e) { customCount = 0; }
 
   if (customCount === 0 && (!allChannels || allChannels.length === 0)) {
@@ -1252,15 +1492,14 @@ function clearCache() {
     return;
   }
 
-  const message = "Warning: this will remove only the playlists you added (not the default ones). Continue?";
+  const message = "Warning: this will remove all the playlists you added. Continue? Open Playlist Manager for check your lists.";
   if (confirm(message)) {
     localStorage.removeItem(LOCAL_STORAGE_CHANNELS_KEY);
-    localStorage.removeItem(LOCAL_STORAGE_PLAYLISTS_KEY);
+    pl2_clearAll();
     alert("Added playlists removed. The app will now reload.");
     location.reload();
   }
 }
-
 function saveToCache() {
   try {
     localStorage.setItem(LOCAL_STORAGE_CHANNELS_KEY, JSON.stringify(allChannels));
@@ -1426,22 +1665,28 @@ function updateServerIconState() {
   const icon = document.getElementById("serverListIcon");
   if (!icon) return;
 
-  let custom = [];
-  try {
-    const stored = localStorage.getItem(LOCAL_STORAGE_PLAYLISTS_KEY);
-    custom = stored ? JSON.parse(stored) : [];
-  } catch {
-    custom = [];
-  }
+  // Check v2 playlists
+  let idx = [];
+  try { idx = pl2_listIndex(); } catch { idx = []; }
+  const v2HasAny = Array.isArray(idx) && idx.length > 0;
+  const hasServer = Array.isArray(idx) && idx.some(x => x && x.type === "url" && x.url === SERVER_PLAYLIST_URL);
 
-  const hasAnyPlaylist = Array.isArray(custom) && custom.length > 0;
   const hasAnyChannels = Array.isArray(allChannels) && allChannels.length > 0;
 
-  // Fade ONLY when you have nothing (no playlists, no channels)
-  if (!hasAnyPlaylist && !hasAnyChannels) icon.classList.add("fa-fade");
-  else icon.classList.remove("fa-fade");
+  // Visual state:
+  // - if server playlist is present -> highlight icon
+  // - if any playlist or channels -> slightly brighter
+  if (hasServer) {
+    icon.style.color = "rgb(255,255,255)";
+    icon.style.opacity = "0.8";
+  } else if (v2HasAny || hasAnyChannels) {
+    icon.style.color = "rgb(255,255,255)";
+    icon.style.opacity = "0.8";
+  } else {
+    icon.style.color = "rgb(255,255,255)";
+    icon.style.opacity = "0.8";
+  }
 }
-
 
 
 
@@ -1453,10 +1698,10 @@ function fetchUserIP() {
         const country = data.country || "??";
         const ip = data.ip || "0.0.0.0";
         
-        console.log("Lampone Legacy Data:", country, ip);
+        console.log("XVB Legacy Data:", country, ip);
         
         if (ipDisplay) {
-            ipDisplay.textContent = `${country} - ${ip}`;
+            ipDisplay.textContent = `${country}`;
         }
         
         // Pulizia: rimuoviamo lo script dopo l'uso
@@ -1556,3 +1801,76 @@ leftSide.addEventListener('mouseleave', () => wrapper.classList.remove('active-l
 
 rightSide.addEventListener('mouseenter', () => wrapper.classList.add('active-right'));
 rightSide.addEventListener('mouseleave', () => wrapper.classList.remove('active-right'));
+
+
+
+
+
+
+
+
+
+function updatePlaylistCount() {
+  try {
+    // v2 (nuovo sistema)
+    let v2 = [];
+    try {
+      const rawV2 = localStorage.getItem(PLAYLIST_INDEX_KEY_V2);
+      const arrV2 = rawV2 ? JSON.parse(rawV2) : [];
+      v2 = Array.isArray(arrV2) ? arrV2 : [];
+    } catch { v2 = []; }
+
+    // legacy (vecchio sistema)
+    let legacy = [];
+    try {
+      const rawOld = localStorage.getItem(LOCAL_STORAGE_PLAYLISTS_KEY);
+      const arrOld = rawOld ? JSON.parse(rawOld) : [];
+      legacy = Array.isArray(arrOld) ? arrOld : [];
+    } catch { legacy = []; }
+
+    // unisco senza duplicati
+    const set = new Set();
+
+    for (const it of v2) {
+      if (!it) continue;
+      if (it.type === "url" && it.url) set.add("url:" + it.url);
+      else if (it.type === "local" && it.id) set.add("local:" + it.id);
+      else if (it.name) set.add("name:" + it.name);
+    }
+
+    for (const url of legacy) {
+      if (!url) continue;
+      set.add("url:" + String(url).trim());
+    }
+
+    const el = document.getElementById("playlistCount");
+    if (el) el.textContent = String(set.size);
+  } catch (e) {
+    console.warn("Playlist count error", e);
+  }
+}
+
+// 1) conta quando la pagina è pronta
+document.addEventListener("DOMContentLoaded", () => {
+  updatePlaylistCount();
+});
+
+// 2) conta quando cambi dal manager (add/remove)
+if ("BroadcastChannel" in window) {
+  const bc = new BroadcastChannel("xvb_playlists_v2");
+  bc.onmessage = () => updatePlaylistCount();
+}
+
+// 3) conta anche quando usi i bottoni vecchi nel player
+document.addEventListener("click", () => {
+  setTimeout(updatePlaylistCount, 150);
+}, true);
+
+
+function showLogoFallback() {
+  const img = document.getElementById("activeLogo");
+  const fallback = document.getElementById("activeLogoFallback");
+
+  if (img) img.style.display = "none";
+  if (fallback) fallback.style.display = "block";
+}

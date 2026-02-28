@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>XVB - Playlist Manager</title>
+
+  <link rel="icon" type="image/png" href="assets/icon.jpg">
+  <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v7.2.0/css/all.css">
+  <link rel="stylesheet" href="css/manager.css">
+</head>
+
+<body>
+  <div class="wrap">
+
+    <div class="hero">
+      <div>
+        <div class="brandline">
+          <a href="index.html" class="logo-area" style="text-decoration:none; color:inherit; ">
+            <img style="padding-right:5px;" src="assets/icon.jpg" alt="XVB" width="50" height="50">
+            <span class="logo">v0.1 beta</span>
+          </a>
+        </div>
+
+        <h1 class="h1">Playlist Manager</h1>
+        <div class="sub">
+          Add or remove playlists individually. Changes apply to the player tabs.
+        </div>
+      </div>
+    </div>
+
+    <!-- Hidden but kept for compatibility -->
+    <button id="btnClearAll" class="iconbtn danger" style="display:none;">
+      <i class="fa-duotone fa-solid fa-trash"></i>
+    </button>
+
+    <div class="grid">
+
+      <!-- SERVER -->
+      <div class="section">
+        <div class="label"><i class="fa-solid fa-circle dot-server"></i>  Download from server</div>
+        <div class="sub" style="margin:0 0 10px 2px; max-width:none;">
+        </div>
+
+        <ul class="list" id="serverPlaylistList"></ul>
+        <div class="status" id="statusServer"></div>
+      </div>
+
+      <!-- ADD URL -->
+      <div class="section">
+        <div class="label"><i class="fa-solid fa-circle dot-url"></i> Add URL</div>
+        <div class="row">
+          <input class="input" id="urlInput" type="text"
+                 placeholder="https://server.com/path/playlist.m3u">
+          <button class="iconbtn primary" id="btnAddUrl" title="Add URL">
+            <i class="fa-duotone fa-solid fa-file-circle-plus"></i>
+          </button>
+        </div>
+        <div class="status" id="statusUrl"></div>
+      </div>
+
+      <!-- ADD FILE -->
+      <div class="section">
+        <div class="label"><i class="fa-solid fa-circle dot-local"></i> Add file</div>
+        <div class="row">
+          <input class="file empty" id="fileInput" type="file" accept=".m3u">
+                  </div>
+        <div class="status" id="statusFile"></div>
+      </div>
+
+      <!-- SAVED -->
+      <div class="section">
+        <div class="h1">Saved playlists</div>
+        <ul class="list" id="playlistList"></ul>
+        <div class="status" id="statusList"></div>
+      </div>
+
+    </div>
+     <br>
+     <br>
+    
+  </div>
+
+
+
+  <footer class="footer">
+
+
+
+  <div class="footer-inner">
+     <div class="legal">
+    <p class="">Legal & responsible use</p>
+          <h2 class="section-title">Use XVB with licensed sources only.</h2>
+          <p class="muted">
+            XVB is a neutral playback tool: it does not provide channels, credentials, or content.
+            You are responsible for the sources you load. Use XVB only with streams and playlists you are
+            authorized to access (public demo streams, your own media, licensed IPTV providers, or content
+            you have rights to distribute).
+          </p>
+          <div class="spacer-16"></div>
+          <p class="muted">
+            Avoid piracy, stolen credentials, “free IPTV” services, or any method intended to bypass paywalls,
+            geo-restrictions, or copyright protections. If you’re unsure whether a source is legal, don’t use it.
+          </p>
+        </div>
+    <div class="footer-left">
+      XVB <span class="footer-version"></span>
+    </div>
+
+    <div class="footer-right">
+      <span>Extended Video Broadcasting</span>
+      <span>© 2026</span>
+    </div>
+  </div>
+</footer>
+
+  <!-- IMPORTANT: storage FIRST, manager AFTER -->
+  <script src="js/playlist-storage-v2.js"></script>
+  <script src="js/playlist-manager.js"></script>
+</body>
+</html>

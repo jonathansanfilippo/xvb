@@ -46,7 +46,19 @@
           <div class="epg-content">
             <div class="epg-now">
               <!-- <span class="label1">NOW ON <span style="color:#FFFFFF91;" id="activeName"></span></span> -->
-              <img id="activeLogo" src="" style="display:none; width:100px; height:100px; object-fit:contain;"><br>
+              <div id="activeLogoWrapper" style="width:100px; height:100px; display:flex; align-items:center; justify-content:center;">
+  
+  <img id="activeLogo"
+       src=""
+       style="display:none; width:100%; height:100%; object-fit:contain;"
+       onerror="showLogoFallback()">
+
+  <i id="activeLogoFallback"
+     class="fa-duotone fa-solid fa-clapperboard-play"
+     style="display:none; font-size:100px; opacity:0.6;">
+  </i>
+
+</div><br>
 
               <span id="current-date" class="date-display"></span><span> - </span>
               <span id="epgNowText">Add an M3U playlist, paste a direct URL, or browse a local file.</span>
@@ -101,7 +113,7 @@
       <div class="video-controls-hint">
         <a href="index.html" class="logo-area" style="text-decoration: none; color: inherit; opacity:0.7;">
           <img style="padding-right: 5px;" src="assets/logo.png" alt="XVB" width="32" height="14">
-          <span class="logo">v1.0 Desktop</span>
+          <span class="logo">v1.1 Desktop</span>
         </a>
 
         <span class="hint-sep"></span>
@@ -116,7 +128,7 @@
             <i class="fa-duotone fa-solid fa-clapperboard-play"
                style="font-size: 18px; margin-right: 3px; color: rgba(255, 255, 255, 0.8);"></i>
           </span>
-          <span id="totalAll"></span> in list
+          <span id="totalAll"></span>/<span id="playlistCount">0</span>
         </span>
 
         <span class="hint-sep"></span>
@@ -140,7 +152,7 @@
         </div>
 
         <span class="hint-sep"></span>
-
+<!--
         <span class="hint-btn"
               onclick="addServerPlaylist()"
               title="Download playlist from server"
@@ -166,17 +178,16 @@
                class="fa-duotone fa-solid fa-trash"></i>
           </span>
 
-          
+          -->
        
-          <!--
           <span class="hint-btn"
-                onclick="window.open('https://github.com/jonathansanfilippo/xvb', '_blank');"
-                title="Repo"
+                onclick="window.open('manager.html', '_blank');"
+                title="Playlist Manger"
                 style="cursor: pointer;">
-            <i class="fa-brands fa-github"
+            <i class="fa-duotone fa-solid fa-file-circle-plus"
                style="font-size: 18px; margin-right: 3px; color: rgba(255, 255, 255, 0.8);"></i>
           </span>
-          -->
+          
         </div>
       </div>
 

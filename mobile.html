@@ -22,7 +22,7 @@
   <a href="index.html" class="logo-area">
     <img src="assets/logo.png" alt="XVB" class="site-logo">
     <span class="site-title"></span>
-    <p class="logomobile">v0.2b Mobile</p>
+    <p class="logomobile">v0.3b Mobile</p>
   </a>
 
 
@@ -57,12 +57,7 @@
 
       
 
-      <div class="video-controls-hint">
-        <a href="index.html" class="logo-area" style="text-decoration: none; color: inherit; opacity:0.7;">
-          <img style="padding-right: 5px;" src="assets/logo.png" alt="XVB" width="32" height="14">
-          <span class="logo">v0.2b Mobile</span>
-        </a>
-        </div>
+      
       </div>
 
     </div>
@@ -75,7 +70,7 @@
 
   <nav class="mobile-footer">
     
-
+<!--
     <div class="footer-item" onclick="addCustomUrl()" title="Add M3U URL">
         <i class="fa-duotone fa-solid fa-file-circle-plus"></i>
         
@@ -87,15 +82,22 @@
         <input type="file" id="localFile" accept=".m3u,.m3u8" onchange="loadLocalFile(event)" style="display:none;">
     </div>
 
+     -->
+
     <div class="footer-item" onclick="clearCache()" title="Clear cache">
         <i class="fa-duotone fa-solid fa-trash"></i>
        
     </div>
 
-    <div class="footer-item" onclick="toggleFullScreen()" title="Fullscreen">
-        <i class="fa-duotone fa-solid fa-expand"></i>
+
+
+
+    <div class="footer-item" onclick="window.open('manager.html', '_blank');" title="Playlist Manager">
+        <i class="fa-duotone fa-solid fa-file-circle-plus"></i>
         
     </div>
+
+
 
     <div class="footer-item active" id="playPauseBtn" onclick="togglePlay()" title="Play/Pause">
         <i class="fa-duotone fa-solid fa-pause"></i>

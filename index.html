@@ -43,8 +43,6 @@
         <a class="icon-link" href="https://github.com/jonathansanfilippo/xvb" target="_blank" rel="noreferrer" aria-label="GitHub">
           <i class="fa-brands fa-github"></i>
         </a>
-
-       
       </div>
     </div>
 
@@ -55,6 +53,7 @@
         <a href="#guide">Guide</a>
         <a href="#features">Features</a>
         <a href="#playlist">Playlist</a>
+        <a href="#playlist-manager">Playlist Manager</a>
         <a href="#limitations">Limitations</a>
         <a href="#legal">Legal</a>
         <a href="#architecture">Architecture</a>
@@ -168,72 +167,81 @@
       </div>
     </section>
 
-    <section id="guide" class="section">
-      <div class="container">
-        <div class="grid-2">
-          <div class="card">
-            <p class="kicker">Quick guide</p>
-            <h2 class="section-title">Adding playlists to XVB.</h2>
-            <p class="muted">
-              This short video shows the most common workflow: add an M3U URL, load a local playlist file,
-              browse categories, and start playback.
-            </p>
-            <div class="spacer-16"></div>
-            <a class="btn btn--primary" href="xvb.html">Open Player</a>
-          </div>
+   
 
-          <div class="card">
-            <div class="video-card">
-              <video src="assets/guide.mp4" controls playsinline preload="metadata"></video>
-            </div>
-            <p class="video-note">How to add playlists and start playback.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-
-
-
-
-
-    
-<section id="ui-guide" class="section section--alt" style="background-color: #0a121e; color: #e2e8f0; padding: 60px 0;">
+    <section id="ui-guide" class="section section--alt" style="background-color: #0a121e; color: #e2e8f0; padding: 60px 0;">
   <div class="container">
     <div class="section__head center">
       <p class="kicker" style="color: #38bdf8;">User Manual</p>
       <h2 class="section-title" style="color: #fff;">Understanding the Interface</h2>
-      <p class="muted" style="max-width: 800px; margin: 0 auto; color: #94a3b8;">
-        XVB features a minimalist yet powerful toolbar designed for speed and real-time monitoring. 
-        Here is a breakdown of every element in your dashboard.
+      <p class="muted" style="max-width: 860px; margin: 0 auto; color: #94a3b8;">
+        XVB keeps the top bar minimal: essential live indicators + search, and a single shortcut to manage playlists.
       </p>
     </div>
 
     <div class="grid-3" style="margin-top: 40px;">
-      
+
+      <!-- LIVE METRICS -->
       <div class="card" style="background: #111b2d; border: 1px solid #1e293b;">
-        <h3 style="color: #38bdf8; font-size: 1.1rem;"><i class="fa-duotone fa-chart-simple"></i> Live Metrics</h3>
+        <h3 style="color: #38bdf8; font-size: 1.1rem;">
+          <i class="fa-duotone fa-chart-simple"></i> Live Status
+        </h3>
+
         <ul style="list-style: none; padding: 0; font-size: 0.95rem; line-height: 2;">
-          <li><i class="fa-duotone fa-solid  fa-clapperboard-play" style="width: 50px; font-size:25px;"></i> <strong>Channels Counter:</strong> Displays the total number of playable streams currently loaded from your active playlists.</li>
-          <li><i class="fa-duotone fa-solid  fa-clock-rotate-left" style="width: 50px; font-size:25px;"></i> <strong>EPG Status:</strong> Real-time timestamp of the last Electronic Program Guide update (Italy & UK sources).</li>
-          <li><i class="fa-duotone fa-solid  fa-eye" style="width: 50px; font-size:25px;"></i> <strong>Online Users:</strong> Shows how many users are currently connected to the XVB ecosystem worldwide.</li>
+          <li>
+            <i class="fa-duotone fa-solid fa-clapperboard-play" style="width: 50px; font-size:25px;"></i>
+            <strong>Channels:</strong> Shows how many streams are currently loaded from your active playlists.
+          </li>
+
+          <li>
+            <i class="fa-duotone fa-solid fa-clock-rotate-left" style="width: 50px; font-size:25px;"></i>
+            <strong>EPG time:</strong> Timestamp of the latest Electronic Program Guide update.
+          </li>
+
+          <li>
+            <i class="fa-duotone fa-solid fa-eye" style="width: 50px; font-size:25px;"></i>
+            <strong>Online:</strong> Number of users currently connected to the XVB ecosystem.
+          </li>
         </ul>
       </div>
 
+      <!-- SEARCH -->
       <div class="card" style="background: #111b2d; border: 1px solid #1e293b;">
-        <h3 style="color: #38bdf8; font-size: 1.1rem;"><i class="fa-duotone fa-magnifying-glass"></i> Navigation</h3>
+        <h3 style="color: #38bdf8; font-size: 1.1rem;">
+          <i class="fa-duotone fa-magnifying-glass"></i> Search
+        </h3>
+
         <ul style="list-style: none; padding: 0; font-size: 0.95rem; line-height: 2;">
-          <li><i class="fa-duotone fa-solid  fa-magnifying-glass" style="width: 50px; font-size:25px;"></i> <strong>Smart Search:</strong> Instant filtering. Start typing a channel name to find it immediately without scrolling.</li>
-          <li><i class="fa-duotone fa-solid  fa-cloud-arrow-down" style="width: 50px; font-size:25px;"></i> <strong>Sample Cloud:</strong> If no lists are present, click this to load a technical sample list to test <strong>MP4, AAC, MP3, OGG, MPD, TS,</strong> and <strong>HLS</strong>.</li>
+          <li>
+            <i class="fa-duotone fa-solid fa-magnifying-glass" style="width: 50px; font-size:25px;"></i>
+            <strong>Instant filter:</strong> Start typing to filter channels in real time — no scrolling needed.
+          </li>
+
+          <li>
+            <i class="fa-duotone fa-solid fa-keyboard" style="width: 50px; font-size:25px;"></i>
+            <strong>Tip:</strong> Use short keywords (e.g., “BBC”, “Sport”, “News”) to narrow results faster.
+          </li>
         </ul>
       </div>
 
+      <!-- PLAYLIST MANAGER (single icon) -->
       <div class="card" style="background: #111b2d; border: 1px solid #1e293b;">
-        <h3 style="color: #38bdf8; font-size: 1.1rem;"><i class="fa-duotone fa-folder-gear"></i> Playlist Management</h3>
+        <h3 style="color: #38bdf8; font-size: 1.1rem;">
+          <i class="fa-duotone fa-folder-gear"></i> Playlist Manager
+        </h3>
+
         <ul style="list-style: none; padding: 0; font-size: 0.95rem; line-height: 2;">
-          <li><i class="fa-duotone fa-solid  fa-file-plus" style="width: 50px; font-size:25px;"></i> <strong>Add Remote URL:</strong> Import direct M3U links. Note: This method targets static direct links for maximum performance.</li>
-          <li><i class="fa-duotone fa-solid  fa-folder-plus" style="width: 50px; font-size:25px;"></i> <strong>Local Import:</strong> Browse your device to upload <code>.m3u</code> or <code>.m3u8</code> files stored locally.</li>
-          <li><i class="fa-duotone fa-solid  fa-trash-can" style="width: 50px; font-size:25px; color: #ff4d4d;"></i> <strong>Clear Cache:</strong> Instantly wipes all stored playlists and data from your browser's local cache.</li>
+          
+
+          <li>
+            <i class="fa-duotone fa-solid fa-file-circle-plus" style="width: 50px; font-size:25px;"></i>
+            <strong>Add sources:</strong> Save M3U URLs, import local files, or download official lists.
+          </li>
+
+          <li>
+            <i class="fa-duotone fa-solid fa-trash-can" style="width: 50px; font-size:25px; color:#ff4d4d;"></i>
+            <strong>Remove items:</strong> Delete playlists individually (no need to wipe everything).
+          </li>
         </ul>
       </div>
 
@@ -241,16 +249,12 @@
 
     <div style="margin-top: 30px; text-align: center; background: rgba(56, 189, 248, 0.05); padding: 20px; border-radius: 10px; border: 1px solid rgba(56, 189, 248, 0.2);">
       <p style="margin: 0; font-size: 0.9rem; color: #cbd5e1;">
-        <i class="fa-duotone fa-solid  fa-circle-info" style="color: #38bdf8;"></i> 
-        <strong>Pro Tip:</strong> Use the <strong>Clear Cache</strong> button if you experience loading glitches after updating a local file. XVB stores data client-side for ultra-fast startup.
+        <i class="fa-duotone fa-solid fa-circle-info" style="color: #38bdf8;"></i>
+        <strong>Note:</strong> Changes made in Playlist Manager are stored locally in your browser and applied immediately to the player.
       </p>
     </div>
   </div>
 </section>
-
-
-
-
     <section id="features" class="section section--alt">
       <div class="container">
         <div class="section__head">
@@ -350,12 +354,92 @@ https://example.com/video/demo.mp4
           <ul class="check-list">
             <li><strong>M3U URL:</strong> add a playlist URL and refresh channels.</li>
             <li><strong>Local file:</strong> load an .m3u / .m3u8 file directly from your device.</li>
+            <li><strong>Playlist Manager:</strong> manage playlists individually from <a href="manager.html">manager.html</a>.</li>
             <li><strong>Categories:</strong> use group-title to organize channels in the sidebar.</li>
             <li><strong>EPG:</strong> set tvg-id to match guide sources (when available).</li>
           </ul>
         </div>
       </div>
     </section>
+
+    <!-- ✅ NEW SECTION: Playlist Manager -->
+    <section id="playlist-manager" class="section section--alt">
+      <div class="container">
+        <div class="section__head">
+          <p class="kicker">Playlists</p>
+          <h2 class="section-title">Playlist Manager.</h2>
+          <p class="muted">
+            Manage playlists individually in a dedicated page. Add URL playlists, import local M3U files,
+            download official sample lists, and delete items one by one — without wiping everything.
+          </p>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <h3 class="card-title">
+              <i class="fa-duotone fa-solid fa-list-check"></i>
+              What it does
+            </h3>
+
+            <ul class="check-list">
+              <li><strong>Add URL:</strong> save an M3U/M3U8 link as a single playlist item.</li>
+              <li><strong>Add file:</strong> import a local <code>.m3u</code>/<code>.m3u8</code> file and store it in your browser.</li>
+              <li><strong>Server lists:</strong> download XVB-provided playlists with one click.</li>
+              <li><strong>Delete individually:</strong> remove a single playlist without touching the others.</li>
+            </ul>
+
+            <div class="spacer-16"></div>
+
+            <a class="btn btn--primary" href="manager.html">
+              Open Playlist Manager <i class="fa-light fa-arrow-up-right-from-square"></i>
+            </a>
+          </div>
+
+          <div class="card">
+            <h3 class="card-title">
+              <i class="fa-duotone fa-solid fa-hard-drive"></i>
+              How it works
+            </h3>
+
+            <p class="muted">
+              The manager stores playlists in your browser using <strong>LocalStorage</strong>.
+              No accounts, no server database. Your lists stay available after refresh and apply directly to the player.
+            </p>
+
+            <div class="spacer-16"></div>
+
+            <div class="pm-preview">
+              <img src="assets/pm.png" alt="Playlist Manager interface preview">
+            </div>
+
+            <div class="spacer-16"></div>
+
+            <div class="pm-note">
+              <p class="muted" style="margin:0;">
+                <i class="fa-duotone fa-solid fa-circle-info"></i>
+                Tip: when the player is open, changes are synced instantly via <strong>BroadcastChannel</strong>.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="spacer-16"></div>
+
+        <div class="card">
+          <h3 class="card-title">
+            <i class="fa-duotone fa-solid fa-shield-check"></i>
+            Notes & limitations
+          </h3>
+
+          <ul class="spec-list">
+            <li><strong>Same browser / same device:</strong> playlists are stored locally on your device.</li>
+            <li><strong>CORS rules apply:</strong> remote playlists must allow cross-origin requests.</li>
+            <li><strong>HTTPS recommended:</strong> avoid mixed-content blocks (HTTPS page + HTTP streams).</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+    <!-- ✅ END NEW SECTION -->
 
     <section id="limitations" class="section">
       <div class="container">

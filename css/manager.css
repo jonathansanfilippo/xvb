@@ -1,0 +1,411 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+:root{
+  /* Light */
+  --bg: #fff;
+  --surface: #ffffff;
+  --soft: #f1f3f654;
+  --text: #0f1115;
+  --muted: rgba(15,17,21,0.62);
+  --accent: #007aff;
+  --danger: #e54848;
+  --r1: 22px;
+  --r2: 16px;
+  --footer:#f6f6f6;
+}
+
+/* Dark theme */
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg: #0b0d12;
+    --surface: #121623;
+    --soft: #171c2c;
+    --text: #f4f6fb;
+    --muted: rgba(244,246,251,0.60);
+    --accent: #5fb3ff;
+    --danger: #ff6b6b;
+    --footer:#131314;
+  }
+}
+
+*{ box-sizing:border-box; }
+html,body{ height:100%; }
+
+body{
+  margin:0;
+  font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+
+  font-size: 17px;
+}
+
+/* layout */
+.wrap{
+  width:min(1100px, 92vw);
+  margin: 28px auto 60px;
+}
+
+/* header “pagina XVB” */
+.hero{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.brandline{
+  font-weight: 700;
+  letter-spacing: 2px;
+  font-size: 12px;
+  color: var(--accent);
+  text-transform: uppercase;
+  padding-bottom: 10px;
+}
+
+/* Titolo (non enorme) */
+.h1{
+  font-size: clamp(20px, 3vw, 28px);
+  line-height: 1.2;
+  font-weight: 700;
+  margin: 0;
+}
+
+.sub{
+  margin-top: 10px;
+  font-size: clamp(12px, 3vw, 17px);
+  line-height: 1.6;
+  color: var(--muted);
+  font-weight: 600;
+  max-width: 62ch;
+}
+
+/* grid */
+.grid{
+  display:grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+/* card soft */
+.section{
+ /* background: var(--surface);
+  border-radius: var(--r1);
+  padding: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.06);*/
+}
+
+@media (prefers-color-scheme: dark){
+  .section{  }
+}
+
+.label{
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(127,132,145,0.95);
+  margin: 2px 0 12px 2px;
+}
+
+
+.row{
+  display: grid;
+  grid-template-columns: 1fr auto; /* input + icona */
+  gap: 12px;
+  align-items: center;
+}
+
+/* Inputs */
+.input, .file{
+  width: 100%;
+  min-width: 0;
+
+  padding: 14px 14px;
+  border-radius: var(--r2);
+  border: none;
+  background: var(--soft);
+  color: #f0931c;
+  outline: none;
+  font-weight: 650;
+
+  font-size: 14px;
+}
+
+.input::placeholder{
+  color: rgba(201, 201, 201, 0.95);
+
+}
+
+
+.iconbtn{
+  background: transparent !important;
+  border: none !important;
+  width: auto;
+  height: auto;
+  padding: 6px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+  transition: transform .12s ease, opacity .12s ease, filter .12s ease;
+  justify-self: end;
+}
+
+.iconbtn i{
+  font-size: 20px; 
+}
+
+/* hover leggero */
+.iconbtn:hover{
+  transform: scale(1.08);
+  opacity: 0.90;
+}
+
+/* colori */
+.iconbtn.primary i{
+  color: var(--accent);
+}
+.iconbtn.danger i{
+  color: var(--danger);
+}
+
+/* ✅ in dark mode ancora più “pop” */
+@media (prefers-color-scheme: dark){
+  .iconbtn.primary i{
+    filter: drop-shadow(0 8px 18px rgba(95,179,255,0.25));
+  }
+  .iconbtn.danger i{
+    filter: drop-shadow(0 8px 18px rgba(255,107,107,0.18));
+  }
+}
+
+/* status */
+.status{
+  margin-top: 10px;
+  
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--muted);
+}
+
+/* list */
+.list{ list-style:none; padding:0; margin:0; }
+
+.item{
+  margin-top: 12px;
+  background: var(--soft);
+  border-radius: 8px;
+  padding: 2px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.item-left{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  gap: 6px;
+}
+
+.item-name{
+  font-weight: 500!important;
+  font-size: 14px!important;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  max-width: 72ch;
+}
+
+.item-meta{
+  display:flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.pill{
+ 
+ /* color: var(--accent);*/
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 1px;
+}
+}
+
+/* ✅ Mobile: bottone icona va sotto ma resta allineato bene */
+@media (max-width: 420px){
+  .wrap{ width: min(1000px, 94vw); }
+
+  .row{
+    grid-template-columns: 1fr; /* va sotto */
+  }
+
+  .iconbtn{
+    justify-self: end;  /* icona a destra */
+  }
+
+  .iconbtn i{
+    font-size: 44px; /* un filo più grande su mobile */
+  }
+}
+
+
+
+/* ===== Custom file input style ===== */
+
+/* nascondiamo il bottone nativo */
+.file::file-selector-button {
+  border: none;
+  background: #007aff;
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  margin-right: 12px;
+  transition: background .15s ease, transform .1s ease;
+}
+
+.file::file-selector-button:hover {
+  background: #92c3f9;
+  transform: translateY(0px);
+}
+
+.file::file-selector-button:active {
+  transform: scale(0.98);
+}
+
+/* Safari fix */
+.file::-webkit-file-upload-button {
+  border: none;
+  background: var(--surface);
+  color: var(--text);
+  padding: 8px 14px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+
+
+/* ================= FOOTER ================= */
+
+.footer{
+  margin-top: 60px;
+  padding: 28px 0 36px;
+  border-top: 1px solid rgba(127,132,145,0.15);
+  background: var(--footer);
+}
+
+.footer-inner{
+  width: min(1100px, 92vw);
+  margin: 0 auto;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:20px;
+  flex-wrap:wrap;
+}
+
+.footer-left{
+  font-weight:600;
+  font-size:14px;
+  color: var(--text);
+}
+
+.footer-version{
+  margin-left:8px;
+  font-size:12px;
+  color: var(--accent);
+  font-weight:600;
+}
+
+.footer-right{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-size:13px;
+  color: var(--muted);
+  font-weight:500;
+}
+
+.footer-dot{
+  width:4px;
+  height:4px;
+  border-radius:50%;
+  background: var(--muted);
+  opacity:0.6;
+}
+
+/* Dark mode tweak */
+@media (prefers-color-scheme: dark){
+  .footer{
+    border-top: 1px solid rgba(244,246,251,0.08);
+  }
+}
+
+
+/* Colore rosso quando non c'è un file (o quando ha la classe empty) */
+.file.empty {
+  color: #ff4d4d !important; 
+}
+
+/* Colore verde (quello che hai già) quando il file è selezionato */
+.file {
+  width: 100%;
+  min-width: 0;
+  padding: 14px 14px;
+  border-radius: var(--r2);
+  border: none;
+  background: var(--soft);
+  color: var(--text); /* Verde */
+  outline: none;
+  font-weight: 650;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+
+
+
+/* --- macOS Style Pastel Dots --- */
+.dot-server { color: #5eb1ff !important; } /* Blu pastello */
+.dot-url    { color: #fdbb66 !important; } /* Arancione pastello */
+.dot-local  { color: #28c5a8 !important; } /* Verde pastello (già tuo) */
+
+/* Allineamento icone nei titoli e nelle liste */
+.label i, .item-name i {
+  margin-right:;
+  font-size: 10px;
+  vertical-align: middle;
+}
+
+.item-name {
+  display: flex;
+  align-items: center;
+}
+
+
+.item {
+    justify-content: flex-start; /* Allinea tutto a sinistra */
+    gap: 16px; /* Spazio costante tra icona e testo */
+}
+
+
+
+.legal{
+font-size: 12px;
+color:var(--muted);
+
+}

@@ -82,7 +82,7 @@ body{
 a{ text-decoration: none !important; color: inherit; }
 a:focus-visible{ outline: none; box-shadow: var(--focus); border-radius: 14px; }
 
-img, video{ max-width:133%; display:block; }
+img, video{ max-width:100%; display:block; }
 
 .container{
   width: min(var(--container), calc(100% - 40px));
@@ -719,3 +719,6 @@ h1{
   .grid-3{ grid-template-columns: 1fr; }
   .nav{ display:none; }
 }
+
+
+
