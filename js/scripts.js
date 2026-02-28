@@ -1524,3 +1524,33 @@ function playPreviousChannel() {
     items[prevIdx].click();
     items[prevIdx].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
+
+
+
+let mouseTimer;
+const wrapper = document.querySelector('.ui-wrapper');
+const leftSide = document.querySelector('.sidebar-left');
+const rightSide = document.querySelector('.sidebar-right');
+
+// Mostra tutto al movimento del mouse
+document.addEventListener('mousemove', () => {
+    wrapper.classList.add('visible');
+    
+    // Resetta il timer: se stai muovendo il mouse non deve sparire
+    clearTimeout(mouseTimer);
+    
+    // Se il mouse è fermo per 3 secondi, toglie la classe .visible
+    mouseTimer = setTimeout(() => {
+        // Non nascondere se il mouse è sopra una sidebar
+        if (!leftSide.matches(':hover') && !rightSide.matches(':hover')) {
+            wrapper.classList.remove('visible');
+        }
+    }, 3000);
+});
+
+// Gestione sfumature specifiche (Left/Right)
+leftSide.addEventListener('mouseenter', () => wrapper.classList.add('active-left'));
+leftSide.addEventListener('mouseleave', () => wrapper.classList.remove('active-left'));
+
+rightSide.addEventListener('mouseenter', () => wrapper.classList.add('active-right'));
+rightSide.addEventListener('mouseleave', () => wrapper.classList.remove('active-right'));
