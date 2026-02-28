@@ -167,7 +167,9 @@ function updateTabTitle(channelName) {
     document.title = DEFAULT_TITLE;
     return;
   }
-  document.title = `${channelName} • ${DEFAULT_TITLE}`;
+  const titleClean = channelName.replace(/<[^>]*>/g, '').trim();
+
+  document.title = `${titleClean} • ${DEFAULT_TITLE}`;
 }
 
 function setPlayPauseIcon(isPlaying) {
