@@ -550,7 +550,7 @@ font-weight: 700;
 
 .epg-next {
   /* ✅ non bloccare mai in “quadretto” */
-  flex: 0 1 260px;
+  
   min-width: 260px;
   border-left: 1px solid rgba(255,255,255,0.1);
   padding-left: 30px;
