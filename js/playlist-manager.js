@@ -37,20 +37,39 @@ function formatDate(ts) {
   catch { return ""; }
 }
 
-function setStatus(id, msg) {
-  const el = $(id);
-  if (el) el.textContent = msg || "";
-}
-
+// --- RENDERING E CONTEGGIO CANALI ---
 function renderSaved() {
   const list = $("playlistList");
   const status = $("statusList");
-  if (!list || !status) return;
+  const totalPlaylistsEl = $("totalPlaylists");
+  const totalChannelsEl = $("totalChannels");
 
+  if (!list || !status) return;
   list.innerHTML = "";
 
   const items = (pl2_listIndex() || []).slice()
     .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+  let channelCount = 0;
+  
+  items.forEach(it => {
+    const raw = localStorage.getItem("xvb.playlists.item.v2." + it.id);
+    if (raw) {
+      try {
+        const parsed = JSON.parse(raw);
+        // Conta sia file locali che scaricati (m3uText o content)
+        const text = parsed.m3uText || parsed.content || "";
+        if (text) {
+          const matches = text.match(/#EXTINF/gi);
+          if (matches) channelCount += matches.length;
+        }
+      } catch (e) {}
+    }
+  });
+
+  // Aggiorna gli span con i numeri
+  if (totalPlaylistsEl) totalPlaylistsEl.textContent = String(items.length);
+  if (totalChannelsEl) totalChannelsEl.textContent = String(channelCount);
 
   if (!items.length) {
     status.textContent = "No playlists saved yet.";
@@ -63,7 +82,6 @@ function renderSaved() {
     const li = document.createElement("li");
     li.className = "item";
 
-    // 1. Bottone Delete (A SINISTRA)
     const del = document.createElement("button");
     del.className = "iconbtn danger";
     del.innerHTML = '<i class="fa-duotone fa-solid fa-trash"></i>';
@@ -71,109 +89,75 @@ function renderSaved() {
       if (!confirm(`Delete "${it.name}"?`)) return;
       pl2_remove(it.id);
       broadcastChanged();
-      renderSaved();
+      renderSaved(); 
     };
 
-    // 2. Contenuto Testuale
     const left = document.createElement("div");
     left.className = "item-left";
-
     const name = document.createElement("div");
     name.className = "item-name";
     const isFromServer = SERVER_PLAYLISTS.some(s => s.url === it.url);
-    
-    // Identifichiamo la classe colore in base al tipo
     let dotClass = it.type === "local" ? "dot-local" : (isFromServer ? "dot-server" : "dot-url");
     
-    const dot = document.createElement("i");
-    dot.className = `fa-solid fa-circle ${dotClass}`;
-    
-    const textSpan = document.createElement("span");
-    textSpan.textContent = it.name || "(no name)";
-    textSpan.style.marginLeft = "8px";
-
-    name.appendChild(dot);
-    name.appendChild(textSpan);
+    name.innerHTML = `<i class="fa-solid fa-circle ${dotClass}"></i> <span style="margin-left:8px;">${it.name || "(no name)"}</span>`;
 
     const meta = document.createElement("div");
     meta.className = "item-meta";
-    
-    // PILL TYPE con colore dinamico
-    const pillType = document.createElement("span");
-    // Applichiamo sia la classe 'pill' che la classe colore (es. 'dot-local')
-    pillType.className = `pill ${dotClass}`; 
-    pillType.textContent = it.type === "local" ? "LOCAL" : (isFromServer ? "SERVER" : "URL");
-
-    // PILL DATE (colore neutro var--muted come da CSS)
-    const pillDate = document.createElement("span");
-    pillDate.className = "pill";
-    pillDate.textContent = it.createdAt ? formatDate(it.createdAt) : "";
-
-    meta.appendChild(pillType);
-    if (pillDate.textContent) meta.appendChild(pillDate);
+    const typeLabel = it.type === "local" ? "LOCAL" : (isFromServer ? "SERVER" : "URL");
+    meta.innerHTML = `<span class="pill ${dotClass}">${typeLabel}</span>`;
+    if (it.createdAt) meta.innerHTML += `<span class="pill">${formatDate(it.createdAt)}</span>`;
 
     left.appendChild(name);
     left.appendChild(meta);
-
-    // AGGIUNTA AL DOM: Prima il tasto delete, poi il blocco testo
     li.appendChild(del);
     li.appendChild(left);
     list.appendChild(li);
   });
 }
 
-
+// --- SERVER LIST CON DOWNLOAD IMMEDIATO ---
 function renderServer() {
   const ul = $("serverPlaylistList");
   const status = $("statusServer");
   if (!ul) return;
-
   ul.innerHTML = "";
 
   SERVER_PLAYLISTS.forEach((pl) => {
     const li = document.createElement("li");
     li.className = "item";
 
-    // 1. Bottone Download (ORA A SINISTRA)
     const btn = document.createElement("button");
     btn.className = "iconbtn primary";
     btn.innerHTML = `<i class="fa-duotone fa-solid fa-cloud-arrow-down"></i>`;
-    btn.onclick = () => {
-      const res = pl2_addUrl(pl.url);
-      if (!res || res.ok === false) {
-        if (status) status.textContent = res?.msg || "Already saved.";
-        return;
+    
+    btn.onclick = async () => {
+      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i>`;
+      const res = pl2_addUrl(pl.url, pl.name);
+      
+      if (res.ok) {
+        try {
+          const response = await fetch(pl.url);
+          const text = await response.text();
+          const itemKey = "xvb.playlists.item.v2." + res.id;
+          const itemData = JSON.parse(localStorage.getItem(itemKey));
+          itemData.m3uText = text;
+          localStorage.setItem(itemKey, JSON.stringify(itemData));
+        } catch (e) { console.warn("Fetch failed"); }
+        
+        if (status) status.textContent = `${pl.name} saved.`;
+        btn.innerHTML = `<i class="fa-duotone fa-solid fa-cloud-arrow-down"></i>`;
+        broadcastChanged();
+        renderSaved();
+      } else {
+        if (status) status.textContent = "Already saved.";
+        btn.innerHTML = `<i class="fa-duotone fa-solid fa-cloud-arrow-down"></i>`;
       }
-      if (status) status.textContent = `${pl.name} saved.`;
-      broadcastChanged();
-      renderSaved();
     };
 
-    // 2. Contenuto Testuale
     const left = document.createElement("div");
     left.className = "item-left";
+    left.innerHTML = `<div class="item-name">${pl.name}</div><div class="item-meta"><span class="pill">SERVER</span></div>`;
 
-    const name = document.createElement("div");
-    name.className = "item-name";
-    
-    const dot = document.createElement("i");
-    dot.className = "";
-    
-    const textSpan = document.createElement("span");
-    textSpan.textContent = pl.name;
-    textSpan.style.marginLeft = "0px";
-
-    name.appendChild(dot);
-    name.appendChild(textSpan);
-
-    const meta = document.createElement("div");
-    meta.className = "item-meta";
-    meta.innerHTML = `<span class="pill"></span>`;
-
-    left.appendChild(name);
-    left.appendChild(meta);
-
-    // AGGIUNTA AL DOM: Prima il tasto, poi il testo
     li.appendChild(btn);
     li.appendChild(left);
     ul.appendChild(li);
@@ -183,44 +167,23 @@ function renderServer() {
 function wireUI() {
   const btnAddUrl = $("btnAddUrl");
   const btnAddFile = $("btnAddFile");
-  const btnClearAll = $("btnClearAll");
+  const btnClearAll = $("btnClearAll"); // Corrisponde all'ID nel tuo manager.html
   const fileInput = $("fileInput");
 
-  // --- GESTIONE CARICAMENTO AUTOMATICO ---
   if (fileInput) {
-    // Rimuoviamo subito la classe empty all'avvio per non avere il rosso fisso
-    fileInput.classList.remove("empty");
-
     fileInput.addEventListener("change", () => {
       const statusEl = $("statusFile");
-      
       if (fileInput.files && fileInput.files.length > 0) {
         const file = fileInput.files[0];
         const reader = new FileReader();
-        
         reader.onload = () => {
-          const text = reader.result;
-          const res = pl2_addLocal(file.name, text);
-          
+          const res = pl2_addLocal(file.name, reader.result);
           if (res.ok) {
-            if (statusEl) {
-              statusEl.textContent = "Saved: " + file.name;
-              statusEl.style.color = "#28c5a8"; // Verde successo
-            }
-            // Reset campo: svuotiamo e togliamo il rosso
             fileInput.value = ""; 
-            fileInput.classList.remove("empty"); 
-
             broadcastChanged();
             renderSaved();
-          } else {
-            if (statusEl) {
-              statusEl.textContent = res.msg || "Error";
-              statusEl.style.color = "var(--danger)"; // Rosso errore
-            }
+            if (statusEl) statusEl.textContent = "Saved: " + file.name;
           }
-          // Reset colore testo dopo 3 secondi
-          setTimeout(() => { if (statusEl) statusEl.style.color = ""; }, 3000);
         };
         reader.readAsText(file);
       }
@@ -228,50 +191,47 @@ function wireUI() {
   }
 
   if (btnAddUrl) {
-    btnAddUrl.addEventListener("click", () => {
+    btnAddUrl.onclick = async () => {
       const url = ($("urlInput")?.value || "").trim();
+      if (!url) return;
       const res = pl2_addUrl(url);
-      const statusEl = $("statusUrl");
-      
-      if (statusEl) {
-        statusEl.textContent = res.ok ? "Saved." : res.msg;
-        statusEl.style.color = res.ok ? "#28c5a8" : "var(--danger)";
-        setTimeout(() => { statusEl.style.color = ""; }, 3000);
+      if (res.ok) {
+        try {
+          const response = await fetch(url);
+          const text = await response.text();
+          const itemKey = "xvb.playlists.item.v2." + res.id;
+          const itemData = JSON.parse(localStorage.getItem(itemKey));
+          itemData.m3uText = text;
+          localStorage.setItem(itemKey, JSON.stringify(itemData));
+        } catch (e) {}
+        if ($("urlInput")) $("urlInput").value = "";
+        broadcastChanged();
+        renderSaved();
       }
-
-      if (res.ok && $("urlInput")) $("urlInput").value = "";
-      if (res.ok) broadcastChanged();
-      renderSaved();
-    });
+    };
   }
 
-  // Il tasto Add File ora apre direttamente il selettore
-  if (btnAddFile) {
-    btnAddFile.addEventListener("click", () => {
-      if (fileInput) fileInput.click();
-    });
-  }
+  if (btnAddFile) btnAddFile.onclick = () => fileInput && fileInput.click();
 
+  // --- RESET FIX (Usa btnClearAll) ---
   if (btnClearAll) {
-    btnClearAll.addEventListener("click", () => {
-      if (!confirm("Remove ALL saved playlists?")) return;
+    btnClearAll.onclick = (e) => {
+      e.preventDefault();
+      if (!confirm("Are you sure? This will delete ALL playlists.")) return;
       pl2_clearAll();
       broadcastChanged();
       renderSaved();
-      setStatus("statusUrl", "");
-      setStatus("statusFile", "");
-      setStatus("statusServer", "");
-    });
+      // Reset manuale degli span
+      if ($("totalPlaylists")) $("totalPlaylists").textContent = "0";
+      if ($("totalChannels")) $("totalChannels").textContent = "0";
+    };
   }
 }
+
 function initManager() {
   wireUI();
   renderServer();
   renderSaved();
 }
 
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", initManager);
-} else {
-  initManager();
-}
+document.addEventListener("DOMContentLoaded", initManager);
