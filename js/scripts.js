@@ -315,11 +315,15 @@ window.addEventListener('resize', requestUiScale);
 window.addEventListener('orientationchange', requestUiScale);
 
 function updateTabTitle(channelName) {
-  if (!channelName) {
+  // Rimuove i tag HTML (es. <i>Nome</i> -> Nome)
+  const cleanName = channelName ? channelName.replace(/<\/?[^>]+(>|$)/g, "").trim() : "";
+
+  if (!cleanName) {
     document.title = DEFAULT_TITLE;
     return;
   }
-  document.title = `${channelName} • ${DEFAULT_TITLE}`;
+
+  document.title = `${cleanName} • ${DEFAULT_TITLE}`;
 }
 
 function setPlayPauseIcon(isPlaying) {
