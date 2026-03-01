@@ -204,7 +204,7 @@ function getAllLocalPlaylistsText() {
 let PLAYLIST_URLS = getAllPlaylistUrls();
 
 const EPG_URLS = [
-  "https://raw.githubusercontent.com/jonathansanfilippo/xvb-data/refs/heads/main/data/guides/it.xml",
+  "https://jonathansanfilippo.github.io/xvb-epg/epg.xml",
   "https://raw.githubusercontent.com/jonathansanfilippo/xvb-data/refs/heads/main/data/guides/uk.xml"
 ];
 
