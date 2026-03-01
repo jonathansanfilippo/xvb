@@ -1,22 +1,17 @@
-/* ===========================
-   XVB Playlist Manager (UI)
-   Requires: playlist-storage-v2.js
-   =========================== */
-
 const CHANNEL_CACHE_KEY = "dvb-m^7Y!zR4*P8&kQ3@h";
 
 const SERVER_PLAYLISTS = [
   {
-    name: "XVB - Italy",
-    url: "https://raw.githubusercontent.com/jonathansanfilippo/xvb-data/refs/heads/main/data/lists/xvb-it.m3u"
+    name: "xvb-it-nazionali",
+    url: "https://jonathansanfilippo.github.io/xvb-server-lists/xvb-it-nazionali"
   },
   {
-    name: "iptv-org - IT.rakuten",
-    url: "https://raw.githubusercontent.com/iptv-org/iptv/refs/heads/master/streams/it_rakuten.m3u"
+    name: "xvb-it-regionali",
+    url: "https://jonathansanfilippo.github.io/xvb-server-lists/xvb-it-regionali"
   },
   {
-    name: "XVB - UK",
-    url: "https://raw.githubusercontent.com/jonathansanfilippo/xvb-data/refs/heads/main/data/lists/xvb-uk.m3u"
+    name: "xvb-it-radio",
+    url: "https://jonathansanfilippo.github.io/xvb-server-lists/xvb-it-radio"
   }
 ];
 
