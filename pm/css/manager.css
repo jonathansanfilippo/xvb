@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu+Mono:ital,wght@0,400;0,700;1,400;1,700&family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap');
 
 :root{
   /* Light */
@@ -21,13 +21,13 @@
 @media (prefers-color-scheme: dark){
   :root{
     --bg: #0d1117;            /* main background */
-    --surface: #161b22;       /* cards / panels */
-    --soft: #161b22;          /* secondary surfaces */
+    --surface: #1e232a;       /* cards / panels */
+    --soft: #1e232a;          /* secondary surfaces */
     
-    --text: #c9d1d9;          /* primary text */
-    --muted: #8b949e;         /* secondary text */
+    --text: #f0f6fc;          /* primary text */
+    --muted: #9198a1;         /* secondary text */
 
-    --accent: #2f81f7;        /* blue (links/buttons) */
+    --accent: #4493f8;        /* blue (links/buttons) */
     --danger: #f85149;        /* errors */
     --warning: #fd7b87;       /* warning / attention */
     --success: #3fb950;       /* success states */
@@ -45,7 +45,9 @@ html,body{ height:100%; }
 
 body{
   margin:0;
-  font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  font-family: "Ubuntu", sans-serif;
+  font-weight: 400;
+  font-style: normal;
   background: var(--bg);
   color: var(--text);
   -webkit-font-smoothing: antialiased;
@@ -93,7 +95,7 @@ body{
 }
 
 .sub{
-  margin-top: 10px;
+  margin-top: 0px;
   font-size: clamp(12px, 3vw, 17px);
   line-height: 1.6;
   color: var(--muted);
@@ -114,6 +116,7 @@ body{
   border-radius: var(--r1);
   padding: 16px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.06);*/
+
 }
 
 @media (prefers-color-scheme: dark){
@@ -368,8 +371,8 @@ body{
 
 .sub-reset{
   margin-top: 10px;
-  font-size: ;
-  color: rgb(210, 153, 34);
+  font-size:19px;
+  color: rgb(253, 187, 102);
 }
 
 /* ================= FOOTER ================= */
@@ -427,7 +430,7 @@ body{
 
 
 .legal{
-font-size: 12px;
+font-size:;
 color:var(--legal);
 
 }

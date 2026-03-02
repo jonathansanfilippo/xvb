@@ -151,7 +151,7 @@ function renderServer() {
     btn.innerHTML = `<i class="fa-duotone fa-solid fa-cloud-arrow-down"></i>`;
 
     btn.onclick = async () => {
-      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i>`;
+      btn.innerHTML = `<i class="fa-duotone fa-solid fa-spinner-third"></i>`;
       const res = pl2_addUrl(pl.url, pl.name);
 
       if (res.ok) {
