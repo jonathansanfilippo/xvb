@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>XVB - Extended Video Broadcasting</title>
+  <link rel="icon" type="image/png" href="assets/icon.jpg">
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mpegts.js@1.7.3/dist/mpegts.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v7.2.0/css/all.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+  <div class="video-container">
+    <video id="videoPlayer" autoplay playsinline poster="assets/placeholder.png"></video>
+  </div>
+
+  <div id="uiOverlay" class="ui-wrapper">
+    <div class="ui-stage">
+
+      <!-- LEFT SIDEBAR: CHANNELS -->
+      <!-- <i style="font-size: 18px;" id="channelTypeIcon"></i> <span style="opacity:0.7;" id="groupCount"></span> -->
+      <aside class="sidebar sidebar-left">
+        <div class="section-label" style="padding: 0 18px;">
+          Channels <span id="channelTypeText">TV</span>
+        </div>
+        <div class="sidebar-chans-scroll">
+          <div id="channelContainer"></div>
+        </div>
+      </aside>
+
+      <!-- RIGHT SIDEBAR: CATEGORIES -->
+      <aside class="sidebar sidebar-right">
+        <div class="section-label" style="padding: 0 18px;">Categories</div>
+        <div class="sidebar-cats-scroll">
+          <div id="categoryContainer" class="sidebar-cats"></div>
+        </div>
+      </aside>
+
+      <div class="epg-overlay">
+        <div class="epg-card">
+          <div class="epg-content">
+            <div class="epg-now">
+              <!-- <span class="label1">NOW ON <span style="color:#FFFFFF91;" id="activeName"></span></span> -->
+              <div id="activeLogoWrapper" style="width:100px; height:100px; display:flex; align-items:center; justify-content:center;">
+  
+  <img id="activeLogo"
+       src=""
+       style="display:none; width:100%; height:100%; object-fit:contain;"
+       onerror="showLogoFallback()">
+
+  <i id="activeLogoFallback"
+     class="fa-duotone fa-solid fa-clapperboard-play"
+     style="display:none; font-size:100px; opacity:0.6;">
+  </i>
+
+</div><br>
+
+              <span id="current-date" class="date-display"></span><span> - </span>
+              <span id="epgNowText">Add an M3U playlist, paste a direct URL, or browse a local file.</span>
+
+              <div class="progress-bar">
+                <div id="epgNowFill" class="progress-fill"></div>
+              </div>
+
+              <div class="player-controls">
+
+                <button class="icon-btn" onclick="rewind()" aria-label="Rewind 10 seconds">
+                  <i class="fa-duotone fa-solid fa-arrow-rotate-left-10"></i>
+                </button>
+
+                <button class="icon-btn" id="playPauseBtn" onclick="togglePlay()" aria-label="Pause">
+                  <i class="fa-duotone fa-solid fa-pause"></i>
+                </button>
+
+                <button class="icon-btn" onclick="forward()" aria-label="Forward 10 seconds">
+                  <i class="fa-duotone fa-solid fa-arrow-rotate-right-10"></i>
+                </button>
+
+                <div class="volume-container">
+                  <button id="muteBtn" onclick="toggleMute()" aria-label="Mute">
+                    <i class="fa-duotone fa-solid fa-volume-high"></i>
+                  </button>
+                  <input type="range" id="volumeSlider" min="0" max="1" step="0.05" value="1"
+                         oninput="changeVolume(this.value)" aria-label="Volume">
+                </div>
+
+                <button class="icon-btn" onclick="toggleFullScreen()" aria-label="Fullscreen" style="margin-left:auto">
+                  <i class="fa-duotone fa-solid fa-expand"></i>
+                </button>
+
+                <div id="qualityBadge" class="quality-badge"></div>
+              </div>
+            </div>
+
+            <div class="epg-next epg-next2">
+              <span class="label2">
+                <i style="font-size: 30px;" class="fa-duotone fa-solid fa-triple-chevrons-right"></i>
+             
+              </span>
+              <p></p>
+              <p></p>
+              <div id="epgNextList"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="video-controls-hint">
+        <a href="index.html" class="logo-area" style="text-decoration: none; color: inherit; opacity:0.7;">
+          <img style="padding-right: 5px;" src="assets/logo.png" alt="XVB" width="32" height="14">
+          <span class="logo">v1.2 Desktop</span>
+        </a>
+
+        <span class="hint-sep"></span>
+           <span class="hint-btn">
+          <i style="font-size: 18px; margin-right: -6px; " class="fa-duotone fa-solid fa-circle-location-arrow"></i>
+          </span> 
+          <span class="ip" id="userIpText"></span>
+          <span class="hint-sep"></span>
+
+        <span style="color: inherit; opacity:0.9; font-weight: 900;">
+          <span>
+            <i class="fa-duotone fa-solid fa-clapperboard-play"
+               style="font-size: 18px; margin-right: 3px; color: rgba(255, 255, 255, 0.8);"></i>
+          </span>
+          <span id="totalAll"></span>/<span id="playlistCount">0</span>
+        </span>
+
+        <span class="hint-sep"></span>
+
+        <span style="color: inherit; opacity:0.9; font-weight: 900;">
+          EPG <i class="fa-duotone fa-solid fa-timer"></i> <span id="epg-uk-time">--:--</span>
+        </span>
+
+        <span class="hint-sep"></span>
+
+        <span class="hint-users" title="Online users">
+          <i class="fa-duotone fa-solid fa-eye"></i>
+          <b id="online">0</b>
+        </span>
+
+        <span class="hint-sep"></span>
+
+        <div class="channel-search">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="channelSearch" placeholder="Search">
+        </div>
+
+        <span class="hint-sep"></span>
+
+       
+          <span class="hint-btn"
+                onclick="window.open('../pm/index.html', '_blank');"
+                title="Playlist Manger"
+                style="cursor: pointer;">
+            <i class="fa-duotone fa-solid fa-file-circle-plus"
+               style="font-size: 18px; margin-right: 3px; color: rgba(255, 255, 255, 0.8);"></i>
+          </span>
+          
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="js/scripts.js"></script>
+</body>
+</html>

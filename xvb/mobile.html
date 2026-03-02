@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>XVB - Extended Video Broadcasting</title>
+  <link rel="icon" type="image/png" href="assets/icon.jpg">
+ <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mpegts.js@1.7.3/dist/mpegts.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v7.2.0/css/all.css">
+  
+  <link rel="stylesheet" href="css/mobile.css">
+</head>
+
+<body>
+
+
+
+<header class="main-header">
+  <a href="index.html" class="logo-area">
+    <img src="assets/logo.png" alt="XVB" class="site-logo">
+    <span class="site-title"></span>
+    <p class="logomobile">v0.3b Mobile</p>
+  </a>
+
+
+
+</header>
+
+
+
+
+  <div class="video-container">
+    <video id="videoPlayer" controls playsinline autoplay poster="assets/placeholder.png"></video>
+  </div>
+
+  <div id="uiOverlay" class="ui-wrapper">
+    <div class="ui-stage">
+
+      <!-- LEFT SIDEBAR: CHANNELS -->
+      <aside class="sidebar sidebar-left">
+        <div class="section-label" style="padding: 0 18px;">Channels</div>
+        <div class="sidebar-chans-scroll">
+          <div id="channelContainer"></div>
+        </div>
+      </aside>
+
+      <!-- RIGHT SIDEBAR: CATEGORIES -->
+      <aside class="sidebar sidebar-right">
+        <div class="section-label" style="padding: 0 18px;">Categories</div>
+        <div class="sidebar-cats-scroll">
+          <div id="categoryContainer" class="sidebar-cats"></div>
+        </div>
+      </aside>
+
+      
+
+      
+      </div>
+
+    </div>
+
+
+
+  </div>
+
+
+
+  <nav class="mobile-footer">
+    
+<!--
+    <div class="footer-item" onclick="addCustomUrl()" title="Add M3U URL">
+        <i class="fa-duotone fa-solid fa-file-circle-plus"></i>
+        
+    </div>
+
+    <div class="footer-item" onclick="document.getElementById('localFile').click()" title="Load local file">
+        <i class="fa-duotone fa-solid fa-folder-plus"></i>
+        
+        <input type="file" id="localFile" accept=".m3u,.m3u8" onchange="loadLocalFile(event)" style="display:none;">
+    </div>
+
+     -->
+
+    <div class="footer-item" onclick="clearCache()" title="Clear cache">
+        <i class="fa-duotone fa-solid fa-trash"></i>
+       
+    </div>
+
+
+
+
+    <div class="footer-item" onclick="window.open('../pm/index.html', '_blank');" title="Playlist Manager">
+        <i class="fa-duotone fa-solid fa-file-circle-plus"></i>
+        
+    </div>
+
+
+
+    <div class="footer-item active" id="playPauseBtn" onclick="togglePlay()" title="Play/Pause">
+        <i class="fa-duotone fa-solid fa-pause"></i>
+      
+    </div>
+
+</nav>
+
+  <script src="js/scripts.js"></script>
+</body>
+</html>

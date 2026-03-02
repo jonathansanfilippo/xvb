@@ -1,0 +1,855 @@
+:root {
+  --glass: rgba(20, 20, 25, 0.55);
+  --accent: #007aff;
+  --text: #ffffff;
+  --ui-scale: 1; /* tenuto ma NON usato per trasformare */
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+
+
+
+body, html {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background:black;
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+.logo{
+font-weight: 700;
+color:#ffffff8a;
+}
+
+
+
+.activeName{
+  color:#ffffffe8;
+  font-weight: 700;
+  font-size: 35px;
+  margin-bottom: 10px!important;
+}
+
+#epgNowText{
+ color:#ffffffe8;
+font-size: 18px;
+font-weight: 700;
+
+}
+
+
+
+.date-display {
+  font-weight: 700;
+  color: #ffbd71;
+  font-size: 18px;
+}
+
+
+
+
+
+
+
+
+.channel-search{
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+}
+
+.channel-search i{
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.channel-search input{
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #fff;
+  font-size: 12px;
+  width: 80px;
+}
+
+.channel-search input::placeholder{
+  color: rgba(255,255,255,0.5);
+}
+
+
+
+
+#groupCount {
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.90);
+}
+
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 14px;   /* 👈 QUESTO crea spazio naturale */
+}
+
+.item-icon,
+.item-img {
+ font-size: 24px;
+  object-fit: contain;
+}
+
+/* ================= VIDEO ================= */
+
+.video-container {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* fallback wallpaper 
+  background: url("assets/radio.jpg") center center / cover no-repeat;*/
+}
+
+#videoPlayer {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+
+.ui-wrapper {
+  position: relative;
+  z-index: 10;
+  height: 100vh;
+  width: 100vw;
+  pointer-events: none;
+  
+  /* Parte da 0 e sparisce lentamente in 3s */
+  opacity: 0;
+  transition: opacity 3s ease;
+  
+  /* Gradiente Base Fisso (Sopra e Sotto) */
+  background: 
+    linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.8) 20%, transparent 60%),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.8) 0%, transparent 10%);
+}
+
+/* Quando muovi il mouse (Entrata veloce) */
+.ui-wrapper.visible {
+  opacity: 1;
+  pointer-events: auto;
+  transition: opacity 0.3s ease;
+}
+
+/* Pseudo-elementi per i lati (Sfumature dinamiche) */
+.ui-wrapper::before,
+.ui-wrapper::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50%; 
+  opacity: 0;
+  z-index: -1;
+  /* Transizione di uscita: lenta (3s) per seguire il player */
+  transition: opacity 3s ease;
+  pointer-events: none;
+}
+
+/* Configurazione Gradienti Laterali */
+.ui-wrapper::before {
+  left: 0;
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.9) 0%, transparent 100%);
+}
+
+.ui-wrapper::after {
+  right: 0;
+  background: linear-gradient(to left, rgba(0, 0, 0, 0.9) 0%, transparent 100%);
+}
+
+/* --- Attivazione (Entrata sfumatura laterale) --- */
+.ui-wrapper.active-left::before,
+.ui-wrapper.active-right::after {
+  opacity: 1;
+  /* Transizione di entrata: più rapida della sparizione ma comunque morbida */
+  transition: opacity 0.8s ease;
+}
+/* ================= FLOATING SIDEBARS ================= */
+.sidebar {
+  position: absolute;
+  top: 65px;
+  bottom: 260px;
+  width: 370px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  opacity: 0.3;
+  /* MODIFICA: Anche le scritte svaniscono in 3s */
+  transition: opacity 3s ease;
+  pointer-events: auto; 
+}
+
+.sidebar:hover {
+  opacity: 1 !important;
+  transition: opacity 0.2s ease !important; /* Reattiva al tocco */
+}
+
+.sidebar-left { left: 0; }
+.sidebar-right { right: 0; }
+
+
+
+
+
+
+/* ===== Scroll CANALI (sx) ===== */
+.sidebar-chans-scroll{
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0 18px 22px;
+  scrollbar-width: none;
+}
+.sidebar-chans-scroll::-webkit-scrollbar{ display:none; }
+
+/* ===== Scroll CATEGORIE (dx) ===== */
+.sidebar-cats-scroll{
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0 18px 22px;
+  scrollbar-width: none;
+}
+.sidebar-cats-scroll::-webkit-scrollbar{ display:none; }
+
+/* Section label (tienila coerente) */
+.section-label{
+  font-size: 11px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.40);
+  letter-spacing: 2px;
+  margin: 10px 0 8px 8px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* Etichette sezioni: rimosso il margin-top per la prima etichetta */
+.section-label {
+  font-size: 14px; /* Leggermente più piccolo per un look pro */
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.70);
+  letter-spacing: 2px;
+  margin: 10px 0 8px 8px; /* Margin ridotto */
+  font-weight: 700;
+  flex-shrink: 0; /* Impedisce al titolo di sparire */
+}
+
+
+/* ===== Sidebar DEStra: orientamento corretto (specchiata) ===== */
+
+.sidebar-right{
+  text-align: right;
+}
+
+/* titolo "CATEGORIE" allineato a destra */
+.sidebar-right .section-label{
+  margin: 10px 8px 8px 0;      /* invece di 10px 0 8px 8px */
+  padding: 0 18px;             /* se lo dai inline in HTML, meglio toglierlo */
+  text-align: right;
+}
+
+/* wrapper scroll: padding invertito */
+.sidebar-right .sidebar-cats-scroll{
+  padding: 0 18px 22px;        /* base */
+  padding-left: 8px;           /* meno a sinistra */
+  padding-right: 18px;         /* più a destra */
+}
+
+/* item: spaziatura e “hit area” coerente con destra */
+.sidebar-right .item{
+  justify-content: flex-end;   /* contenuto verso destra */
+  padding: 8px 12px;
+  margin-bottom: 6px;
+}
+
+/* se nelle categorie NON vuoi icone, ignora.
+   se ci sono icone/immagini: mettile a destra */
+.sidebar-right .item-img{
+  margin-right: 0;
+  margin-left: 12px;
+}
+
+/* hover/active: highlight che parte da destra */
+.sidebar-right .item:hover{
+ 
+}
+
+.sidebar-right .item.active{
+  
+
+}
+
+
+
+
+
+
+/* ================= ITEMS ================= */
+
+.item {
+  padding: 8px 12px;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  transition: 0.25s ease;
+  color: #fff;
+  font-weight: 700;
+  font-size: 18px;
+  opacity: 0.7;
+}
+
+.item:hover {
+  opacity: 1;
+  zoom: 120%;
+  
+}
+
+.item.active {
+  color: white;
+  opacity: 1;
+
+}
+
+.item-img {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  margin-right: 12px;
+}
+
+
+.epg-next2{
+  opacity: 0.3;
+  transition: opacity 5s ease-out;
+
+}
+
+.epg-next2:hover{
+  opacity:1;
+  transition: opacity 0.2s ease-in;
+}
+
+
+
+
+
+
+/* ================= EPG OVERLAY (FISSO + USA SPAZIO) ================= */
+
+.epg-overlay {
+  position: absolute;
+  bottom: 0px;
+  left: 300px;
+  right: 250px;
+}
+
+.epg-card {
+  padding: 20px 40px;
+
+  
+  
+/*
+ background: rgba(20,20,25,0.55);
+  backdrop-filter: blur(30px);
+  border-radius: 22px;
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+  background: var(--glass);
+   backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+*/
+  
+ 
+  
+  width: 100%;
+  height: 250px;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+
+
+.epg-content {
+  display: flex;
+  justify-content: space-between;
+  /*align-items: flex-end;*/
+  gap: 26px;
+}
+
+.epg-now {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.label1 {
+  font-size: 14px;
+  font-weight: 700;
+  
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #ffffff91;
+}
+
+.label2 {
+  font-size: 14px;
+  font-weight: 700;
+  
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #ffffffc7;
+}
+
+
+.epg-now h2 {
+  margin: 8px 0 15px 0;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 4px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 10px;
+}
+
+
+
+.progress-fill::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -50%;
+  width: 50%;
+  height: 100%;
+
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255,255,255,0.8) 50%,
+    transparent 100%
+  );
+
+  filter: blur(4px);   /* glow più morbido */
+  animation: progressSweep 1.8s linear infinite;
+}
+
+@keyframes progressSweep {
+  from { left: -40%; }
+  to   { left: 100%; }
+}
+
+
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  transition: width 0.5s;
+  position: relative;
+  overflow: hidden;
+
+  background: linear-gradient(
+    90deg,
+    #71d0ff 0%,
+    #4ade80 50%,
+    #d2de4a 100%
+  );
+}
+
+
+
+
+
+/* ===== Barra player (no EPG) colore verde ===== */
+.epg-overlay.media-progress .progress-fill{
+  background: linear-gradient(90deg, #71d0ff 0%, #4ade80 50%, #d2de4a 100%);
+}
+/* ================= PLAYER CONTROLS ================= */
+
+.player-controls {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+ margin-top: 10px;
+}
+
+
+
+.player-controls button.icon-btn {
+  /* Rimuove cerchi e sfondi */
+  width: auto;
+  height: auto;
+  background: none !important;
+  border: none !important;
+  border-radius: 0;
+  padding: 0;
+  
+  /* Aspetto Icona */
+  color: #FFF;
+  font-size: 18px; /* Dimensione dell'icona */
+  
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+/* Effetto al passaggio del mouse: cambia solo colore o si ingrandisce leggermente */
+.player-controls button.icon-btn:hover {
+  color: #ffffff;
+  transform: scale(1.1); /* Leggera enfasi */
+  background: none !important;
+}
+
+/* Ombra morbida solo sulle icone per leggibilità su video chiari */
+.player-controls button.icon-btn i {
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
+}
+
+.volume-container {
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  max-width: 45px;
+  transition: max-width 0.3s ease;
+  cursor: pointer;
+  margin-right: 10px;
+}
+
+.volume-container.open {
+  max-width: 160px;
+}
+
+#volumeSlider {
+  -webkit-appearance: none;
+  width: 100px;
+  height: 7px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 5px;
+  outline: none;
+  opacity: 0;
+  margin-left: 8px;
+  transition: opacity 0.25s ease; /* ← questo fa il fade */
+  accent-color: #ffffff;
+}
+
+.volume-container.open #volumeSlider {
+  opacity: 1;
+}
+
+/* Thumb (Chrome, Edge, Safari) */
+#volumeSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 0px;
+  height: 0px;
+  background: #ffffff;
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+}
+
+/* Thumb (Firefox) */
+#volumeSlider::-moz-range-thumb {
+  width: 0px;
+  height: 0px;
+  background: #ffffff;
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+}
+
+/* Progress (Firefox) */
+#volumeSlider::-moz-range-progress {
+  background-color: #ffffff;
+  height: 7px;
+}
+
+#muteBtn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 20px;
+}
+
+.fa-volume-xmark { color: red; }
+
+/* ================= QUALITY BADGE ================= */
+.quality-badge{
+  display: none;
+  align-items: center;
+  justify-content: center;
+
+  
+  border-radius: 999px;
+
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+
+  color:#ffffff;
+
+}
+
+/* ================= NEXT PROGRAM (FLESSIBILE) ================= */
+
+/* ================= NEXT PROGRAM (FLESSIBILE) ================= */
+
+.epg-next {
+  min-width: 260px;
+  border-left: 1px solid rgba(255,255,255,0.1);
+  padding-left: 30px;
+  
+  
+  flex-direction: column;
+}
+
+.epg-next-item {
+  margin: 8px 0;
+  font-size: 14px;
+  font-weight: 900;
+  /* Transizione fluida per eventuali cambi di focus */
+  transition: opacity 0.3s ease; 
+}
+
+/* Gestione dello span (l'orario) */
+.epg-next-item span {
+  color: #fff;
+  font-weight: 700;
+  margin-right: 8px;
+}
+
+/* --- EFFETTO SFUMATURA GRADUALE (6 LIVELLI - RIGA UNICA) --- */
+
+/* 1. Primo programma: Piena visibilità */
+.epg-next-item:nth-of-type(1),
+.epg-next-item:nth-of-type(1) span {
+  opacity: 1;
+  }
+
+/* 2. Secondo programma */
+.epg-next-item:nth-of-type(2),
+.epg-next-item:nth-of-type(2) span {
+  opacity: 0.90;
+
+}
+
+/* 3. Terzo programma */
+.epg-next-item:nth-of-type(3),
+.epg-next-item:nth-of-type(3) span {
+  opacity: 0.85;
+}
+
+/* 4. Quarto programma */
+.epg-next-item:nth-of-type(4),
+.epg-next-item:nth-of-type(4) span {
+  opacity: 0.70;
+}
+
+/* 5. Quinto programma */
+.epg-next-item:nth-of-type(5),
+.epg-next-item:nth-of-type(5) span {
+  opacity: 0.70;
+}
+
+/* 6. Sesto programma e successivi */
+.epg-next-item:nth-of-type(n+6),
+.epg-next-item:nth-of-type(n+6) span {
+  opacity: 0.70;
+}
+
+/* 6. Sesto programma e successivi */
+.epg-next-item:nth-of-type(n+7),
+.epg-next-item:nth-of-type(n+7) span {
+  opacity: 0.65;
+}
+
+/* 6. Sesto programma e successivi */
+.epg-next-item:nth-of-type(n+8),
+.epg-next-item:nth-of-type(n+8) span {
+  opacity: 0.65;
+}
+
+/* 6. Sesto programma e successivi */
+.epg-next-item:nth-of-type(n+9),
+.epg-next-item:nth-of-type(n+9) span {
+  opacity: 0.65;
+}
+/* ================= VOLUME TOP RIGHT + ONLINE (FISSO) ================= */
+
+.video-controls-hint {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  left: 0px;
+  /*background: rgba(20,20,25,0.55);
+  backdrop-filter: blur(20px);*/
+  padding: 10px 40px;
+  border-radius: 0px;
+  font-size: 0.9rem;
+
+  display: flex;
+  align-items: center;
+  gap: 12px;
+justify-content: center;
+  pointer-events: auto;  
+}
+
+
+
+
+.hint-sep{
+  width: 1px;
+  height: 18px;
+  background: rgba(255,255,255,0.18);
+  display: inline-block;
+}
+
+.hint-users{
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.user-ico{
+  font-size: 18px;
+  color: white;
+}
+
+
+
+/* ===== Quality badge icon + colori ===== */
+.quality-badge{
+  gap: 8px;
+}
+
+.quality-badge i{
+  font-size: 16px;
+  opacity: 0.95;
+}
+
+.quality-badge .q-text{
+  font-weight: 400;
+}
+
+
+
+/* ===== Soft & Clear Quality Colors ===== 
+
+.quality-badge[data-q="16k"] {
+  color: #ffffff;
+  text-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+}
+
+
+.quality-badge[data-q="8k"]  { color: #e0ccff; } 
+.quality-badge[data-q="5k"]  { color: #d1b3ff; }
+
+
+.quality-badge[data-q="4k"]  { color: #b2ffda; } 
+.quality-badge[data-q="2k"]  { color: #a3f0ff; } 
+
+
+.quality-badge[data-q="1440p"] { color: #94e1ff; }
+.quality-badge[data-q="1080p"] { color: #8ad6ff; }
+
+.quality-badge[data-q="720p"]  { color: #ffe69c; }
+.quality-badge[data-q="576p"]  { color: #ffcc90; }
+.quality-badge[data-q="480p"]  { color: #ffb38a; }
+
+
+.quality-badge[data-q="360p"]  { color: #ff9999; }
+.quality-badge[data-q="240p"],
+.quality-badge[data-q="144p"],
+.quality-badge[data-q="120p"],
+.quality-badge[data-q="96p"] { color: #ff8585; }
+
+.quality-badge[data-q="hdr"] { color: #c2f5ff; font-weight: bold; }
+.quality-badge[data-q="sd"]  { color: #ffb3b3; }
+.quality-badge[data-q="hd"]  { color: #ffe180; }
+
+*/
+
+
+
+
+
+/* ===== Stato caricamento / errore ===== */
+.quality-badge[data-q="loading"] { color: rgba(255,255,255,0.9); }
+.quality-badge[data-q="error"]   { color: #ff8484; }
+
+
+
+/* Canale non funzionante (KO) -> sbiadisce il NOME sicuro */
+#channelContainer .item.is-dead{
+  opacity: 1;                 /* non toccare tutto il blocco */
+  filter: none;
+}
+
+#channelContainer .item.is-dead span{
+  color: rgba(255,255,255,0.30) !important; /* batte .item.active */
+  font-weight: 500 !important;
+}
+
+#channelContainer .item.is-dead img,
+#channelContainer .item.is-dead .item-icon,
+#channelContainer .item.is-dead i{
+  opacity: 0.35;
+  filter: grayscale(1);
+}
+}
+
+
+
+/* ===== Audio-only badge ===== */
+.quality-badge[data-q="radio"]{
+  color: #ffffff!important;
+}
+
+
+
+.ip{
+  color: #ffffffd4;
+  font-weight: 700;
+
+
+}
+
+
+
+
+
+
+
+
