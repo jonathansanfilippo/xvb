@@ -892,3 +892,14 @@ justify-content: center;
 #year { margin: 0 6px; display: inline-block; } 
 
 
+
+
+/* =========================================
+   HIDE BOTTOM PANEL UNDER 1210px
+   ========================================= */
+
+@media (max-width: 1209px) {
+  .epg-overlay {
+    display: none !important;
+  }
+}
