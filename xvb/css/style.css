@@ -23,6 +23,15 @@ body, html {
   -webkit-font-smoothing: antialiased;
 }
 
+
+
+body.hide-cursor {
+  cursor: none;
+}
+
+
+
+
 .logo{
 font-weight: 700;
 color:#ffffff8a;
@@ -553,7 +562,7 @@ font-weight: 700;
 
 #volumeSlider {
   -webkit-appearance: none;
-  width: 100px;
+  width: 70px;
   height: 7px;
   background: rgba(255, 255, 255, 0.3);
   border-radius: 5px;
@@ -592,7 +601,8 @@ font-weight: 700;
 
 /* Progress (Firefox) */
 #volumeSlider::-moz-range-progress {
-  background-color: #ffffff;
+  background-color: #d0d0d0;
+  
   height: 7px;
 }
 
