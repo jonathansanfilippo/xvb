@@ -1748,25 +1748,72 @@ function playPreviousChannel() {
   items[prevIdx].scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 
-let mouseTimer;
+let mouseTimer = null;
+
 const wrapper = document.querySelector(".ui-wrapper");
 const leftSide = document.querySelector(".sidebar-left");
 const rightSide = document.querySelector(".sidebar-right");
 
-document.addEventListener("mousemove", () => {
+function showWrapper() {
+  if (!wrapper) return;
   wrapper.classList.add("visible");
-  clearTimeout(mouseTimer);
+}
 
+function scheduleHide() {
+  if (!wrapper) return;
+
+  clearTimeout(mouseTimer);
   mouseTimer = setTimeout(() => {
-    if (!leftSide.matches(":hover") && !rightSide.matches(":hover")) wrapper.classList.remove("visible");
+    // se il mouse è ancora sopra la UI (incluse le sidebar), NON nascondere
+    if (wrapper.matches(":hover")) return;
+    wrapper.classList.remove("visible");
   }, 3000);
+}
+
+// 1) muovere il mouse mostra e poi nasconde dopo 3s
+document.addEventListener("mousemove", () => {
+  showWrapper();
+  scheduleHide();
 });
 
-leftSide.addEventListener("mouseenter", () => wrapper.classList.add("active-left"));
-leftSide.addEventListener("mouseleave", () => wrapper.classList.remove("active-left"));
+// 2) se entri nella UI, resta visibile finché stai sopra
+if (wrapper) {
+  wrapper.addEventListener("mouseenter", () => {
+    showWrapper();
+    clearTimeout(mouseTimer);
+  });
 
-rightSide.addEventListener("mouseenter", () => wrapper.classList.add("active-right"));
-rightSide.addEventListener("mouseleave", () => wrapper.classList.remove("active-right"));
+  wrapper.addEventListener("mouseleave", () => {
+    scheduleHide();
+  });
+}
+
+// Effetti “accensione” sidebar
+if (leftSide) {
+  leftSide.addEventListener("mouseenter", () => {
+    showWrapper();
+    clearTimeout(mouseTimer);
+    wrapper.classList.add("active-left");
+  });
+
+  leftSide.addEventListener("mouseleave", () => {
+    wrapper.classList.remove("active-left");
+    scheduleHide();
+  });
+}
+
+if (rightSide) {
+  rightSide.addEventListener("mouseenter", () => {
+    showWrapper();
+    clearTimeout(mouseTimer);
+    wrapper.classList.add("active-right");
+  });
+
+  rightSide.addEventListener("mouseleave", () => {
+    wrapper.classList.remove("active-right");
+    scheduleHide();
+  });
+}
 
 function updatePlaylistCount() {
   try {
