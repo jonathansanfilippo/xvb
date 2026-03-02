@@ -1815,6 +1815,22 @@ if (rightSide) {
   });
 }
 
+let cursorTimer;
+
+function showCursor() {
+  document.body.classList.remove("hide-cursor");
+}
+
+function hideCursor() {
+  document.body.classList.add("hide-cursor");
+}
+
+document.addEventListener("mousemove", () => {
+  showCursor();
+
+  clearTimeout(cursorTimer);
+  cursorTimer = setTimeout(hideCursor, 5500);
+});
 function updatePlaylistCount() {
   try {
     let v2 = [];

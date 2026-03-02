@@ -32,6 +32,7 @@ body.hide-cursor {
 
 
 
+
 .logo{
 font-weight: 700;
 color:#ffffff8a;
@@ -602,7 +603,7 @@ font-weight: 700;
 /* Progress (Firefox) */
 #volumeSlider::-moz-range-progress {
   background-color: #d0d0d0;
-  
+
   height: 7px;
 }
 
