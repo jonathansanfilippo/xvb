@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="logo.png" alt="XVB Logo" width="160">
+  <img src="assets/logo.png" alt="XVB Logo" width="160">
 </p>
 
 # XVB — Extended Video Broadcasting
