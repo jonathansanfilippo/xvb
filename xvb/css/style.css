@@ -1,8 +1,12 @@
+
+
+
+
 :root {
   --glass: rgba(20, 20, 25, 0.55);
   --accent: #007aff;
   --text: #ffffff;
-  --ui-scale: 1; /* tenuto ma NON usato per trasformare */
+  --ui-scale: 1; 
 }
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
@@ -15,7 +19,8 @@ body, html {
   padding: 0;
   width: 100%;
   height: 100%;
-  background:black;
+  background:#000f28;
+  /* background:#000f28 ; */
   color: var(--text);
   font-family: 'Inter', sans-serif;
   font-weight: 500;
@@ -108,7 +113,7 @@ font-weight: 700;
 .item {
   display: flex;
   align-items: center;
-  gap: 14px;   /* 👈 QUESTO crea spazio naturale */
+  gap: 14px;   
 }
 
 .item-icon,
@@ -127,8 +132,7 @@ font-weight: 700;
   align-items: center;
   justify-content: center;
 
-  /* fallback wallpaper 
-  background: url("assets/radio.jpg") center center / cover no-repeat;*/
+  
 }
 
 #videoPlayer {
@@ -145,14 +149,30 @@ font-weight: 700;
   width: 100vw;
   pointer-events: none;
   
-  /* Parte da 0 e sparisce lentamente in 3s */
+ 
   opacity: 0;
   transition: opacity 3s ease;
   
-  /* Gradiente Base Fisso (Sopra e Sotto) */
-  background: 
-    linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.8) 20%, transparent 60%),
-    linear-gradient(to bottom, rgba(0, 0, 0, 0.8) 0%, transparent 10%);
+background:
+  radial-gradient(
+    ellipse 60% 70% at 50% 115%,
+    rgba(0, 15, 40, 0.92) 0%,
+    rgba(0, 15, 40, 1) 30%,
+    transparent 78%
+  ),
+  linear-gradient(to top,
+    rgba(0, 15, 40, 0.9) 0%,
+    rgba(0, 15, 40, 0.8) 10%,
+    transparent 70%
+  ),
+  linear-gradient(to bottom,
+    rgba(0, 15, 40, 1) 0%,
+    transparent 10%
+  );
+
+
+
+
 }
 
 /* Quando muovi il mouse (Entrata veloce) */
@@ -180,12 +200,12 @@ font-weight: 700;
 /* Configurazione Gradienti Laterali */
 .ui-wrapper::before {
   left: 0;
-  background: linear-gradient(to right, rgba(0, 0, 0, 0.9) 0%, transparent 100%);
+  background: linear-gradient(to right, rgba(0, 15, 40, 0.9) 0%, transparent 100%);
 }
 
 .ui-wrapper::after {
   right: 0;
-  background: linear-gradient(to left, rgba(0, 0, 0, 0.9) 0%, transparent 100%);
+  background: linear-gradient(to left, rgba(0, 15, 40, 0.9) 0%, transparent 100%);
 }
 
 /* --- Attivazione (Entrata sfumatura laterale) --- */
@@ -614,7 +634,7 @@ font-weight: 700;
   font-size: 20px;
 }
 
-.fa-volume-xmark { color: red; }
+.fa-volume-xmark { color: #ff6b6b; }
 
 /* ================= QUALITY BADGE ================= */
 .quality-badge{
@@ -851,16 +871,24 @@ justify-content: center;
 
 
 .ip{
-  color: #ffffffd4;
+  color: #ffffff4f;
   font-weight: 700;
 
 
 }
 
 
+.copy{
+  font-size: 12px;
+  color: #ffffff7a;
+   font-weight: 700;
+   justify-content: center;
+   display: flex;
+   padding: 20px;
+
+}
 
 
-
-
+#year { margin: 0 6px; display: inline-block; } 
 
 

@@ -1892,6 +1892,14 @@ function showLogoFallback() {
   if (fallback) fallback.style.display = "block";
 }
 
+
+document.addEventListener("DOMContentLoaded", function () {
+  const year = document.getElementById("year");
+  if (year) {
+    year.textContent = new Date().getFullYear() + " ";
+  }
+});
+
 async function init() {
   PLAYLIST_URLS = getAllPlaylistUrls();
 
