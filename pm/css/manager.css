@@ -4,29 +4,39 @@
   /* Light */
   --bg: #fff;
   --surface: #ffffff;
-  --soft: #f1f3f654;
+  --soft: #fff;
   --text: #0f1115;
   --muted: rgba(15,17,21,0.62);
   --accent: #007aff;
   --danger: #e54848;
   --r1: 22px;
   --r2: 16px;
-  --footer:#f6f6f6;
-  --warning:#ff9321;
+  --footer:#fafbfc;
+  --warning:#fd7b87;
+  --input:#fafbfc;
+  --legal:rgb(130, 137, 145);
 }
 
-/* Dark theme */
+/* Dark theme - GitHub style */
 @media (prefers-color-scheme: dark){
   :root{
-    --bg: #0b0d12;
-    --surface: #121623;
-    --soft: #171c2c;
-    --text: #f4f6fb;
-    --muted: rgba(244,246,251,0.60);
-    --accent: #5fb3ff;
-    --danger: #ff6b6b;
-    --footer:#131314;
-    --warning:#ffb76b;
+    --bg: #0d1117;            /* main background */
+    --surface: #161b22;       /* cards / panels */
+    --soft: #161b22;          /* secondary surfaces */
+    
+    --text: #c9d1d9;          /* primary text */
+    --muted: #8b949e;         /* secondary text */
+
+    --accent: #2f81f7;        /* blue (links/buttons) */
+    --danger: #f85149;        /* errors */
+    --warning: #fd7b87;       /* warning / attention */
+    --success: #3fb950;       /* success states */
+
+    --footer: #161b22;
+    --input: #0d1117;
+
+    --border: #30363d;        /* subtle borders */
+    --legal: #8b949e;         /* legal / small text */
   }
 }
 
@@ -42,6 +52,13 @@ body{
 
   font-size: 17px;
 }
+
+.accent{color:var(--accent);}
+
+.warning{
+  color: var(--warning);
+}
+
 
 /* layout */
 .wrap{
@@ -93,7 +110,7 @@ body{
 
 /* card soft */
 .section{
- /* background: var(--surface);
+ background: var(--surface);
   border-radius: var(--r1);
   padding: 16px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.06);*/
@@ -104,12 +121,12 @@ body{
 }
 
 .label{
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 900;
-  letter-spacing: 2px;
+  letter-spacing: 1px;
   text-transform: uppercase;
   color: rgba(127,132,145,0.95);
-  margin: 2px 0 12px 2px;
+  margin: 5px 0 14px 2px;
 }
 
 
@@ -128,8 +145,8 @@ body{
   padding: 14px 14px;
   border-radius: var(--r2);
   border: none;
-  background: var(--soft);
-  color: #f0931c;
+  background: var(--input);
+  color: var(--text);
   outline: none;
   font-weight: 650;
 
@@ -137,7 +154,7 @@ body{
 }
 
 .input::placeholder{
-  color: rgba(201, 201, 201, 0.95);
+  color:var(--legal);
 
 }
 
@@ -190,14 +207,23 @@ body{
   }
 }
 
-/* status */
+
 .status{
-  margin-top: 10px;
+  margin-top: 30px;
+  font-size: 14px;
+  font-weight: 500;
   
-  font-size: 13px;
-  font-weight: 650;
-  color: var(--muted);
 }
+
+.status.success{color:rgb(40, 197, 168)}
+.status.error{color:rgba(255,140,140,.95)}
+.status.warn{color:rgb(253, 187, 102)}
+.status.info{color:var(--legal);}
+
+
+
+
+
 
 /* list */
 .list{ list-style:none; padding:0; margin:0; }
@@ -304,13 +330,53 @@ body{
 }
 
 
+/* ================= reset ================= */
+
+
+
+
+.reset{
+  margin-top: 60px;
+  padding: 28px 0 36px;
+  color: var(--text);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.reset-inner{
+  width: min(1100px, 92vw);
+  margin: 0 auto;
+  
+  justify-content:space-between;
+  align-items:center;
+  gap:20px;
+  flex-wrap:wrap;
+}
+
+.resetlabel{
+  font-size: 20px;
+  font-weight: 700;
+}
+
+
+.btnClearAll i{
+  font-size: 30px;
+}
+
+
+
+
+.sub-reset{
+  margin-top: 10px;
+  font-size: ;
+  color: rgb(210, 153, 34);
+}
 
 /* ================= FOOTER ================= */
 
 .footer{
-  margin-top: 60px;
+  margin-top: 0px;
   padding: 28px 0 36px;
-  border-top: 1px solid rgba(127,132,145,0.15);
   background: var(--footer);
 }
 
@@ -327,7 +393,7 @@ body{
 .footer-left{
   font-weight:600;
   font-size:14px;
-  color: var(--text);
+  color:var(--legal);
 }
 
 .footer-version{
@@ -342,7 +408,7 @@ body{
   align-items:center;
   gap:10px;
   font-size:13px;
-  color: var(--muted);
+  color:var(--legal);
   font-weight:500;
 }
 
@@ -350,21 +416,48 @@ body{
   width:4px;
   height:4px;
   border-radius:50%;
-  background: var(--muted);
+  color:var(--legal);
   opacity:0.6;
 }
 
-/* Dark mode tweak */
-@media (prefers-color-scheme: dark){
-  .footer{
-    border-top: 1px solid rgba(244,246,251,0.08);
-  }
+
+
+
+
+
+
+.legal{
+font-size: 12px;
+color:var(--legal);
+
 }
+
+
+.footer-logo{
+  height: 18px;
+  color: var(--legal);
+   width: auto;
+  display: block;
+}
+
+.footer-logo path,
+.footer-logo text {
+  fill: currentColor;
+}
+
+
+
+.footer-left{
+  display: flex;
+  align-items: flex-end;
+}
+
+
 
 
 /* Colore rosso quando non c'è un file (o quando ha la classe empty) */
 .file.empty {
-  color: #ff4d4d !important; 
+  color:var(--legal); 
 }
 
 /* Colore verde (quello che hai già) quando il file è selezionato */
@@ -406,14 +499,6 @@ body{
 .item {
     justify-content: flex-start; /* Allinea tutto a sinistra */
     gap: 16px; /* Spazio costante tra icona e testo */
-}
-
-
-
-.legal{
-font-size: 12px;
-color:var(--muted);
-
 }
 
 
