@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<link rel="icon" type="image/png" href="assets/icon.jpg">
+<title>IP Information • XVB</title>
+
+<style>
+:root{
+  --bg:#0d1117;
+  --card:#161b22;
+  --border:#30363d;
+  --text:#c9d1d9;
+  --muted:#8b949e;
+  --accent:#58a6ff;
+  --success:#2ea043;
+  --danger:#f85149;
+  --shadow:0 12px 30px rgba(0,0,0,.45);
+  --radius:14px;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  min-height:100vh;
+  background:
+    radial-gradient(1200px 600px at 20% 10%, rgba(88,166,255,.12), transparent 55%),
+    radial-gradient(900px 500px at 90% 80%, rgba(46,160,67,.10), transparent 60%),
+    var(--bg);
+  color:var(--text);
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+  padding:24px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.wrap{width:min(1000px,100%);display:flex;flex-direction:column;gap:16px;}
+.top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  padding:16px 18px;
+  background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.01));
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+}
+h1{margin:0;font-size:18px;color:var(--accent);}
+.sub{margin:4px 0 0;font-size:13px;color:var(--muted);}
+.actions{display:flex;gap:10px;flex-wrap:wrap;}
+.btn{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.03);
+  color:var(--text);
+  padding:10px 12px;
+  border-radius:10px;
+  font-weight:700;
+  font-size:13px;
+  cursor:pointer;
+  transition:.2s;
+}
+.btn:hover{opacity:.9;border-color:rgba(88,166,255,.6);}
+.btn.primary{
+  background:linear-gradient(180deg,rgba(46,160,67,.22),rgba(46,160,67,.1));
+  border-color:rgba(46,160,67,.6);
+  color:#fff;
+}
+.btn.danger{
+  background:rgba(248,81,73,.1);
+  border-color:rgba(248,81,73,.4);
+  color:#ffd7d5;
+}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+@media(max-width:860px){.grid{grid-template-columns:1fr;}}
+.card{
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.01));
+  box-shadow:var(--shadow);
+}
+.card-h{
+  padding:14px 16px;
+  border-bottom:1px solid rgba(48,54,61,.7);
+  background:rgba(0,0,0,.1);
+  display:flex;
+  justify-content:space-between;
+}
+.card-h h2{margin:0;font-size:14px;}
+.badge{
+  font-size:12px;
+  padding:6px 10px;
+  border-radius:999px;
+  border:1px solid var(--border);
+  color:var(--muted);
+}
+.card-b{padding:14px 16px;display:flex;flex-direction:column;gap:10px;}
+.row{
+  display:flex;
+  justify-content:space-between;
+  padding:10px 12px;
+  border-radius:12px;
+  background:rgba(88,166,255,.06);
+  border:1px solid rgba(88,166,255,.2);
+}
+.k{color:var(--muted);font-size:12px;}
+.v{font-weight:800;font-size:13px;overflow-wrap:anywhere;}
+pre{
+  background:rgba(0,0,0,.3);
+  padding:12px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  max-height:300px;
+  overflow:auto;
+  font-size:12px;
+}
+</style>
+</head>
+
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <div>
+      <h1>IP Information</h1>
+      <p class="sub">Source: ipinfo.io • Last update: <span id="timestamp">—</span></p>
+    </div>
+    <div class="actions">
+      <button class="btn" id="refreshBtn">Refresh</button>
+      <button class="btn primary" id="copyIpBtn">Copy IP</button>
+      <button class="btn" id="openJsonBtn">Open JSON</button>
+      <button class="btn" id="openMapBtn">Open Map</button>
+    </div>
+  </div>
+
+  <div class="grid">
+
+    <div class="card">
+      <div class="card-h">
+        <h2>Details</h2>
+        <span class="badge" id="statusBadge">Loading…</span>
+      </div>
+      <div class="card-b">
+        <div class="row"><div class="k">IP</div><div class="v" id="ip">—</div></div>
+        <div class="row"><div class="k">City</div><div class="v" id="city">—</div></div>
+        <div class="row"><div class="k">Region</div><div class="v" id="region">—</div></div>
+        <div class="row"><div class="k">Country</div><div class="v" id="country">—</div></div>
+        <div class="row"><div class="k">Postal</div><div class="v" id="postal">—</div></div>
+        <div class="row"><div class="k">Timezone</div><div class="v" id="timezone">—</div></div>
+        <div class="row"><div class="k">ISP / Org</div><div class="v" id="org">—</div></div>
+        <div class="row"><div class="k">Coordinates</div><div class="v" id="loc">—</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-h">
+        <h2>Raw JSON</h2>
+        <span class="badge" id="jsonBadge">—</span>
+      </div>
+      <div class="card-b">
+        <pre id="jsonOutput">{}</pre>
+        <button class="btn danger" id="copyJsonBtn">Copy JSON</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+let currentData = null;
+
+function $(id){ return document.getElementById(id); }
+
+function updateUI(data){
+  currentData = data;
+  $("timestamp").textContent = new Date().toLocaleString();
+  $("statusBadge").textContent = "OK";
+
+  $("ip").textContent = data.ip || "—";
+  $("city").textContent = data.city || "—";
+  $("region").textContent = data.region || "—";
+  $("country").textContent = data.country || "—";
+  $("postal").textContent = data.postal || "—";
+  $("timezone").textContent = data.timezone || "—";
+  $("org").textContent = data.org || "—";
+  $("loc").textContent = data.loc || "—";
+
+  $("jsonOutput").textContent = JSON.stringify(data, null, 2);
+  $("jsonBadge").textContent = data.ip ? `/${data.ip}/json` : "/json";
+}
+
+async function loadIP(){
+  $("statusBadge").textContent = "Loading…";
+  try{
+    const res = await fetch("https://ipinfo.io/json");
+    const data = await res.json();
+    updateUI(data);
+  }catch{
+    $("statusBadge").textContent = "Error";
+  }
+}
+
+$("refreshBtn").onclick = loadIP;
+
+$("copyIpBtn").onclick = () => {
+  if(currentData?.ip) navigator.clipboard.writeText(currentData.ip);
+};
+
+$("openJsonBtn").onclick = () => {
+  window.open(
+    currentData?.ip
+      ? `https://ipinfo.io/${currentData.ip}/json`
+      : "https://ipinfo.io/json",
+    "_blank"
+  );
+};
+
+$("openMapBtn").onclick = () => {
+  if(!currentData?.loc) return;
+  window.open(`https://www.google.com/maps?q=${currentData.loc}`, "_blank");
+};
+
+$("copyJsonBtn").onclick = () => {
+  if(currentData) navigator.clipboard.writeText(JSON.stringify(currentData,null,2));
+};
+
+loadIP();
+</script>
+</body>
+</html>
