@@ -8,7 +8,7 @@ const CHANNEL_CACHE_KEY = "dvb-m^7Y!zR4*P8&kQ3@h";
 const SERVER_PLAYLISTS = [
   { name: "xvb-it nazionali", url: "https://jonathansanfilippo.github.io/xvb-server-lists/xvb-it-nazionali" },
   { name: "xvb-it regionali", url: "https://jonathansanfilippo.github.io/xvb-server-lists/xvb-it-regionali" },
-  { name: "xvb-it radio",     url: "https://jonathansanfilippo.github.io/xvb-server-lists/xvb-it-radio" }
+  { name: "xvb-it radio",     url: "https://raw.githubusercontent.com/jonathansanfilippo/xvb-server-lists/refs/heads/main/xvb-radio-master.m3u" }
 ];
 
 const SERVER_PLAYLISTS_2 = [
