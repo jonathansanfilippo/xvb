@@ -12,8 +12,8 @@ const SERVER_PLAYLISTS = [
 ];
 
 const SERVER_PLAYLISTS_2 = [
-  { name: "iptv-org World", url: "https://iptv-org.github.io/iptv/index.m3u" },
-  { name: "Free-TV World",  url: "https://raw.githubusercontent.com/Free-TV/IPTV/master/playlist.m3u8" }
+  { name: "iptv-org", url: "https://iptv-org.github.io/iptv/index.m3u" },
+  { name: "Free-TV",  url: "https://raw.githubusercontent.com/Free-TV/IPTV/master/playlist.m3u8" }
   
 ];
 
