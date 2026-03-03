@@ -7,113 +7,227 @@
 <title>IP Information • XVB</title>
 
 <style>
-:root{
-  --bg:#0d1117;
-  --card:#161b22;
-  --border:#30363d;
-  --text:#c9d1d9;
-  --muted:#8b949e;
-  --accent:#58a6ff;
-  --success:#2ea043;
-  --danger:#f85149;
-  --shadow:0 12px 30px rgba(0,0,0,.45);
-  --radius:14px;
+:root {
+  /* === STESSO SET DEL MANAGER === */
+  --bg: #0d1117;
+  --card: #161b22;
+  --card2: #0d1117;
+  --text: #e6edf3;
+  --muted: rgba(255, 255, 255, 0.60);
+  --muted2: rgba(255, 255, 255, 0.45);
+  --accent: #58a6ff;
+
+  --server2: #a971ff;
+  --server: #49a6ff;
+  --url: #ffb340;
+  --local: #63e776;
+  --danger: #f85149;
+
+  --radius: 26px;
 }
-*{box-sizing:border-box;}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #ffffff;
+    --card: #f6f8fa;
+    --card2: #ffffff;
+    --text: #1f2328;
+    --muted: rgba(0, 0, 0, 0.60);
+    --muted2: rgba(0, 0, 0, 0.45);
+    --accent: #007aff;
+
+    --server2: #8046d9;
+    --server: #007aff;
+    --url: #ffab01;
+    --local: #64c572;
+    --danger: #cf222e;
+  }
+}
+
+* { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+html, body { height: 100%; margin: 0; }
+
 body{
   margin:0;
   min-height:100vh;
-  background:
-    radial-gradient(1200px 600px at 20% 10%, rgba(88,166,255,.12), transparent 55%),
-    radial-gradient(900px 500px at 90% 80%, rgba(46,160,67,.10), transparent 60%),
-    var(--bg);
+  background: var(--bg);
   color:var(--text);
-  font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  letter-spacing: .1px;
+  line-height: 1.5;
   padding:24px;
   display:flex;
   align-items:center;
   justify-content:center;
 }
-.wrap{width:min(1000px,100%);display:flex;flex-direction:column;gap:16px;}
+
+/* container same feeling as manager */
+.wrap{
+  width: min(1200px, 100%);
+  margin: 0 auto;
+  padding: 0 18px;
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+}
+
+/* top bar = flat card */
 .top{
   display:flex;
   justify-content:space-between;
   align-items:center;
   gap:12px;
-  padding:16px 18px;
-  background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.01));
-  border:1px solid var(--border);
-  border-radius:var(--radius);
-  box-shadow:var(--shadow);
+
+  padding: 24px;
+  background: var(--card);
+  border: none;
+  border-radius: var(--radius);
+  box-shadow: none;
 }
-h1{margin:0;font-size:18px;color:var(--accent);}
-.sub{margin:4px 0 0;font-size:13px;color:var(--muted);}
-.actions{display:flex;gap:10px;flex-wrap:wrap;}
+
+/* title style */
+h1{
+  margin:0;
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.sub{
+  margin:6px 0 0;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.actions{ display:flex; gap:10px; flex-wrap:wrap; }
+
+/* buttons: flat + hover scale/opacity like iconbtn */
 .btn{
-  border:1px solid var(--border);
-  background:rgba(255,255,255,.03);
-  color:var(--text);
-  padding:10px 12px;
-  border-radius:10px;
-  font-weight:700;
-  font-size:13px;
+  appearance:none;
+  height: 44px;
+  padding: 0 14px;
+  border-radius: 16px;
+  border: none;
+  background: var(--card2);
+  color: var(--text);
+  font-weight: 800;
+  font-size: 13px;
   cursor:pointer;
-  transition:.2s;
+  transition: opacity 0.2s, transform 0.1s;
 }
-.btn:hover{opacity:.9;border-color:rgba(88,166,255,.6);}
+.btn:hover{ opacity: 0.7; transform: scale(1.03); }
+.btn:active{ transform: scale(0.97); }
+
+/* primary = local accent mix (flat) */
 .btn.primary{
-  background:linear-gradient(180deg,rgba(46,160,67,.22),rgba(46,160,67,.1));
-  border-color:rgba(46,160,67,.6);
-  color:#fff;
+  background: color-mix(in srgb, var(--local) 18%, var(--card2));
 }
+
+/* danger = danger mix (flat) */
 .btn.danger{
-  background:rgba(248,81,73,.1);
-  border-color:rgba(248,81,73,.4);
-  color:#ffd7d5;
+  background: color-mix(in srgb, var(--danger) 16%, var(--card2));
+  color: var(--text);
 }
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-@media(max-width:860px){.grid{grid-template-columns:1fr;}}
+
+/* grid same as manager */
+.grid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:18px;
+}
+@media (max-width: 900px){
+  .grid{ grid-template-columns: 1fr; }
+}
+
+/* cards = flat sections */
 .card{
-  border:1px solid var(--border);
-  border-radius:var(--radius);
-  background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.01));
-  box-shadow:var(--shadow);
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 24px;
+  border:none;
+  box-shadow:none;
 }
+
+/* card header like label + pill */
 .card-h{
-  padding:14px 16px;
-  border-bottom:1px solid rgba(48,54,61,.7);
-  background:rgba(0,0,0,.1);
+  padding: 0;
+  margin-bottom: 16px;
   display:flex;
   justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  border:none;
+  background: transparent;
 }
-.card-h h2{margin:0;font-size:14px;}
+.card-h h2{
+  margin:0;
+  font-size: 14px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .02em;
+  color: var(--muted);
+}
+
+/* badge = pill */
 .badge{
-  font-size:12px;
-  padding:6px 10px;
-  border-radius:999px;
-  border:1px solid var(--border);
-  color:var(--muted);
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border:none;
+  background: var(--card2);
+  color: var(--muted);
+  font-weight: 700;
+  white-space: nowrap;
 }
-.card-b{padding:14px 16px;display:flex;flex-direction:column;gap:10px;}
+
+.card-b{
+  padding: 0;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+/* rows = item blocks */
 .row{
   display:flex;
   justify-content:space-between;
-  padding:10px 12px;
-  border-radius:12px;
-  background:rgba(88,166,255,.06);
-  border:1px solid rgba(88,166,255,.2);
+  gap:12px;
+  padding: 16px;
+  border-radius: 18px;
+  background: var(--card2);
+  border:none;
 }
-.k{color:var(--muted);font-size:12px;}
-.v{font-weight:800;font-size:13px;overflow-wrap:anywhere;}
+
+.k{
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.v{
+  font-weight: 900;
+  font-size: 13px;
+  overflow-wrap:anywhere;
+  color: var(--text);
+  text-align:right;
+}
+
+/* raw json box -> same card2 */
 pre{
-  background:rgba(0,0,0,.3);
-  padding:12px;
-  border-radius:12px;
-  border:1px solid var(--border);
-  max-height:300px;
+  background: var(--card2);
+  padding: 16px;
+  border-radius: 18px;
+  border: none;
+  max-height: 320px;
   overflow:auto;
-  font-size:12px;
+  font-size: 12px;
+  color: var(--text);
 }
+
+/* (optional) make pre text a bit softer like muted2 for long blobs */
+pre#jsonOutput{ color: var(--text); }
 </style>
 </head>
 
