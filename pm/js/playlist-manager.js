@@ -6,9 +6,14 @@
 const CHANNEL_CACHE_KEY = "dvb-m^7Y!zR4*P8&kQ3@h";
 
 const SERVER_PLAYLISTS = [
-  { name: "xvb-it-nazionali", url: "https://jonathansanfilippo.github.io/xvb-server-lists/xvb-it-nazionali" },
-  { name: "xvb-it-regionali", url: "https://jonathansanfilippo.github.io/xvb-server-lists/xvb-it-regionali" },
-  { name: "xvb-it-radio", url: "https://jonathansanfilippo.github.io/xvb-server-lists/xvb-it-radio" }
+  { name: "xvb-it nazionali", url: "https://jonathansanfilippo.github.io/xvb-server-lists/xvb-it-nazionali" },
+  { name: "xvb-it regionali", url: "https://jonathansanfilippo.github.io/xvb-server-lists/xvb-it-regionali" },
+  { name: "xvb-it radio",     url: "https://jonathansanfilippo.github.io/xvb-server-lists/xvb-it-radio" }
+];
+
+const SERVER_PLAYLISTS_2 = [
+  { name: "iptv-org World", url: "https://iptv-org.github.io/iptv/index.m3u" },
+  { name: "Free-TV World",  url: "https://raw.githubusercontent.com/Free-TV/IPTV/master/playlist.m3u8" }
 ];
 
 const $ = (id) => document.getElementById(id);
@@ -32,7 +37,6 @@ function isValidHttpsUrl(input) {
 
 function looksLikeM3U(text) {
   if (!text) return false;
-  // tollerante: molti M3U iniziano con #EXTM3U, alcuni hanno BOM/spazi
   return /#EXTM3U/i.test(text);
 }
 
@@ -50,6 +54,10 @@ function formatDate(ts) {
   try { return new Date(ts).toLocaleString(); }
   catch { return ""; }
 }
+
+/* ===========================
+   SAVED LIST
+   =========================== */
 
 function renderSaved() {
   const list = $("playlistList");
@@ -115,16 +123,27 @@ function renderSaved() {
     const name = document.createElement("div");
     name.className = "item-name";
 
-    const isFromServer = SERVER_PLAYLISTS.some(s => s.url === it.url);
-    const dotClass = it.type === "local" ? "dot-local" : (isFromServer ? "dot-server" : "dot-url");
+    const isFromServer  = SERVER_PLAYLISTS.some(s => s.url === it.url);
+    const isFromServer2 = SERVER_PLAYLISTS_2.some(s => s.url === it.url);
+
+    const dotClass =
+      it.type === "local" ? "dot-local" :
+      isFromServer2 ? "dot-server2" :
+      isFromServer  ? "dot-server"  :
+      "dot-url";
+
+    const typeLabel =
+      it.type === "local" ? "LOCAL" :
+      isFromServer2 ? "THIRD-PARTY" :
+      isFromServer  ? "XVB-SERVER" :
+      "URL";
 
     name.innerHTML =
       `<i class="fa-solid fa-circle ${dotClass}"></i>
-       <span style="margin-left:8px;">${it.name || "(no name)"}</span>`;
+       <span style="">${it.name || "(no name)"}</span>`;
 
     const meta = document.createElement("div");
     meta.className = "item-meta";
-    const typeLabel = it.type === "local" ? "LOCAL" : (isFromServer ? "SERVER" : "URL");
     meta.innerHTML = `<span class="pill ${dotClass}">${typeLabel}</span>`;
     if (it.createdAt) meta.innerHTML += `<span class="pill">${formatDate(it.createdAt)}</span>`;
 
@@ -137,26 +156,40 @@ function renderSaved() {
   });
 }
 
-function renderServer() {
-  const ul = $("serverPlaylistList");
+/* ===========================
+   SERVER LIST RENDER (icon + color per list)
+   =========================== */
+
+function renderServer(
+  listId,
+  statusId,
+  data,
+  label = "XVB-SERVER",
+  dotClass = "dot-server",
+  iconClass = "fa-duotone fa-solid fa-cloud-arrow-down",
+  btnExtraClass = "primary"
+) {
+  const ul = $(listId);
   if (!ul) return;
   ul.innerHTML = "";
 
-  SERVER_PLAYLISTS.forEach((pl) => {
+  (data || []).forEach((pl) => {
     const li = document.createElement("li");
     li.className = "item";
 
     const btn = document.createElement("button");
-    btn.className = "iconbtn primary";
-    btn.innerHTML = `<i class="fa-duotone fa-solid fa-cloud-arrow-down"></i>`;
+    btn.className = `iconbtn ${btnExtraClass}`.trim();
+    btn.innerHTML = `<i class="${iconClass}"></i>`;
 
     btn.onclick = async () => {
-      btn.innerHTML = `<i class="fa-duotone fa-solid fa-spinner-third"></i>`;
+      // spinner
+      btn.innerHTML = `<i class="fa-duotone fa-solid fa-spinner-third fa-spin"></i>`;
+
       const res = pl2_addUrl(pl.url, pl.name);
 
       if (res.ok) {
         try {
-          const response = await fetch(pl.url);
+          const response = await fetch(pl.url, { cache: "no-store" });
           if (!response.ok) throw new Error("fetch");
           const text = await response.text();
 
@@ -167,22 +200,19 @@ function renderServer() {
           itemData.m3uText = text;
           localStorage.setItem(itemKey, JSON.stringify(itemData));
 
-          setStatus("statusServer", `<i class="fa-solid fa-check"></i> ${pl.name} saved.`, "success");
+          setStatus(statusId, `<i class="fa-solid fa-check"></i> ${pl.name} saved.`, "success");
         } catch {
-          // rollback
           try { pl2_remove(res.id); } catch {}
-          setStatus("statusServer", `<i class="fa-solid fa-triangle-exclamation"></i> Invalid playlist.`, "error");
+          setStatus(statusId, `<i class="fa-solid fa-triangle-exclamation"></i> Invalid playlist.`, "error");
         }
 
-        btn.innerHTML = `<i class="fa-duotone fa-solid fa-cloud-arrow-down"></i>`;
+        // restore icon
+        btn.innerHTML = `<i class="${iconClass}"></i>`;
         broadcastChanged();
         renderSaved();
       } else {
-        setStatus("statusServer",
-          `<i class="fa-solid fa-circle-exclamation"></i> Already saved.`,
-          "warn"
-        );
-        btn.innerHTML = `<i class="fa-duotone fa-solid fa-cloud-arrow-down"></i>`;
+        setStatus(statusId, `<i class="fa-solid fa-circle-exclamation"></i> Already saved.`, "warn");
+        btn.innerHTML = `<i class="${iconClass}"></i>`;
       }
     };
 
@@ -190,13 +220,17 @@ function renderServer() {
     left.className = "item-left";
     left.innerHTML =
       `<div class="item-name">${pl.name}</div>
-       <div class="item-meta"><span class="pill">SERVER</span></div>`;
+       <div class="item-meta"><span class="pill ${dotClass}">${label}</span></div>`;
 
     li.appendChild(btn);
     li.appendChild(left);
     ul.appendChild(li);
   });
 }
+
+/* ===========================
+   UI WIRING
+   =========================== */
 
 function wireUI() {
   const btnAddUrl = $("btnAddUrl");
@@ -282,7 +316,6 @@ function wireUI() {
           broadcastChanged();
           renderSaved();
         } catch {
-          // rollback se download fallisce o non è M3U
           try { pl2_remove(res.id); } catch {}
           broadcastChanged();
           renderSaved();
@@ -319,10 +352,134 @@ function wireUI() {
   }
 }
 
+/* ===========================
+   INIT
+   =========================== */
+
 function initManager() {
   wireUI();
-  renderServer();
+
+  // SERVER 1 (cloud, colore primary)
+  renderServer(
+    "serverPlaylistList",
+    "statusServer",
+    SERVER_PLAYLISTS,
+    "XVB-SERVER",
+    "dot-server",
+    "fa-duotone fa-solid fa-cloud-arrow-down",
+    "primary"
+  );
+
+  // SERVER 2 / THIRD-PARTY  fa-duotone fa-solid fa-cloud-question"></i>
+  renderServer(
+    "serverPlaylistList2",
+    "statusServer2",
+    SERVER_PLAYLISTS_2,
+    "THIRD-PARTY",
+    "dot-server2",
+    "fa-duotone fa-solid fa-cloud-question",
+    "server2"
+  );
+
   renderSaved();
 }
 
 document.addEventListener("DOMContentLoaded", initManager);
+
+
+
+
+
+/* ===========================
+   EPG STATUS + Download
+   =========================== */
+
+document.addEventListener("DOMContentLoaded", async () => {
+
+  const icon  = document.getElementById("epg-status-icon");
+  const shaEl = document.getElementById("epg-commit-sha");
+  const dateEl = document.getElementById("epg-commit-date");
+  const msgEl = document.getElementById("epg-commit-msg");
+
+  const REPO = "jonathansanfilippo/xvb-epg";
+  const BRANCH = "main";
+  const XML_PATH = "docs/epg.xml";
+  const XML_URL = `https://raw.githubusercontent.com/${REPO}/${BRANCH}/${XML_PATH}`;
+
+  if (!icon) return;
+
+  // CHECKING
+  icon.style.color = "rgb(253, 187, 102)";
+  icon.title = "Checking EPG status...";
+  icon.classList.remove("epg-online");
+
+  if (msgEl) {
+    msgEl.className = "status warn";
+    msgEl.innerHTML = `
+      <i class="fa-solid fa-triangle-exclamation"></i>
+      Checking EPG build status...
+    `;
+  }
+
+  try {
+    // Last commit
+    const commitRes = await fetch(
+      `https://api.github.com/repos/${REPO}/commits?path=${encodeURIComponent(XML_PATH)}&sha=${encodeURIComponent(BRANCH)}&per_page=1`,
+      { headers: { "Accept": "application/vnd.github+json" } }
+    );
+
+    if (!commitRes.ok) throw new Error("GitHub API error");
+
+    const commitData = await commitRes.json();
+    const commit = commitData[0];
+
+    if (commit) {
+      if (shaEl) shaEl.textContent = commit.sha.slice(0, 7);
+
+      const iso =
+        commit.commit?.committer?.date ||
+        commit.commit?.author?.date;
+
+      if (dateEl) dateEl.textContent = new Date(iso).toLocaleString("en-GB");
+    }
+
+    // Check XML reachable
+    const xmlCheck = await fetch(XML_URL, { method: "HEAD", cache: "no-store" });
+
+    if (xmlCheck.ok) {
+      icon.style.color = "#3fb950";
+      icon.classList.add("epg-online");
+      icon.title = "EPG Online";
+
+      if (msgEl) {
+        msgEl.className = "status success";
+        msgEl.innerHTML = `
+          <i class="fa-solid fa-check"></i>
+          EPG build completed successfully.
+        `;
+      }
+    } else {
+      throw new Error("XML not reachable");
+    }
+
+  } catch (err) {
+    icon.style.color = "#f85149";
+    icon.classList.remove("epg-online");
+    icon.title = "EPG Offline";
+
+    if (msgEl) {
+      msgEl.className = "status error";
+      msgEl.innerHTML = `
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        EPG build failed or XML unavailable.
+      `;
+    }
+
+    console.error("EPG status error:", err);
+  }
+});
+
+// Download button
+document.getElementById("btnDownloadEpg")?.addEventListener("click", () => {
+  window.open("https://github.com/jonathansanfilippo/xvb-epg", "_blank");
+});

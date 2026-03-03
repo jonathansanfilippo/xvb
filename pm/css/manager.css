@@ -1,511 +1,276 @@
-@import url('https://fonts.googleapis.com/css2?family=Ubuntu+Mono:ital,wght@0,400;0,700;1,400;1,700&family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap');
-
-:root{
-  /* Light */
-  --bg: #fff;
-  --surface: #ffffff;
-  --soft: #fff;
-  --text: #0f1115;
-  --muted: rgba(15,17,21,0.62);
-  --accent: #007aff;
-  --danger: #e54848;
-  --r1: 22px;
-  --r2: 16px;
-  --footer:#fafbfc;
-  --warning:#fd7b87;
-  --input:#fafbfc;
-  --legal:rgb(130, 137, 145);
+:root {
+  /* GITHUB DARK (Default) */
+  --bg: #0d1117;
+  --card: #161b22;
+  --card2: #0d1117;
+  --text: #e6edf3;
+  --muted: rgba(255, 255, 255, 0.60);
+  --muted2: rgba(255, 255, 255, 0.45);
+  --accent: #58a6ff;
+  --server2:#a971ff;
+  --server: #49a6ff;
+  --url: #ffb340;
+  --local: #63e776;
+  --danger: #f85149;
+ 
+  --radius: 26px;
 }
 
-/* Dark theme - GitHub style */
-@media (prefers-color-scheme: dark){
-  :root{
-    --bg: #0d1117;            /* main background */
-    --surface: #1e232a;       /* cards / panels */
-    --soft: #1e232a;          /* secondary surfaces */
-    
-    --text: #f0f6fc;          /* primary text */
-    --muted: #9198a1;         /* secondary text */
-
-    --accent: #4493f8;        /* blue (links/buttons) */
-    --danger: #f85149;        /* errors */
-    --warning: #fd7b87;       /* warning / attention */
-    --success: #3fb950;       /* success states */
-
-    --footer: #161b22;
-    --input: #0d1117;
-
-    --border: #30363d;        /* subtle borders */
-    --legal: #8b949e;         /* legal / small text */
+/* GITHUB LIGHT MODE */
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #ffffff;
+    --card: #f6f8fa;
+    --card2: #ffffff;
+    --text: #1f2328;
+    --muted: rgba(0, 0, 0, 0.60);
+    --muted2: rgba(0, 0, 0, 0.45);
+    --accent: #007aff;
+     --server2:#8046d9;
+    --server: #007aff;
+    --url: #ffab01;
+    --local: #64c572;
+    --danger: #cf222e;
   }
 }
 
-*{ box-sizing:border-box; }
-html,body{ height:100%; }
+* { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+html, body { height: 100%; margin: 0; }
 
-body{
-  margin:0;
-  font-family: "Ubuntu", sans-serif;
-  font-weight: 400;
-  font-style: normal;
-  background: var(--bg);
+body {
   color: var(--text);
-  -webkit-font-smoothing: antialiased;
-
-  font-size: 17px;
+  background-color: var(--bg);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  letter-spacing: .1px;
+  line-height: 1.5;
 }
 
-.accent{color:var(--accent);}
-
-.warning{
-  color: var(--warning);
+/* CONTENITORE UNIFICATO PER ALLINEAMENTO PERFETTO */
+.wrap, .reset-inner, .footer-inner {
+  width: min(1200px, 100%);
+  margin: 0 auto;
+  padding: 0 18px;
 }
 
+.wrap { margin-top: 28px; }
 
-/* layout */
-.wrap{
-  width:min(1100px, 92vw);
-  margin: 28px auto 60px;
-}
-
-/* header “pagina XVB” */
-.hero{
-  display:flex;
-  align-items:flex-end;
-  justify-content:space-between;
-  gap: 24px;
-  margin-bottom: 24px;
-}
-
-.brandline{
-  font-weight: 700;
-  letter-spacing: 2px;
-  font-size: 12px;
-  color: var(--accent);
-  text-transform: uppercase;
-  padding-bottom: 10px;
-}
-
-/* Titolo (non enorme) */
-.h1{
-  font-size: clamp(20px, 3vw, 28px);
-  line-height: 1.2;
-  font-weight: 700;
-  margin: 0;
-}
-
-.sub{
-  margin-top: 0px;
-  font-size: clamp(12px, 3vw, 17px);
-  line-height: 1.6;
-  color: var(--muted);
-  font-weight: 600;
-  max-width: 62ch;
-}
-
-/* grid */
-.grid{
-  display:grid;
-  grid-template-columns: 1fr;
-  gap: 16px;
-}
-
-/* card soft */
-.section{
- background: var(--surface);
-  border-radius: var(--r1);
-  padding: 16px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.06);*/
-
-}
-
-@media (prefers-color-scheme: dark){
-  .section{  }
-}
-
-.label{
-  font-size: 14px;
-  font-weight: 900;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  color: rgba(127,132,145,0.95);
-  margin: 5px 0 14px 2px;
-}
-
-
-.row{
-  display: grid;
-  grid-template-columns: 1fr auto; /* input + icona */
-  gap: 12px;
-  align-items: center;
-}
-
-/* Inputs */
-.input, .file{
-  width: 100%;
-  min-width: 0;
-
-  padding: 14px 14px;
-  border-radius: var(--r2);
+/* SEZIONI FLAT - NO BORDERS - NO SHADOWS */
+.hero, .section, .reset-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 24px;
   border: none;
-  background: var(--input);
-  color: var(--text);
-  outline: none;
-  font-weight: 650;
-
-  font-size: 14px;
+  margin-bottom: 18px;
 }
 
-.input::placeholder{
-  color:var(--legal);
-
+/* GRID LAYOUT 2 COLONNE */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
 }
 
+@media (max-width: 900px) {
+  .grid { grid-template-columns: 1fr; }
+}
 
-.iconbtn{
-  background: transparent !important;
-  border: none !important;
-  width: auto;
-  height: auto;
-  padding: 6px;
+/* TITOLI E LABEL */
+.h1 { margin: 0; font-size: 26px; font-weight: 800; letter-spacing: -0.02em; }
+.sub { margin-top: 6px; color: var(--muted); max-width: 60ch; }
 
+.label {
   display: flex;
   align-items: center;
-  justify-content: center;
-
-  cursor: pointer;
-  transition: transform .12s ease, opacity .12s ease, filter .12s ease;
-  justify-self: end;
-}
-
-.iconbtn i{
-  font-size: 20px; 
-}
-
-/* hover leggero */
-.iconbtn:hover{
-  transform: scale(1.08);
-  opacity: 0.90;
-}
-
-/* colori */
-.iconbtn.primary i{
-  color: var(--accent);
-}
-.iconbtn.danger i{
-  color: var(--danger);
-}
-
-.iconbtn.warning i{
-  color:var(--warning);
-}
-
-/* ✅ in dark mode ancora più “pop” */
-@media (prefers-color-scheme: dark){
-  .iconbtn.primary i{
-    filter: drop-shadow(0 8px 18px rgba(95,179,255,0.25));
-  }
-  .iconbtn.danger i{
-    filter: drop-shadow(0 8px 18px rgba(255,107,107,0.18));
-  }
-}
-
-
-.status{
-  margin-top: 30px;
-  font-size: 14px;
-  font-weight: 500;
+  gap: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--muted);
+  
+  margin-bottom: 16px;
   
 }
 
-.status.success{color:rgb(40, 197, 168)}
-.status.error{color:rgba(255,140,140,.95)}
-.status.warn{color:rgb(253, 187, 102)}
-.status.info{color:var(--legal);}
+/* CLASSI COLORI PER JS */
+.dot-server { color: var(--server)!important; }
+.dot-server2 { color: var(--server2)!important; }
+.dot-url { color: var(--url)!important; }
+.dot-local { color: var(--local)!important; }
 
+/* INPUT E FORM FLAT */
+.input, .file {
+  flex: 1;
+  width: 80%;
+  height: 52px;
+  border-radius: 16px;
+  border: none;
+  background: var(--card2);
+  color: var(--text);
+  padding: 0 16px;
+  outline: none;
+  font-size: 14px;
+}
+.input::placeholder { color: var(--muted2); }
 
+/* BOTTONI: SOLO ICONE (NO BACKGROUND) */
+.iconbtn, .smallbtn {
+  height: 52px;
+  min-width: 52px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s, transform 0.1s;
+}
 
+.iconbtn i, .smallbtn i { font-size: 36px; color: var(--text); }
 
+/* Hover: leggera opacità e zoom */
+.iconbtn:hover, .smallbtn:hover { opacity: 0.7; transform: scale(1.05); }
+.iconbtn:active { transform: scale(0.95); }
 
+/* Colori icone per classi JS */
+.iconbtn.primary i { color: #4196ff; }
+.iconbtn.warning i { color: var(--url); }
+.iconbtn.danger i  { color: var(--danger); }
+.iconbtn.server2 i { color: var(--server2); }
 
-/* list */
-.list{ list-style:none; padding:0; margin:0; }
-
-.item{
-  margin-top: 12px;
-  background: var(--soft);
-  border-radius: 8px;
-  padding: 2px 10px;
+/* LISTE E ITEM */
+.list { display: flex; flex-direction: column; gap: 10px; padding: 0; margin: 0; list-style: none; }
+.item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 14px;
+  padding: 16px;
+  border-radius: 18px;
+  background: var(--card2);
 }
+.item-name { font-weight: 700; display: flex; align-items: center; gap: 5px; }
 
-.item-left{
-  min-width:0;
-  display:flex;
-  flex-direction:column;
-  gap: 6px;
-}
-
-.item-name{
-  font-weight: 500!important;
-  font-size: 14px!important;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  max-width: 72ch;
-}
-
-.item-meta{
-  display:flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--muted);
-}
-
-.pill{
+.pill {
+  padding: 4px 10px;
  
- /* color: var(--accent);*/
+  color: var(--muted);
   font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 1px;
-}
-}
-
-/* ✅ Mobile: bottone icona va sotto ma resta allineato bene */
-@media (max-width: 420px){
-  .wrap{ width: min(1000px, 94vw); }
-
-  .row{
-    grid-template-columns: 1fr; /* va sotto */
-  }
-
-  .iconbtn{
-    justify-self: end;  /* icona a destra */
-  }
-
-  .iconbtn i{
-    font-size: 44px; /* un filo più grande su mobile */
-  }
-}
-
-
-
-/* ===== Custom file input style ===== */
-
-/* nascondiamo il bottone nativo */
-.file::file-selector-button {
-  border: none;
-  background: #007aff;
-  color: #fff;
-  padding: 8px 14px;
-  border-radius: 12px;
   font-weight: 600;
-  font-size: 14px;
-  cursor: pointer;
-  margin-right: 12px;
-  transition: background .15s ease, transform .1s ease;
 }
 
-.file::file-selector-button:hover {
-  background: #92c3f9;
-  transform: translateY(0px);
-}
+/* FIX SEZIONE RESET: ALLINEATA E PULITA */
+.reset { margin-top: 18px; }
+.reset-card { margin-bottom: 0; } /* Reset usa la classe .reset-card per coerenza */
 
-.file::file-selector-button:active {
-  transform: scale(0.98);
-}
-
-/* Safari fix */
-.file::-webkit-file-upload-button {
-  border: none;
-  background: var(--surface);
-  color: var(--text);
-  padding: 8px 14px;
-  border-radius: 12px;
-  font-weight: 600;
-  font-size: 14px;
-  cursor: pointer;
-}
-
-
-/* ================= reset ================= */
-
-
-
-
-.reset{
-  margin-top: 60px;
-  padding: 28px 0 36px;
-  color: var(--text);
-  font-size: 16px;
-  font-weight: 700;
-}
-
-.reset-inner{
-  width: min(1100px, 92vw);
-  margin: 0 auto;
-  
-  justify-content:space-between;
-  align-items:center;
-  gap:20px;
-  flex-wrap:wrap;
-}
-
-.resetlabel{
-  font-size: 20px;
-  font-weight: 700;
-}
-
-
-.btnClearAll i{
-  font-size: 30px;
-}
-
-
-
-
-.sub-reset{
-  margin-top: 10px;
-  font-size:19px;
-  color: rgb(253, 187, 102);
-}
-
-/* ================= FOOTER ================= */
-
-.footer{
-  margin-top: 0px;
-  padding: 28px 0 36px;
-  background: var(--footer);
-}
-
-.footer-inner{
-  width: min(1100px, 92vw);
-  margin: 0 auto;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:20px;
-  flex-wrap:wrap;
-}
-
-.footer-left{
-  font-weight:600;
-  font-size:14px;
-  color:var(--legal);
-}
-
-.footer-version{
-  margin-left:8px;
-  font-size:12px;
-  color: var(--accent);
-  font-weight:600;
-}
-
-.footer-right{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  font-size:13px;
-  color:var(--legal);
-  font-weight:500;
-}
-
-.footer-dot{
-  width:4px;
-  height:4px;
-  border-radius:50%;
-  color:var(--legal);
-  opacity:0.6;
-}
-
-
-
-
-
-
-
-.legal{
-font-size:;
-color:var(--legal);
-
-}
-
-
-.footer-logo{
-  height: 18px;
-  color: var(--legal);
-   width: auto;
-  display: block;
-}
-
-.footer-logo path,
-.footer-logo text {
-  fill: currentColor;
-}
-
-
-
-.footer-left{
-  display: flex;
-  align-items: flex-end;
-}
-
-
-
-
-/* Colore rosso quando non c'è un file (o quando ha la classe empty) */
-.file.empty {
-  color:var(--legal); 
-}
-
-/* Colore verde (quello che hai già) quando il file è selezionato */
-.file {
-  width: 100%;
-  min-width: 0;
-  padding: 14px 14px;
-  border-radius: var(--r2);
-  border: none;
-  background: var(--soft);
-  color: var(--text); /* Verde */
-  outline: none;
-  font-weight: 650;
-  font-size: 14px;
-  cursor: pointer;
-}
-
-
-
-
-/* --- macOS Style Pastel Dots --- */
-.dot-server { color: #5eb1ff !important; } /* Blu pastello */
-.dot-url    { color: #fdbb66 !important; } /* Arancione pastello */
-.dot-local  { color: #28c5a8 !important; } /* Verde pastello (già tuo) */
-
-/* Allineamento icone nei titoli e nelle liste */
-.label i, .item-name i {
-  margin-right:;
-  font-size: 10px;
-  vertical-align: middle;
-}
-
-.item-name {
+.row.reset-row {
   display: flex;
   align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+.resetlabel { font-weight: 700; font-size: 16px; }
+
+/* FOOTER ALLINEATO */
+.footer {
+  margin-top: 40px;
+  padding-bottom: 60px;
+}
+.footer-inner {
+  border-top: 1px solid var(--card);
+  padding-top: 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  color: var(--muted2);
+  font-size: 13px;
+}
+.footer-left { max-width: 65%; }
+.footer-logo { font-weight: 800; color: var(--muted); margin-bottom: 10px; display: block; }
+
+/* ANIMAZIONE EPG (ID JS) */
+#epg-status-icon { font-size: 10px; transition: opacity 1.6s ease; }
+.epg-online { animation: epgPulse 2.2s ease-in-out infinite; }
+@keyframes epgPulse { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+
+/* STATUS FEEDBACK JS */
+.status { margin-top: 12px; font-size: 14px; font-weight: 700; min-height: 20px; }
+.status.success { color: var(--local); }
+.status.error { color: var(--danger); }
+.status.warn { color: var(--url); }
+.status.info { color: var(--accent); }
+.warning{color: var(--url);}
+.accent{color: var(--accent);}
+
+
+
+/* ✅ NUOVO STILE FLAT MODERNO PER IL BOTTONE BROWSE */
+.file {
+  width: 100%;
+  height: 52px;
+  border-radius: 18px; /* Mantiene la coerenza col tuo layout */
+  border: none; /* Rimosso bordo 1px per stile Flat */
+  background-color: var(--card2); /* Sfondo scuro flat */
+  color: var(--muted); /* Colore testo "No file selected" */
+  padding: 0; /* Gestiamo il padding internamente al bottone */
+  outline: none;
+  font-size: 14px;
+  font-family: inherit;
+  display: flex; /* Allinea perfettamente bottone e testo */
+  align-items: center;
+  overflow: hidden; /* Mantiene gli angoli arrotondati */
+  cursor: pointer;
+}
+
+/* Stile specifico per il bottone vero e proprio (Chrome/Edge/Safari) */
+.file::-webkit-file-upload-button {
+  height: 100%; /* Occupa tutta l'altezza dell'input */
+  padding: 0 24px; /* Padding generoso ai lati */
+  margin-right: 16px; /* Spazio dal testo del file */
+  border: none;
+  border-radius: 0; /* Il raggio è gestito dal genitore .file */
+  background-color: var(--local); /* Colore verde della tua palette */
+  color: #fff; /* Testo bianco */
+  font-weight: 700; /* Testo in grassetto */
+  font-size: 13px;
+  text-transform: uppercase; /* Stile etichetta */
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: background-color 0.15s ease; /* Transizione fluida al passaggio del mouse */
+}
+
+/* Stile specifico per Firefox (se necessario) */
+.file::file-selector-button {
+  height: 100%;
+  padding: 0 24px;
+  margin-right: 16px;
+  border: none;
+  border-radius: 0;
+  background-color: #696f76;
+  color: #fff;
+  font-weight: 700;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+/* Effetto Hover (al passaggio del mouse) */
+.file:hover::-webkit-file-upload-button,
+.file:hover::file-selector-button {
+  background-color: #35c083; /* Una variante leggermente più scura del tuo verde per il feedback */
+}
+
+/* Effetto Active (al click) */
+.file:active::-webkit-file-upload-button,
+.file:active::file-selector-button {
+  transform: none; /* Rimosso lo spostamento in basso per stile flat pulito */
 }
 
 
-.item {
-    justify-content: flex-start; /* Allinea tutto a sinistra */
-    gap: 16px; /* Spazio costante tra icona e testo */
+/* Header EPG con bottone a destra */
+.epg-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
 }
-
-
-
-
-
 
