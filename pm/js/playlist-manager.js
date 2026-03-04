@@ -1,6 +1,9 @@
 /* ===========================
    XVB Playlist Manager (UI)
    Requires: playlist-storage-v2.js
+
+
+   https://raw.githubusercontent.com/jonathansanfilippo/xvb-server-lists/refs/heads/main/
    =========================== */
 
 const CHANNEL_CACHE_KEY = "dvb-m^7Y!zR4*P8&kQ3@h";
@@ -8,7 +11,8 @@ const CHANNEL_CACHE_KEY = "dvb-m^7Y!zR4*P8&kQ3@h";
 const SERVER_PLAYLISTS = [
   { name: "xvb-it naz", url: "https://jonathansanfilippo.github.io/xvb-server-lists/xvb-it-naz" },
   { name: "xvb-it reg", url: "https://jonathansanfilippo.github.io/xvb-server-lists/xvb-it-reg" },
-  { name: "xvb-it radio", url: "https://raw.githubusercontent.com/jonathansanfilippo/xvb-server-lists/refs/heads/main/xvb-radio-master.m3u" }
+  { name: "xvb-it radio", url: "https://raw.githubusercontent.com/jonathansanfilippo/xvb-server-lists/refs/heads/main/xvb-radio-master.m3u" },
+  { name: "xvb-it radio", url: "https://raw.githubusercontent.com/jonathansanfilippo/xvb-server-lists/refs/heads/main/xvb-SumPlus.m3u" }
 ];
 
 const SERVER_PLAYLISTS_2 = [
