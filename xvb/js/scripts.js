@@ -816,10 +816,23 @@ function markDeadAndSkip(reason) {
   if (!ok) showLoadStatus("error", { title: reason || "No working channel found" });
 }
 
-function play(ch) {
+
+
+
+
+
+
+
+
+
+
+
+
+async function play(ch) {
   const url = String(ch?.url || "");
   const name = String(ch?.name || "");
   const tvgId = String(ch?.tvgId || "");
+  const lic = ch?.["license-details"] || "";
   const token = ++_playToken;
 
   const failAndSkip = (msg) => {
@@ -831,18 +844,59 @@ function play(ch) {
   showLoadStatus("loading", { token, title: `Loading: ${name || ""}` });
   updateTabTitle(name);
 
-  if (hlsInst) {
-    try {
-      hlsInst.destroy();
-    } catch {}
-    hlsInst = null;
-  }
-  if (dashInst) {
-    try {
-      dashInst.reset();
-    } catch {}
-    dashInst = null;
-  }
+  // -------------------------
+  // WATCHDOG (NUOVO)
+  // -------------------------
+  const START_TIMEOUT_MS = 15000; // entro 15s deve partire (playing/canplay) oppure skip
+  const STALL_TIMEOUT_MS = 12000; // se resta in waiting/stalled per 12s -> skip
+
+  let startTimer = null;
+  let stallTimer = null;
+  let startedOk = false;
+
+  const clearWatchdogs = () => {
+    if (startTimer) { clearTimeout(startTimer); startTimer = null; }
+    if (stallTimer) { clearTimeout(stallTimer); stallTimer = null; }
+  };
+
+  const armStartWatchdog = () => {
+    clearWatchdogs();
+    startedOk = false;
+    startTimer = setTimeout(() => {
+      if (token !== _playToken) return;
+      // Se non è mai partito davvero -> KO
+      if (!startedOk) {
+        showLoadStatus("error", { token, title: "Timeout loading" });
+        failAndSkip("Timeout loading");
+      }
+    }, START_TIMEOUT_MS);
+  };
+
+  const armStallWatchdog = (reason) => {
+    if (token !== _playToken) return;
+    // se non è partito ancora, lo gestisce già lo start watchdog
+    if (!startedOk) return;
+
+    if (stallTimer) clearTimeout(stallTimer);
+    stallTimer = setTimeout(() => {
+      if (token !== _playToken) return;
+      showLoadStatus("error", { token, title: "Stalled" });
+      failAndSkip(reason || "Playback stalled");
+    }, STALL_TIMEOUT_MS);
+  };
+
+  const markStarted = () => {
+    if (token !== _playToken) return;
+    startedOk = true;
+    // una volta partito, stoppa il timer di start
+    if (startTimer) { clearTimeout(startTimer); startTimer = null; }
+    // se era in stall, lo puliamo
+    if (stallTimer) { clearTimeout(stallTimer); stallTimer = null; }
+  };
+
+  // Pulizia istanze
+  if (hlsInst) { try { hlsInst.destroy(); } catch {} hlsInst = null; }
+  if (dashInst) { try { dashInst.reset(); } catch {} dashInst = null; }
   if (mpegtsInst) {
     try {
       mpegtsInst.pause();
@@ -853,6 +907,12 @@ function play(ch) {
     mpegtsInst = null;
   }
 
+  // Shaka cleanup (non rompe nulla se non esiste)
+  if (window.__shakaPlayer) {
+    try { window.__shakaPlayer.destroy(); } catch {}
+    window.__shakaPlayer = null;
+  }
+
   if (el.video) {
     el.video.pause();
     el.video.removeAttribute("src");
@@ -861,32 +921,34 @@ function play(ch) {
 
   stopMediaBar();
   document.querySelector(".epg-overlay")?.classList.remove("media-progress");
-
   checkIfAudioOnlyAndShowIcon(token);
 
   if (el.video) {
+    // (NUOVO) armiamo subito watchdog caricamento
+    armStartWatchdog();
+
     el.video.onplaying = () => {
       if (token !== _playToken) return;
+      markStarted();
       hideLoadStatus(token);
     };
+
     el.video.oncanplay = () => {
       if (token !== _playToken) return;
+      markStarted();
       hideLoadStatus(token);
     };
-    el.video.onwaiting = () => {
-      if (token !== _playToken) return;
-      showLoadStatus("loading", { token, title: `Buffering: ${name || ""}` });
-    };
-    el.video.onstalled = () => {
-      if (token !== _playToken) return;
-      showLoadStatus("loading", { token, title: `Waiting for data: ${name || ""}` });
-    };
+
+    // (NUOVO) se resta “appeso” senza errori, intercettiamo
+    el.video.onwaiting = () => { if (token === _playToken) armStallWatchdog("Buffering too long"); };
+    el.video.onstalled = () => { if (token === _playToken) armStallWatchdog("Network stalled"); };
+    el.video.onpause = () => { /* non forziamo skip */ };
+
     el.video.onerror = () => {
       if (token !== _playToken) return;
       const err = el.video?.error;
-      const msg = err?.message || (err?.code ? `Video error code ${err.code}` : "Playback error");
-      showLoadStatus("error", { token, title: msg });
-      failAndSkip(msg);
+      clearWatchdogs();
+      failAndSkip(err?.message || "Playback error");
     };
   }
 
@@ -901,77 +963,263 @@ function play(ch) {
 
   if (!el.video) return;
 
-  if (url.includes(".mpd")) {
-    dashInst = dashjs.MediaPlayer().create();
-    dashInst.initialize(el.video, url, true);
-    attachDashQualityListeners(name);
+  // -------------------------
+  // HELPERS DRM + Shaka
+  // -------------------------
+  const hexToB64Url = (hex) => {
+    const clean = String(hex || "").trim().toLowerCase().replace(/^0x/, "").replace(/[^0-9a-f]/g, "");
+    const bytes = clean.match(/.{1,2}/g) || [];
+    const bin = bytes.map(b => String.fromCharCode(parseInt(b, 16))).join("");
+    return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  };
+
+  const parseKidKey = (licStr) => {
+    if (!licStr || !licStr.includes(":")) return null;
+    const [kidHex, keyHex] = licStr.split(":").map(s => s.trim());
+    if (!kidHex || !keyHex) return null;
+    return { kidB64: hexToB64Url(kidHex), keyB64: hexToB64Url(keyHex) };
+  };
+
+  const tryShakaClearKey = async () => {
+    const kk = parseKidKey(lic);
+    if (!kk) return false;
+    if (!window.shaka || !window.shaka.Player) return false;
 
     try {
-      dashInst.on(dashjs.MediaPlayer.events.ERROR, () => {
-        if (token !== _playToken) return;
-        const msg = "DASH error";
-        showLoadStatus("error", { token, title: msg });
-        failAndSkip(msg);
-      });
-    } catch {}
-    return;
-  }
+      shaka.polyfill.installAll();
 
-  if (url.includes(".m3u8")) {
-    if (Hls.isSupported()) {
-      hlsInst = new Hls();
-      hlsInst.loadSource(url);
-      hlsInst.attachMedia(el.video);
-      attachHlsQualityListeners(name);
+      // (nota) tuo codice: new shaka.Player(el.video)
+      // lasciamo così per non “rompere” nulla nel progetto
+      const player = new shaka.Player(el.video);
+      window.__shakaPlayer = player;
 
-      hlsInst.on(Hls.Events.MANIFEST_PARSED, () => {
-        if (token !== _playToken) return;
-        el.video.play().catch(() => {});
+      player.configure({
+        drm: { clearKeys: { [kk.kidB64]: kk.keyB64 } }
       });
 
-      hlsInst.on(Hls.Events.ERROR, (_, data) => {
+      player.addEventListener("error", () => {
         if (token !== _playToken) return;
-        if (data?.fatal) {
-          const msg = `HLS: ${data?.details || "fatal error"}`;
-          showLoadStatus("error", { token, title: msg });
-          failAndSkip(msg);
-        }
+        clearWatchdogs();
+        failAndSkip("DASH DRM error");
       });
-    } else {
-      el.video.src = url;
-      detectQualityFromName(name);
+
+      console.log("Shaka ClearKey forced:", name);
+      await player.load(url);
       el.video.play().catch(() => {});
+      return true;
+    } catch (e) {
+      console.warn("Shaka fallback failed:", e);
+      return false;
     }
-    return;
-  }
+  };
 
-  if (url.includes(".ts") || url.includes("type=m3u_plus")) {
-    if (mpegts.getFeatureList().mseLivePlayback) {
+  const startDash = () => {
+    dashInst = dashjs.MediaPlayer().create();
+
+    const kk = parseKidKey(lic);
+    if (kk) {
+      dashInst.setProtectionData({
+        "org.w3.clearkey": { clearkeys: { [kk.kidB64]: kk.keyB64 } }
+      });
+      console.log("DRM ClearKey injected (dash.js):", name);
+    }
+
+    dashInst.initialize(el.video, url, true);
+
+    if (typeof attachDashQualityListeners === "function") attachDashQualityListeners(name);
+
+    dashInst.on(dashjs.MediaPlayer.events.ERROR, async (e) => {
+      if (token !== _playToken) return;
+
+      const msg = (e?.event?.message || e?.error?.message || "").toString();
+      const isLicenseMissing = msg.toLowerCase().includes("license") || msg.toLowerCase().includes("drm");
+
+      const kk2 = parseKidKey(lic);
+      if (kk2 && isLicenseMissing) {
+        try { dashInst.reset(); } catch {}
+        dashInst = null;
+
+        const ok = await tryShakaClearKey();
+        if (ok) return;
+      }
+
+      clearWatchdogs();
+      failAndSkip("DASH error");
+    });
+  };
+
+  const startHls = () => {
+    if (url.includes(".m3u8") || true) {
+      if (window.Hls && Hls.isSupported()) {
+        hlsInst = new Hls();
+
+        // (NUOVO) intercettiamo errori HLS e li trasformiamo in skip
+        hlsInst.on(Hls.Events.ERROR, (_, data) => {
+          if (token !== _playToken) return;
+          // Se è fatal -> skip
+          if (data?.fatal) {
+            clearWatchdogs();
+            failAndSkip("HLS fatal error");
+          }
+        });
+
+        hlsInst.loadSource(url);
+        hlsInst.attachMedia(el.video);
+        if (typeof attachHlsQualityListeners === "function") attachHlsQualityListeners(name);
+        hlsInst.on(Hls.Events.MANIFEST_PARSED, () => {
+          if (token === _playToken) el.video.play().catch(() => {});
+        });
+      } else {
+        el.video.src = url;
+        el.video.play().catch(() => {});
+      }
+    }
+  };
+
+  const startMpegTs = () => {
+    if (window.mpegts && mpegts.getFeatureList().mseLivePlayback) {
       mpegtsInst = mpegts.createPlayer({ type: "mpegts", isLive: true, url });
-      mpegtsInst.attachMediaElement(el.video);
-      mpegtsInst.load();
-      mpegtsInst.play().catch(() => {});
-      detectQualityFromName(name);
 
+      // (NUOVO) se mpegts.js emette errore -> skip
       try {
         mpegtsInst.on(mpegts.Events.ERROR, () => {
           if (token !== _playToken) return;
-          const msg = "MPEG-TS error";
-          showLoadStatus("error", { token, title: msg });
-          failAndSkip(msg);
+          clearWatchdogs();
+          failAndSkip("MPEGTS error");
         });
       } catch {}
+
+      mpegtsInst.attachMediaElement(el.video);
+      mpegtsInst.load();
+      mpegtsInst.play().catch(() => {});
     } else {
       el.video.src = url;
       el.video.play().catch(() => {});
     }
+  };
+
+  // -------------------------
+  // AUTO-DETECTION STREAM TYPE
+  // -------------------------
+  const sniffByUrl = () => {
+    const u = url.toLowerCase();
+    if (u.includes(".mpd")) return "dash";
+    if (u.includes(".m3u8")) return "hls";
+    if (u.includes(".ts")) return "mpegts";
+    if (u.includes("format=mpd") || u.includes("type=dash")) return "dash";
+    if (u.includes("format=m3u8") || u.includes("type=hls")) return "hls";
+    if (u.includes("type=mpegts") || u.includes("type=ts")) return "mpegts";
+    return "";
+  };
+
+  // (NUOVO) fetch con timeout, così non resta appeso
+  const fetchWithTimeout = async (input, init, timeoutMs) => {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), timeoutMs);
+    try {
+      return await fetch(input, { ...(init || {}), signal: ctrl.signal });
+    } finally {
+      clearTimeout(t);
+    }
+  };
+
+  const sniffByContentType = async () => {
+    const tryHead = async () => {
+      const r = await fetchWithTimeout(url, { method: "HEAD", cache: "no-store" }, 4500);
+      const ct = (r.headers.get("content-type") || "").toLowerCase();
+      return ct;
+    };
+
+    const tryRangeGet = async () => {
+      const r = await fetchWithTimeout(
+        url,
+        {
+          method: "GET",
+          cache: "no-store",
+          headers: { Range: "bytes=0-2047" }
+        },
+        6500
+      );
+      const ct = (r.headers.get("content-type") || "").toLowerCase();
+      let text = "";
+      try { text = (await r.text()) || ""; } catch {}
+      return { ct, text: text.slice(0, 2048) };
+    };
+
+    // 1) prova HEAD
+    try {
+      const ct = await tryHead();
+      if (ct) return { ct, text: "" };
+    } catch {}
+
+    // 2) fallback GET range
+    try {
+      return await tryRangeGet();
+    } catch {}
+
+    return { ct: "", text: "" };
+  };
+
+  const decideFromSniff = (ct, headText) => {
+    const c = (ct || "").toLowerCase();
+    const t = (headText || "").trim();
+
+    // Content-Type
+    if (c.includes("dash") || c.includes("mpd") || c.includes("application/dash+xml")) return "dash";
+    if (c.includes("application/vnd.apple.mpegurl") || c.includes("application/x-mpegurl") || c.includes("mpegurl")) return "hls";
+    if (c.includes("video/mp2t") || c.includes("mp2t")) return "mpegts";
+
+    // Body sniff (solo se abbiamo qualche byte di testo)
+    const upper = t.toUpperCase();
+    if (upper.includes("#EXTM3U") || upper.includes("#EXT-X-STREAM-INF") || upper.includes("#EXT-X-TARGETDURATION")) return "hls";
+    if (upper.includes("<MPD") || upper.includes("URN: MPEG:DASH")) return "dash";
+
+    return "";
+  };
+
+  // -------------------------
+  // PLAY STRATEGY
+  // -------------------------
+  const hinted = sniffByUrl();
+  if (hinted === "dash") { startDash(); return; }
+  if (hinted === "hls") { startHls(); return; }
+  if (hinted === "mpegts") { startMpegTs(); return; }
+
+  // se URL non dice nulla => sniff rete
+  const sniff = await sniffByContentType();
+  if (token !== _playToken) return;
+
+  const decided = decideFromSniff(sniff.ct, sniff.text);
+
+  if (decided === "dash") { startDash(); return; }
+  if (decided === "hls") { startHls(); return; }
+  if (decided === "mpegts") { startMpegTs(); return; }
+
+  // fallback "best effort": prima DASH (se c'è DRM), poi HLS, poi TS, poi src
+  if (parseKidKey(lic)) { startDash(); return; }
+
+  try {
+    startHls();
     return;
-  }
+  } catch {}
+
+  try {
+    startMpegTs();
+    return;
+  } catch {}
 
   el.video.src = url;
-  detectQualityFromName(name);
   el.video.play().catch(() => {});
 }
+
+
+
+
+
+
+
+
+
 
 function stopAndResetPlayback() {
   try {
@@ -1111,6 +1359,10 @@ function initPlaylistBroadcastListener() {
   } catch {}
 }
 
+
+
+
+
 async function refreshAllPlaylists() {
   const finalUrlsToLoad = getAllPlaylistUrls();
   const localPlaylists = getAllLocalPlaylistsText();
@@ -1118,72 +1370,75 @@ async function refreshAllPlaylists() {
   const prevCount = Array.isArray(allChannels) ? allChannels.length : 0;
   allChannels = [];
 
+  // --- FUNZIONE DI PARSING CORRETTA ---
+  const parseM3U = (text, fallbackCategory) => {
+    const lines = text.split(/\r?\n/);
+    let cur = null;
+
+    lines.forEach((l) => {
+      l = (l || "").trim();
+      if (!l) return;
+
+      if (l.startsWith("#EXTINF:")) {
+        const name = l.split(",").pop().trim();
+        
+        const getAttr = (key) => {
+          const regex = new RegExp(key + '=["\']?([^"\',]+)["\']?', 'i');
+          const match = l.match(regex);
+          return match ? match[1] : "";
+        };
+
+        // MODIFICA QUI: Cerchiamo specificamente 'license-details'
+        const license = getAttr("license-details") || getAttr("license");
+
+        if (license) {
+          console.log(`%c[Parser] Chiavi DRM trovate per ${name}`, "color: #00ff00; font-weight: bold;");
+        }
+
+        cur = { 
+          name, 
+          logo: getAttr("tvg-logo"), 
+          group: getAttr("group-title") || fallbackCategory, 
+          tvgId: getAttr("tvg-id"), 
+          // Salviamo il campo con il nome esatto che la funzione play() si aspetta
+          "license-details": license 
+        };
+      } else if (l.startsWith("http") && cur) {
+        cur.url = l;
+        if (!allChannels.some((ch) => ch.url === cur.url)) {
+          allChannels.push(cur);
+        }
+        cur = null;
+      }
+    });
+  };
+
+  // 1. ELABORAZIONE PLAYLIST REMOTE
   for (let url of finalUrlsToLoad) {
     url = (url || "").trim();
     if (!url) continue;
-
     const fallbackCategory = _pl2_guessNameFromUrl(url).replace(/\.m3u8?$/i, "");
 
     try {
       const bust = (url.includes("?") ? "&" : "?") + "t=" + Date.now();
       const res = await fetch(url + bust, { cache: "no-store" });
       const text = await res.text();
-      const lines = text.split("\n");
-      let cur = null;
-
-      lines.forEach((l) => {
-        l = (l || "").trim();
-
-        if (l.startsWith("#EXTINF:")) {
-          const name = l.split(",").pop().trim();
-          const logo = (l.match(/tvg-logo="([^"]*)"/i) || [])[1] || "";
-          const group = (l.match(/group-title="([^"]*)"/i) || [])[1] || fallbackCategory;
-          const tvgId = (l.match(/tvg-id="([^"]*)"/i) || [])[1] || "";
-          cur = { name, logo, group, tvgId };
-        } else if (l.startsWith("http") && cur) {
-          cur.url = l;
-          if (!allChannels.some((ch) => ch.url === cur.url)) allChannels.push(cur);
-          cur = null;
-        }
-      });
+      parseM3U(text, fallbackCategory);
     } catch {
       console.warn("Unable to refresh URL:", url);
     }
   }
 
+  // 2. ELABORAZIONE PLAYLIST LOCALI
   for (const pl of localPlaylists) {
     const fallbackCategory = (pl.name || "Local").replace(/\.m3u8?$/i, "");
-
-    try {
-      const lines = (pl.text || "").split("\n");
-      let cur = null;
-
-      lines.forEach((l) => {
-        l = (l || "").trim();
-
-        if (l.startsWith("#EXTINF:")) {
-          const name = l.split(",").pop().trim();
-          const logo = (l.match(/tvg-logo="([^"]*)"/i) || [])[1] || "";
-          const group = (l.match(/group-title="([^"]*)"/i) || [])[1] || fallbackCategory;
-          const tvgId = (l.match(/tvg-id="([^"]*)"/i) || [])[1] || "";
-          cur = { name, logo, group, tvgId };
-        } else if (l.startsWith("http") && cur) {
-          cur.url = l;
-          if (!allChannels.some((ch) => ch.url === cur.url)) allChannels.push(cur);
-          cur = null;
-        }
-      });
-    } catch {
-      console.warn("Unable to parse local playlist:", pl && pl.name);
-    }
+    parseM3U(pl.text || "", fallbackCategory);
   }
 
+  // GESTIONE FINALE
   if (allChannels.length === 0) {
     writeChannelsCache([]);
-    try {
-      localStorage.removeItem(LEGACY_CHANNELS_KEY);
-    } catch {}
-
+    try { localStorage.removeItem(LEGACY_CHANNELS_KEY); } catch {}
     stopAndResetPlayback();
     updateGlobalCounts();
     updateServerIconState();
@@ -1197,6 +1452,11 @@ async function refreshAllPlaylists() {
   updateGlobalCounts();
   updateServerIconState();
 }
+
+
+
+
+
 
 function selectCategory(cat, opts = {}) {
   const { autoplayFirst = false } = opts;
@@ -1902,7 +2162,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 async function init() {
   PLAYLIST_URLS = getAllPlaylistUrls();
-
+  initLiveLogsPlayer();
   injectPlaylistManagerButton();
   initPlaylistBroadcastListener();
 
@@ -1933,4 +2193,188 @@ async function init() {
   }
 }
 
+
+/* ===========================
+   LIVE LOGS (BroadcastChannel) — XVB PLAYER
+   Channel: xvb_logs
+   Invia TUTTI i console.log/warn/error al Playlist Manager
+   =========================== */
+
+
+const LOG_CHANNEL = "xvb_logs";
+let _xvbLogBc = null;
+let _xvbConsoleHooked = false;
+let _xvbOrigConsole = null;
+const _xvbLogQueue = [];
+
+function _xvbLogTime(ts) {
+  const d = ts ? new Date(ts) : new Date();
+  const hh = String(d.getHours()).padStart(2, "0");
+  const mm = String(d.getMinutes()).padStart(2, "0");
+  const ss = String(d.getSeconds()).padStart(2, "0");
+  return `${hh}:${mm}:${ss}`;
+}
+
+function _xvbSafeStringify(value, maxLen = 6000) {
+  try {
+    const seen = new WeakSet();
+    const json = JSON.stringify(
+      value,
+      (k, v) => {
+        if (typeof v === "object" && v !== null) {
+          if (seen.has(v)) return "[Circular]";
+          seen.add(v);
+        }
+        if (typeof v === "function") return "[Function]";
+        if (v instanceof Error) return { name: v.name, message: v.message, stack: v.stack };
+        return v;
+      },
+      0
+    );
+    if (typeof json !== "string") return String(json);
+    if (json.length > maxLen) return json.slice(0, maxLen) + "…";
+    return json;
+  } catch {
+    try {
+      return String(value);
+    } catch {
+      return "[Unserializable]";
+    }
+  }
+}
+
+function _xvbStripConsoleCssArgs(args) {
+  const out = [];
+  for (let i = 0; i < args.length; i++) {
+    const a = args[i];
+    if (typeof a === "string" && a.includes("%c")) {
+      out.push(a.replace(/%c/g, "").trim());
+      if (typeof args[i + 1] === "string") i += 1;
+      continue;
+    }
+    out.push(a);
+  }
+  return out;
+}
+
+function _xvbArgsToMsg(args) {
+  const cleaned = _xvbStripConsoleCssArgs(args || []);
+  const parts = cleaned.map((a) => {
+    if (a == null) return "";
+    if (typeof a === "string") return a;
+    if (typeof a === "number" || typeof a === "boolean") return String(a);
+    return _xvbSafeStringify(a);
+  });
+  return parts.join(" ").replace(/\s+/g, " ").trim();
+}
+
+function _xvbShortUrl(u) {
+  const s = String(u || "");
+  if (s.length <= 140) return s;
+  return s.slice(0, 90) + "…" + s.slice(-40);
+}
+
+function _xvbPostLog(level, msg, meta) {
+  try {
+    if (!_xvbLogBc) return;
+    _xvbLogBc.postMessage({
+      type: "log",
+      source: "xvb-player",
+      level: level || "info",
+      msg: String(msg ?? ""),
+      meta: meta || {},
+      ts: Date.now(),
+    });
+  } catch {}
+}
+
+function xvbLog(level, msg, meta) {
+  try {
+    const payload = { level: level || "info", msg: String(msg ?? ""), meta: meta || {} };
+    if (!_xvbLogBc) {
+      _xvbLogQueue.push(payload);
+      return;
+    }
+    _xvbPostLog(payload.level, payload.msg, payload.meta);
+  } catch {}
+}
+
+function initLiveLogsPlayer() {
+  try {
+    _xvbOrigConsole = _xvbOrigConsole || {
+      log: console.log.bind(console),
+      warn: console.warn.bind(console),
+      error: console.error.bind(console),
+    };
+
+    if (!("BroadcastChannel" in window)) {
+      _xvbOrigConsole.warn("[XVB] BroadcastChannel not supported.");
+      return;
+    }
+
+    _xvbLogBc = new BroadcastChannel(LOG_CHANNEL);
+
+    _xvbLogBc.onmessage = (ev) => {
+      const d = ev?.data;
+      if (!d || d.type !== "log") return;
+      if (d.source === "xvb-player") return;
+
+      const pfx = `[BC ${d.source || "unknown"} ${_xvbLogTime(d.ts)}]`;
+      try {
+        if (d.level === "error") _xvbOrigConsole.error(pfx, d.msg, d.meta || {});
+        else if (d.level === "warn") _xvbOrigConsole.warn(pfx, d.msg, d.meta || {});
+        else _xvbOrigConsole.log(pfx, d.msg, d.meta || {});
+      } catch {}
+    };
+
+    if (!_xvbConsoleHooked) {
+      _xvbConsoleHooked = true;
+
+      const oLog = _xvbOrigConsole.log;
+      const oWarn = _xvbOrigConsole.warn;
+      const oErr = _xvbOrigConsole.error;
+
+      console.log = (...args) => {
+        oLog(...args);
+        const msg = _xvbArgsToMsg(args);
+        _xvbPostLog("info", msg, {
+          args: _xvbStripConsoleCssArgs(args).map((a) => (typeof a === "object" ? _xvbSafeStringify(a) : a)),
+        });
+      };
+
+      console.warn = (...args) => {
+        oWarn(...args);
+        const msg = _xvbArgsToMsg(args);
+        _xvbPostLog("warn", msg, {
+          args: _xvbStripConsoleCssArgs(args).map((a) => (typeof a === "object" ? _xvbSafeStringify(a) : a)),
+        });
+      };
+
+      console.error = (...args) => {
+        oErr(...args);
+        const msg = _xvbArgsToMsg(args);
+        _xvbPostLog("error", msg, {
+          args: _xvbStripConsoleCssArgs(args).map((a) => (typeof a === "object" ? _xvbSafeStringify(a) : a)),
+        });
+      };
+    }
+
+    while (_xvbLogQueue.length) {
+      const it = _xvbLogQueue.shift();
+      if (it) _xvbPostLog(it.level, it.msg, it.meta);
+    }
+
+    _xvbPostLog("ok", "Log channel ready.", { channel: LOG_CHANNEL });
+  } catch (e) {
+    try {
+      (_xvbOrigConsole?.warn || console.warn).call(console, "[XVB] initLiveLogsPlayer error", e);
+    } catch {}
+  }
+}
+
+
 init();
+
+
+
+
