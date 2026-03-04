@@ -9,7 +9,7 @@ const PLAYLIST_MIGRATED_FLAG_V2 = "xvb.playlists.migrated.v2";
 const DEFAULT_PLAYLISTS = [""];
 const SERVER_PLAYLIST_URL = "";
 
-const EPG_URLS = ["https://jonathansanfilippo.github.io/xvb-epg/epg.xml", "https://raw.githubusercontent.com/matthuisman/i.mjh.nz/master/PlutoTV/it.xml"];
+const EPG_URLS = ["https://jonathansanfilippo.github.io/xvb-epg/epg.xml", "https://raw.githubusercontent.com/matthuisman/i.mjh.nz/master/PlutoTV/it.xml" , "https://raw.githubusercontent.com/matthuisman/i.mjh.nz/refs/heads/master/SamsungTVPlus/it.xml"];
 
 const serverUrl = "https://render-com-a2ck.onrender.com";
 const DEFAULT_TITLE = "XVB";
