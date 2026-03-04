@@ -8,16 +8,126 @@ const CHANNEL_CACHE_KEY = "dvb-m^7Y!zR4*P8&kQ3@h";
 const SERVER_PLAYLISTS = [
   { name: "xvb-it naz", url: "https://jonathansanfilippo.github.io/xvb-server-lists/xvb-it-naz" },
   { name: "xvb-it reg", url: "https://jonathansanfilippo.github.io/xvb-server-lists/xvb-it-reg" },
-  { name: "xvb-it radio",     url: "https://raw.githubusercontent.com/jonathansanfilippo/xvb-server-lists/refs/heads/main/xvb-radio-master.m3u" }
+  { name: "xvb-it radio", url: "https://raw.githubusercontent.com/jonathansanfilippo/xvb-server-lists/refs/heads/main/xvb-radio-master.m3u" }
 ];
 
 const SERVER_PLAYLISTS_2 = [
   { name: "iptv-org", url: "https://iptv-org.github.io/iptv/index.m3u" },
-  { name: "Free-TV",  url: "https://raw.githubusercontent.com/Free-TV/IPTV/master/playlist.m3u8" }
-  
+  { name: "Free-TV", url: "https://raw.githubusercontent.com/Free-TV/IPTV/master/playlist.m3u8" }
 ];
 
 const $ = (id) => document.getElementById(id);
+
+/* ===========================
+   LIVE LOGS (BroadcastChannel)
+   =========================== */
+
+const LOG_CHANNEL = "xvb_logs";
+let _logBc = null;
+let _logEl = null;
+
+function _logTime() {
+  const d = new Date();
+  const hh = String(d.getHours()).padStart(2, "0");
+  const mm = String(d.getMinutes()).padStart(2, "0");
+  const ss = String(d.getSeconds()).padStart(2, "0");
+  return `${hh}:${mm}:${ss}`;
+}
+
+function logUI(msg, level = "info", meta = {}) {
+  try {
+    if (!_logEl) _logEl = document.getElementById("logConsole");
+    if (!_logEl) return;
+
+    const line = document.createElement("div");
+    line.className = `log-line ${level || "info"}`;
+    line.innerHTML = `<span class="t">[${_logTime()}]</span>${String(msg || "")}`;
+
+    _logEl.appendChild(line);
+    _logEl.scrollTop = _logEl.scrollHeight;
+
+    // keep last ~300 lines
+    const children = _logEl.children;
+    if (children.length > 300) {
+      for (let i = 0; i < children.length - 300; i++) {
+        _logEl.removeChild(children[0]);
+      }
+    }
+  } catch {}
+}
+
+function logBroadcast(msg, level = "info", meta = {}) {
+  // UI + console
+  logUI(msg, level, meta);
+  try {
+    if (level === "error") console.error("[PM]", msg, meta);
+    else if (level === "warn") console.warn("[PM]", msg, meta);
+    else console.log("[PM]", msg, meta);
+  } catch {}
+
+  // send to channel (so other tabs can see it)
+  try {
+    if (!_logBc) return;
+    _logBc.postMessage({
+      type: "log",
+      source: "playlist-manager",
+      level,
+      msg: String(msg || ""),
+      meta: meta || {},
+      ts: Date.now()
+    });
+  } catch {}
+}
+
+function initLiveLogs() {
+  try {
+    const chName = document.getElementById("logChannelName");
+    if (chName) chName.textContent = LOG_CHANNEL;
+
+    if ("BroadcastChannel" in window) {
+      _logBc = new BroadcastChannel(LOG_CHANNEL);
+
+      _logBc.onmessage = (ev) => {
+        const d = ev?.data;
+        if (!d || d.type !== "log") return;
+
+        // evita doppio echo se arriva da noi stessi
+        if (d.source === "playlist-manager") return;
+
+        const prefix = d.source ? `[${d.source}] ` : "";
+        logUI(prefix + (d.msg || ""), d.level || "info", d.meta || {});
+      };
+
+      logUI("Log channel ready.", "ok");
+    } else {
+      logUI("BroadcastChannel not supported in this browser.", "warn");
+    }
+
+    const btnClear = document.getElementById("btnLogClear");
+    const btnCopy = document.getElementById("btnLogCopy");
+
+    if (btnClear) {
+      btnClear.onclick = () => {
+        const el = document.getElementById("logConsole");
+        if (el) el.innerHTML = "";
+        logUI("Logs cleared.", "info");
+      };
+    }
+
+    if (btnCopy) {
+      btnCopy.onclick = async () => {
+        const el = document.getElementById("logConsole");
+        const text = el ? el.innerText : "";
+        try {
+          await navigator.clipboard.writeText(text);
+          logUI("Copied to clipboard.", "ok");
+        } catch {
+          logUI("Clipboard denied by browser.", "warn");
+        }
+      };
+    }
+  } catch {}
+}
 
 function setStatus(id, msg, type = "info") {
   const el = $(id);
@@ -52,8 +162,11 @@ function broadcastChanged() {
 }
 
 function formatDate(ts) {
-  try { return new Date(ts).toLocaleString(); }
-  catch { return ""; }
+  try {
+    return new Date(ts).toLocaleString();
+  } catch {
+    return "";
+  }
 }
 
 /* ===========================
@@ -68,12 +181,13 @@ function renderSaved() {
   if (!list) return;
   list.innerHTML = "";
 
-  const items = (pl2_listIndex() || []).slice()
+  const items = (pl2_listIndex() || [])
+    .slice()
     .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 
   let channelCount = 0;
 
-  items.forEach(it => {
+  items.forEach((it) => {
     const raw = localStorage.getItem("xvb.playlists.item.v2." + it.id);
     if (!raw) return;
     try {
@@ -88,17 +202,11 @@ function renderSaved() {
   if (totalChannelsEl) totalChannelsEl.textContent = String(channelCount);
 
   if (!items.length) {
-    setStatus("statusList",
-      `<i class="fa-solid fa-circle-info"></i> No playlists saved yet.`,
-      "info"
-    );
+    setStatus("statusList", `<i class="fa-solid fa-circle-info"></i> No playlists saved yet.`, "info");
     return;
   }
 
-  setStatus("statusList",
-    `<i class="fa-solid fa-circle-info"></i> ${items.length} playlist(s) saved.`,
-    "info"
-  );
+  setStatus("statusList", `<i class="fa-solid fa-circle-info"></i> ${items.length} playlist(s) saved.`, "info");
 
   items.forEach((it) => {
     const li = document.createElement("li");
@@ -112,10 +220,7 @@ function renderSaved() {
       pl2_remove(it.id);
       broadcastChanged();
       renderSaved();
-      setStatus("statusList",
-        `<i class="fa-solid fa-circle-info"></i> Deleted: ${it.name}`,
-        "info"
-      );
+      setStatus("statusList", `<i class="fa-solid fa-circle-info"></i> Deleted: ${it.name}`, "info");
     };
 
     const left = document.createElement("div");
@@ -124,23 +229,28 @@ function renderSaved() {
     const name = document.createElement("div");
     name.className = "item-name";
 
-    const isFromServer  = SERVER_PLAYLISTS.some(s => s.url === it.url);
-    const isFromServer2 = SERVER_PLAYLISTS_2.some(s => s.url === it.url);
+    const isFromServer = SERVER_PLAYLISTS.some((s) => s.url === it.url);
+    const isFromServer2 = SERVER_PLAYLISTS_2.some((s) => s.url === it.url);
 
     const dotClass =
-      it.type === "local" ? "dot-local" :
-      isFromServer2 ? "dot-server2" :
-      isFromServer  ? "dot-server"  :
-      "dot-url";
+      it.type === "local"
+        ? "dot-local"
+        : isFromServer2
+          ? "dot-server2"
+          : isFromServer
+            ? "dot-server"
+            : "dot-url";
 
     const typeLabel =
-      it.type === "local" ? "LOCAL" :
-      isFromServer2 ? "THIRD-PARTY" :
-      isFromServer  ? "XVB-SERVER" :
-      "URL";
+      it.type === "local"
+        ? "LOCAL"
+        : isFromServer2
+          ? "THIRD-PARTY"
+          : isFromServer
+            ? "XVB-SERVER"
+            : "URL";
 
-    name.innerHTML =
-      `<i class="fa-solid fa-circle ${dotClass}"></i>
+    name.innerHTML = `<i class="fa-solid fa-circle ${dotClass}"></i>
        <span style="">${it.name || "(no name)"}</span>`;
 
     const meta = document.createElement("div");
@@ -158,7 +268,7 @@ function renderSaved() {
 }
 
 /* ===========================
-   SERVER LIST RENDER (icon + color per list)
+   SERVER LIST RENDER
    =========================== */
 
 function renderServer(
@@ -203,7 +313,9 @@ function renderServer(
 
           setStatus(statusId, `<i class="fa-solid fa-check"></i> ${pl.name} saved.`, "success");
         } catch {
-          try { pl2_remove(res.id); } catch {}
+          try {
+            pl2_remove(res.id);
+          } catch {}
           setStatus(statusId, `<i class="fa-solid fa-triangle-exclamation"></i> Invalid playlist.`, "error");
         }
 
@@ -219,8 +331,7 @@ function renderServer(
 
     const left = document.createElement("div");
     left.className = "item-left";
-    left.innerHTML =
-      `<div class="item-name">${pl.name}</div>
+    left.innerHTML = `<div class="item-name">${pl.name}</div>
        <div class="item-meta"><span class="pill ${dotClass}">${label}</span></div>`;
 
     li.appendChild(btn);
@@ -250,22 +361,13 @@ function wireUI() {
             fileInput.value = "";
             broadcastChanged();
             renderSaved();
-            setStatus("statusFile",
-              `<i class="fa-solid fa-check"></i> Saved: ${file.name}`,
-              "success"
-            );
+            setStatus("statusFile", `<i class="fa-solid fa-check"></i> Saved: ${file.name}`, "success");
           } else {
-            setStatus("statusFile",
-              `<i class="fa-solid fa-circle-exclamation"></i> Already saved.`,
-              "warn"
-            );
+            setStatus("statusFile", `<i class="fa-solid fa-circle-exclamation"></i> Already saved.`, "warn");
           }
         };
         reader.onerror = () =>
-          setStatus("statusFile",
-            `<i class="fa-solid fa-triangle-exclamation"></i> File read failed.`,
-            "error"
-          );
+          setStatus("statusFile", `<i class="fa-solid fa-triangle-exclamation"></i> File read failed.`, "error");
         reader.readAsText(file);
       }
     });
@@ -277,18 +379,18 @@ function wireUI() {
       const url = (urlInput?.value || "").trim();
 
       if (!url) {
-        setStatus("statusUrl",
-          `<i class="fa-solid fa-circle-exclamation"></i> Enter a URL first.`,
-          "warn"
-        );
+        setStatus("statusUrl", `<i class="fa-solid fa-circle-exclamation"></i> Enter a URL first.`, "warn");
         return;
       }
 
       if (!isValidHttpsUrl(url)) {
-        setStatus("statusUrl",
-          `<i class="fa-solid fa-triangle-exclamation"></i> Only https:// URLs allowed.`,
-          "error"
-        );
+        setStatus("statusUrl", `<i class="fa-solid fa-triangle-exclamation"></i> Only https:// URLs allowed.`, "error");
+        return;
+      }
+
+     
+      if (!url.toLowerCase().split('?')[0].endsWith('.m3u') && !url.toLowerCase().split('?')[0].endsWith('.m3u8')) {
+        setStatus("statusUrl", `<i class="fa-solid fa-triangle-exclamation"></i> URL must end with .m3u or .m3u8.`, "error");
         return;
       }
 
@@ -309,29 +411,21 @@ function wireUI() {
 
           if (urlInput) urlInput.value = "";
 
-          setStatus("statusUrl",
-            `<i class="fa-solid fa-check"></i> Playlist saved.`,
-            "success"
-          );
+          setStatus("statusUrl", `<i class="fa-solid fa-check"></i> Playlist saved.`, "success");
 
           broadcastChanged();
           renderSaved();
         } catch {
-          try { pl2_remove(res.id); } catch {}
+          try {
+            pl2_remove(res.id);
+          } catch {}
           broadcastChanged();
           renderSaved();
 
-          setStatus("statusUrl",
-            `<i class="fa-solid fa-triangle-exclamation"></i> Invalid M3U playlist.`,
-            "error"
-          );
+          setStatus("statusUrl", `<i class="fa-solid fa-triangle-exclamation"></i> Invalid M3U playlist.`, "error");
         }
-
       } else {
-        setStatus("statusUrl",
-          `<i class="fa-solid fa-circle-exclamation"></i> Already saved.`,
-          "warn"
-        );
+        setStatus("statusUrl", `<i class="fa-solid fa-circle-exclamation"></i> Already saved.`, "warn");
       }
     };
   }
@@ -345,10 +439,7 @@ function wireUI() {
       pl2_clearAll();
       broadcastChanged();
       renderSaved();
-      setStatus("statusList",
-        `<i class="fa-solid fa-circle-info"></i> All playlists removed.`,
-        "info"
-      );
+      setStatus("statusList", `<i class="fa-solid fa-circle-info"></i> All playlists removed.`, "info");
     };
   }
 }
@@ -358,6 +449,9 @@ function wireUI() {
    =========================== */
 
 function initManager() {
+  initLiveLogs();
+  logBroadcast("Playlist Manager started", "ok");
+
   wireUI();
 
   // SERVER 1 (cloud, colore primary)
@@ -371,7 +465,7 @@ function initManager() {
     "primary"
   );
 
-  // SERVER 2 / THIRD-PARTY  fa-duotone fa-solid fa-cloud-question"></i>
+  // SERVER 2 / THIRD-PARTY
   renderServer(
     "serverPlaylistList2",
     "statusServer2",
@@ -387,17 +481,12 @@ function initManager() {
 
 document.addEventListener("DOMContentLoaded", initManager);
 
-
-
-
-
 /* ===========================
    EPG STATUS + Download
    =========================== */
 
 document.addEventListener("DOMContentLoaded", async () => {
-
-  const icon  = document.getElementById("epg-status-icon");
+  const icon = document.getElementById("epg-status-icon");
   const shaEl = document.getElementById("epg-commit-sha");
   const dateEl = document.getElementById("epg-commit-date");
   const msgEl = document.getElementById("epg-commit-msg");
@@ -425,8 +514,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   try {
     // Last commit
     const commitRes = await fetch(
-      `https://api.github.com/repos/${REPO}/commits?path=${encodeURIComponent(XML_PATH)}&sha=${encodeURIComponent(BRANCH)}&per_page=1`,
-      { headers: { "Accept": "application/vnd.github+json" } }
+      `https://api.github.com/repos/${REPO}/commits?path=${encodeURIComponent(XML_PATH)}&sha=${encodeURIComponent(
+        BRANCH
+      )}&per_page=1`,
+      { headers: { Accept: "application/vnd.github+json" } }
     );
 
     if (!commitRes.ok) throw new Error("GitHub API error");
@@ -437,9 +528,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (commit) {
       if (shaEl) shaEl.textContent = commit.sha.slice(0, 7);
 
-      const iso =
-        commit.commit?.committer?.date ||
-        commit.commit?.author?.date;
+      const iso = commit.commit?.committer?.date || commit.commit?.author?.date;
 
       if (dateEl) dateEl.textContent = new Date(iso).toLocaleString("en-GB");
     }
@@ -462,7 +551,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     } else {
       throw new Error("XML not reachable");
     }
-
   } catch (err) {
     icon.style.color = "#f85149";
     icon.classList.remove("epg-online");

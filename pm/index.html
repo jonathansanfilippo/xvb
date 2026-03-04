@@ -77,7 +77,7 @@
           <i class="fa-duotone fa-solid fa-circle-info"></i> M3U format required.
         </div> <div class="sub" style="margin:20px 0 10px 2px; max-width:none;"></div>
         <div class="row">
-          <input class="file empty" id="fileInput" type="file" accept=".m3u">
+          <input class="file empty" id="fileInput" type="file" accept=".m3u, .m3u8">
         </div>
         <div class="status" id="statusFile"></div>
       </div>
@@ -126,10 +126,37 @@
   </div>
 
 </div>
+  <!-- LOGS (NEW) -->
+  <section class="logwrap" id="logWrap">
+    <div class="log-inner">
+      <div class="section log-section">
+        <div class="log-head">
+          <div>
+            <div class="h1">Live Logs</div>
+            <div class="sub">
+              <i class="fa-duotone fa-solid fa-circle-info"></i> Real-time logs via BroadcastChannel.
+            </div>
+          </div>
 
+          <div class="log-actions">
+            <button class="iconbtn" id="btnLogClear" title="Clear logs">
+              <i class="fa-duotone fa-solid fa-trash-can"></i>
+            </button>
+            <button class="iconbtn" id="btnLogCopy" title="Copy logs">
+              <i class="fa-duotone fa-solid fa-copy"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="log-console" id="logConsole" aria-live="polite"></div>
+        <div class="status info" id="logStatus">
+          <i class="fa-duotone fa-solid fa-tower-broadcast"></i>
+          Listening on <span class="accent" id="logChannelName">xvb_logs</span>
+        </div>
+      </div>
     </div>
-
-    <br><br>
+  </section>
+    </div>
   </div>
 
   <div class="reset">
