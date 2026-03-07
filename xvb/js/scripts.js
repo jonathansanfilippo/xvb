@@ -844,7 +844,7 @@ async function play(ch) {
   showLoadStatus("loading", { token, title: `Loading: ${name || ""}` });
   updateTabTitle(name);
 
-  const START_TIMEOUT_MS = 8000;
+  const START_TIMEOUT_MS = 12000;
 
   let startTimer = null;
   let startedOk = false;
