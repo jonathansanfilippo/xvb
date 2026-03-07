@@ -1104,14 +1104,18 @@ async function play(ch) {
         if (data?.fatal) {
           switch (data.type) {
             case Hls.ErrorTypes.NETWORK_ERROR:
-              console.warn("[XVB] HLS network error -> recover");
-              try {
-                hlsInst.startLoad(-1);
-              } catch {
-                clearWatchdogs();
-                failAndSkip("HLS network error");
-              }
-              break;
+  console.warn("[XVB] HLS network error -> recover");
+  try {
+    if (typeof hlsInst.stopLoad === "function") hlsInst.stopLoad();
+    setTimeout(() => {
+      if (token !== _playToken || !hlsInst) return;
+      hlsInst.startLoad();
+    }, 500);
+  } catch {
+    clearWatchdogs();
+    failAndSkip("HLS network error");
+  }
+  break;
 
             case Hls.ErrorTypes.MEDIA_ERROR:
               console.warn("[XVB] HLS media error -> recover");
