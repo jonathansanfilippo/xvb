@@ -1076,23 +1076,29 @@ async function play(ch) {
   };
 
   const startHls = () => {
-  if (window.Hls && Hls.isSupported()) {
-    hlsInst = new Hls({
-      enableWorker: true,
-      lowLatencyMode: false,
-      startLevel: 0,
-      testBandwidth: false
-    });
+    if (window.Hls && Hls.isSupported()) {
+      hlsInst = new Hls({
+        enableWorker: true,
+        lowLatencyMode: false,
+        startLevel: -1,
+        testBandwidth: true
+      });
 
-    hlsInst.on(Hls.Events.ERROR, (_, data) => {
-      if (token !== _playToken) return;
+      hlsInst.on(Hls.Events.ERROR, (_, data) => {
+        if (token !== _playToken) return;
+        if (!data?.fatal) return;
 
-      if (data?.fatal) {
         switch (data.type) {
           case Hls.ErrorTypes.NETWORK_ERROR:
             console.warn("[XVB] HLS network error -> recover");
+            if (hlsRecoverCount >= HLS_MAX_RECOVER) {
+              clearWatchdogs();
+              failAndSkip("HLS network error");
+              return;
+            }
+            hlsRecoverCount++;
             try {
-              hlsInst.startLoad();
+              hlsInst.startLoad(-1);
             } catch {
               clearWatchdogs();
               failAndSkip("HLS network error");
@@ -1101,6 +1107,12 @@ async function play(ch) {
 
           case Hls.ErrorTypes.MEDIA_ERROR:
             console.warn("[XVB] HLS media error -> recover");
+            if (hlsRecoverCount >= HLS_MAX_RECOVER) {
+              clearWatchdogs();
+              failAndSkip("HLS media error");
+              return;
+            }
+            hlsRecoverCount++;
             try {
               hlsInst.recoverMediaError();
             } catch {
@@ -1114,26 +1126,25 @@ async function play(ch) {
             failAndSkip("HLS fatal error");
             break;
         }
+      });
+
+      hlsInst.loadSource(url);
+      hlsInst.attachMedia(el.video);
+
+      if (typeof attachHlsQualityListeners === "function") {
+        attachHlsQualityListeners(name);
       }
-    });
 
-    hlsInst.loadSource(url);
-    hlsInst.attachMedia(el.video);
-
-    if (typeof attachHlsQualityListeners === "function") {
-      attachHlsQualityListeners(name);
+      hlsInst.on(Hls.Events.MANIFEST_PARSED, () => {
+        if (token === _playToken) {
+          el.video.play().catch(() => {});
+        }
+      });
+    } else {
+      el.video.src = url;
+      el.video.play().catch(() => {});
     }
-
-    hlsInst.on(Hls.Events.MANIFEST_PARSED, () => {
-      if (token === _playToken) {
-        el.video.play().catch(() => {});
-      }
-    });
-  } else {
-    el.video.src = url;
-    el.video.play().catch(() => {});
-  }
-};
+  };
 
   const startMpegTs = () => {
     if (window.mpegts && mpegts.getFeatureList().mseLivePlayback) {
@@ -1278,7 +1289,6 @@ async function play(ch) {
   el.video.src = url;
   el.video.play().catch(() => {});
 }
-
 
 
 
