@@ -844,12 +844,14 @@ async function play(ch) {
   showLoadStatus("loading", { token, title: `Loading: ${name || ""}` });
   updateTabTitle(name);
 
-  const START_TIMEOUT_MS = 15000;
-  const STALL_TIMEOUT_MS = 20000;
+  const START_TIMEOUT_MS = 20000;
+  const STALL_TIMEOUT_MS = 35000;
 
   let startTimer = null;
   let stallTimer = null;
   let startedOk = false;
+  let hlsRecoverCount = 0;
+  const HLS_MAX_RECOVER = 6;
 
   const clearWatchdogs = () => {
     if (startTimer) {
@@ -863,8 +865,9 @@ async function play(ch) {
   };
 
   const armStartWatchdog = () => {
-    clearWatchdogs();
+    if (startTimer) clearTimeout(startTimer);
     startedOk = false;
+
     startTimer = setTimeout(() => {
       if (token !== _playToken) return;
       if (!startedOk) {
@@ -886,6 +889,13 @@ async function play(ch) {
     }, STALL_TIMEOUT_MS);
   };
 
+  const clearStallOnly = () => {
+    if (stallTimer) {
+      clearTimeout(stallTimer);
+      stallTimer = null;
+    }
+  };
+
   const markStarted = () => {
     if (token !== _playToken) return;
     startedOk = true;
@@ -893,23 +903,16 @@ async function play(ch) {
       clearTimeout(startTimer);
       startTimer = null;
     }
-    if (stallTimer) {
-      clearTimeout(stallTimer);
-      stallTimer = null;
-    }
+    clearStallOnly();
   };
 
   if (hlsInst) {
-    try {
-      hlsInst.destroy();
-    } catch {}
+    try { hlsInst.destroy(); } catch {}
     hlsInst = null;
   }
 
   if (dashInst) {
-    try {
-      dashInst.reset();
-    } catch {}
+    try { dashInst.reset(); } catch {}
     dashInst = null;
   }
 
@@ -924,14 +927,12 @@ async function play(ch) {
   }
 
   if (window.__shakaPlayer) {
-    try {
-      window.__shakaPlayer.destroy();
-    } catch {}
+    try { window.__shakaPlayer.destroy(); } catch {}
     window.__shakaPlayer = null;
   }
 
   if (el.video) {
-    el.video.pause();
+    try { el.video.pause(); } catch {}
     el.video.removeAttribute("src");
     el.video.load();
     el.video.preload = "auto";
@@ -964,6 +965,11 @@ async function play(ch) {
 
     el.video.onstalled = () => {
       if (token === _playToken) armStallWatchdog("Network stalled");
+    };
+
+    el.video.ontimeupdate = () => {
+      if (token !== _playToken) return;
+      if (startedOk) clearStallOnly();
     };
 
     el.video.onerror = () => {
@@ -1057,9 +1063,7 @@ async function play(ch) {
 
       const kk2 = parseKidKey(lic);
       if (kk2 && isLicenseMissing) {
-        try {
-          dashInst.reset();
-        } catch {}
+        try { dashInst.reset(); } catch {}
         dashInst = null;
 
         const ok = await tryShakaClearKey();
@@ -1073,66 +1077,102 @@ async function play(ch) {
 
   const startHls = () => {
     if (window.Hls && Hls.isSupported()) {
+      hlsRecoverCount = 0;
+
       hlsInst = new Hls({
         enableWorker: true,
         lowLatencyMode: false,
         liveDurationInfinity: true,
 
-        maxBufferLength: 90,
-        maxMaxBufferLength: 120,
-        backBufferLength: 60,
-        maxBufferSize: 120 * 1000 * 1000,
-        maxBufferHole: 1.5,
+        maxBufferLength: 180,
+        maxMaxBufferLength: 240,
+        backBufferLength: 120,
+        maxBufferSize: 200 * 1000 * 1000,
+        maxBufferHole: 2.5,
 
-        liveSyncDurationCount: 5,
-        liveMaxLatencyDurationCount: 10,
+        liveSyncDurationCount: 8,
+        liveMaxLatencyDurationCount: 16,
 
-        fragLoadingTimeOut: 20000,
-        fragLoadingMaxRetry: 6,
+        fragLoadingTimeOut: 30000,
+        fragLoadingMaxRetry: 8,
         fragLoadingRetryDelay: 2000,
+        fragLoadingMaxRetryTimeout: 15000,
 
-        manifestLoadingTimeOut: 20000,
+        manifestLoadingTimeOut: 30000,
         manifestLoadingMaxRetry: 6,
+        manifestLoadingRetryDelay: 2000,
 
-        levelLoadingTimeOut: 20000,
-        levelLoadingMaxRetry: 6
+        levelLoadingTimeOut: 30000,
+        levelLoadingMaxRetry: 6,
+        levelLoadingRetryDelay: 2000,
+
+        startLevel: -1,
+        capLevelToPlayerSize: false
       });
 
       hlsInst.on(Hls.Events.ERROR, (_, data) => {
         if (token !== _playToken) return;
 
-        if (data?.fatal) {
+        if (!data) return;
+
+        if (data.fatal) {
+          if (hlsRecoverCount >= HLS_MAX_RECOVER) {
+            clearWatchdogs();
+            failAndSkip("HLS fatal error");
+            return;
+          }
+
           switch (data.type) {
             case Hls.ErrorTypes.NETWORK_ERROR:
-  console.warn("[XVB] HLS network error -> recover");
-  try {
-    if (typeof hlsInst.stopLoad === "function") hlsInst.stopLoad();
-    setTimeout(() => {
-      if (token !== _playToken || !hlsInst) return;
-      hlsInst.startLoad();
-    }, 500);
-  } catch {
-    clearWatchdogs();
-    failAndSkip("HLS network error");
-  }
-  break;
+              hlsRecoverCount++;
+              console.warn("[XVB] HLS network error -> recover", data.details || "");
+
+              try {
+                if (typeof hlsInst.stopLoad === "function") hlsInst.stopLoad();
+                setTimeout(() => {
+                  if (token !== _playToken || !hlsInst) return;
+                  hlsInst.startLoad(-1);
+                }, 700);
+                return;
+              } catch {
+                clearWatchdogs();
+                failAndSkip("HLS network error");
+                return;
+              }
 
             case Hls.ErrorTypes.MEDIA_ERROR:
-              console.warn("[XVB] HLS media error -> recover");
+              hlsRecoverCount++;
+              console.warn("[XVB] HLS media error -> recover", data.details || "");
+
               try {
                 hlsInst.recoverMediaError();
+                return;
               } catch {
                 clearWatchdogs();
                 failAndSkip("HLS media error");
+                return;
               }
-              break;
 
             default:
               clearWatchdogs();
               failAndSkip("HLS fatal error");
-              break;
+              return;
           }
         }
+
+        if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
+          console.warn("[XVB] HLS soft network error", data.details || "");
+        }
+      });
+
+      hlsInst.on(Hls.Events.FRAG_LOADED, () => {
+        if (token !== _playToken) return;
+        if (startedOk) clearStallOnly();
+      });
+
+      hlsInst.on(Hls.Events.LEVEL_LOADED, () => {
+        if (token !== _playToken) return;
+        if (startedOk) clearStallOnly();
       });
 
       hlsInst.loadSource(url);
@@ -1296,7 +1336,6 @@ async function play(ch) {
   el.video.src = url;
   el.video.play().catch(() => {});
 }
-
 
 
 
