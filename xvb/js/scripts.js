@@ -844,27 +844,32 @@ async function play(ch) {
   showLoadStatus("loading", { token, title: `Loading: ${name || ""}` });
   updateTabTitle(name);
 
-  // -------------------------
-  // WATCHDOG (NUOVO)
-  // -------------------------
-  const START_TIMEOUT_MS = 15000; // entro 15s deve partire (playing/canplay) oppure skip
-  const STALL_TIMEOUT_MS = 12000; // se resta in waiting/stalled per 12s -> skip
+  const START_TIMEOUT_MS = 15000;
+  const STALL_TIMEOUT_MS = 20000;
 
   let startTimer = null;
   let stallTimer = null;
   let startedOk = false;
+  let hlsRecoverCount = 0;
+  const HLS_MAX_RECOVER = 4;
 
   const clearWatchdogs = () => {
-    if (startTimer) { clearTimeout(startTimer); startTimer = null; }
-    if (stallTimer) { clearTimeout(stallTimer); stallTimer = null; }
+    if (startTimer) {
+      clearTimeout(startTimer);
+      startTimer = null;
+    }
+    if (stallTimer) {
+      clearTimeout(stallTimer);
+      stallTimer = null;
+    }
   };
 
   const armStartWatchdog = () => {
-    clearWatchdogs();
+    if (startTimer) clearTimeout(startTimer);
     startedOk = false;
+
     startTimer = setTimeout(() => {
       if (token !== _playToken) return;
-      // Se non è mai partito davvero -> KO
       if (!startedOk) {
         showLoadStatus("error", { token, title: "Timeout loading" });
         failAndSkip("Timeout loading");
@@ -874,7 +879,6 @@ async function play(ch) {
 
   const armStallWatchdog = (reason) => {
     if (token !== _playToken) return;
-    // se non è partito ancora, lo gestisce già lo start watchdog
     if (!startedOk) return;
 
     if (stallTimer) clearTimeout(stallTimer);
@@ -885,18 +889,33 @@ async function play(ch) {
     }, STALL_TIMEOUT_MS);
   };
 
+  const clearStallOnly = () => {
+    if (stallTimer) {
+      clearTimeout(stallTimer);
+      stallTimer = null;
+    }
+  };
+
   const markStarted = () => {
     if (token !== _playToken) return;
     startedOk = true;
-    // una volta partito, stoppa il timer di start
-    if (startTimer) { clearTimeout(startTimer); startTimer = null; }
-    // se era in stall, lo puliamo
-    if (stallTimer) { clearTimeout(stallTimer); stallTimer = null; }
+    if (startTimer) {
+      clearTimeout(startTimer);
+      startTimer = null;
+    }
+    clearStallOnly();
   };
 
-  // Pulizia istanze
-  if (hlsInst) { try { hlsInst.destroy(); } catch {} hlsInst = null; }
-  if (dashInst) { try { dashInst.reset(); } catch {} dashInst = null; }
+  if (hlsInst) {
+    try { hlsInst.destroy(); } catch {}
+    hlsInst = null;
+  }
+
+  if (dashInst) {
+    try { dashInst.reset(); } catch {}
+    dashInst = null;
+  }
+
   if (mpegtsInst) {
     try {
       mpegtsInst.pause();
@@ -907,16 +926,18 @@ async function play(ch) {
     mpegtsInst = null;
   }
 
-  // Shaka cleanup (non rompe nulla se non esiste)
   if (window.__shakaPlayer) {
     try { window.__shakaPlayer.destroy(); } catch {}
     window.__shakaPlayer = null;
   }
 
   if (el.video) {
-    el.video.pause();
+    try { el.video.pause(); } catch {}
     el.video.removeAttribute("src");
     el.video.load();
+    el.video.preload = "auto";
+    el.video.crossOrigin = "anonymous";
+    el.video.playsInline = true;
   }
 
   stopMediaBar();
@@ -924,7 +945,6 @@ async function play(ch) {
   checkIfAudioOnlyAndShowIcon(token);
 
   if (el.video) {
-    // (NUOVO) armiamo subito watchdog caricamento
     armStartWatchdog();
 
     el.video.onplaying = () => {
@@ -939,10 +959,18 @@ async function play(ch) {
       hideLoadStatus(token);
     };
 
-    // (NUOVO) se resta “appeso” senza errori, intercettiamo
-    el.video.onwaiting = () => { if (token === _playToken) armStallWatchdog("Buffering too long"); };
-    el.video.onstalled = () => { if (token === _playToken) armStallWatchdog("Network stalled"); };
-    el.video.onpause = () => { /* non forziamo skip */ };
+    el.video.onwaiting = () => {
+      if (token === _playToken) armStallWatchdog("Buffering too long");
+    };
+
+    el.video.onstalled = () => {
+      if (token === _playToken) armStallWatchdog("Network stalled");
+    };
+
+    el.video.ontimeupdate = () => {
+      if (token !== _playToken) return;
+      if (startedOk) clearStallOnly();
+    };
 
     el.video.onerror = () => {
       if (token !== _playToken) return;
@@ -963,19 +991,16 @@ async function play(ch) {
 
   if (!el.video) return;
 
-  // -------------------------
-  // HELPERS DRM + Shaka
-  // -------------------------
   const hexToB64Url = (hex) => {
     const clean = String(hex || "").trim().toLowerCase().replace(/^0x/, "").replace(/[^0-9a-f]/g, "");
     const bytes = clean.match(/.{1,2}/g) || [];
-    const bin = bytes.map(b => String.fromCharCode(parseInt(b, 16))).join("");
+    const bin = bytes.map((b) => String.fromCharCode(parseInt(b, 16))).join("");
     return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
   };
 
   const parseKidKey = (licStr) => {
     if (!licStr || !licStr.includes(":")) return null;
-    const [kidHex, keyHex] = licStr.split(":").map(s => s.trim());
+    const [kidHex, keyHex] = licStr.split(":").map((s) => s.trim());
     if (!kidHex || !keyHex) return null;
     return { kidB64: hexToB64Url(kidHex), keyB64: hexToB64Url(keyHex) };
   };
@@ -988,8 +1013,6 @@ async function play(ch) {
     try {
       shaka.polyfill.installAll();
 
-      // (nota) tuo codice: new shaka.Player(el.video)
-      // lasciamo così per non “rompere” nulla nel progetto
       const player = new shaka.Player(el.video);
       window.__shakaPlayer = player;
 
@@ -1003,7 +1026,6 @@ async function play(ch) {
         failAndSkip("DASH DRM error");
       });
 
-      console.log("Shaka ClearKey forced:", name);
       await player.load(url);
       el.video.play().catch(() => {});
       return true;
@@ -1026,7 +1048,9 @@ async function play(ch) {
 
     dashInst.initialize(el.video, url, true);
 
-    if (typeof attachDashQualityListeners === "function") attachDashQualityListeners(name);
+    if (typeof attachDashQualityListeners === "function") {
+      attachDashQualityListeners(name);
+    }
 
     dashInst.on(dashjs.MediaPlayer.events.ERROR, async (e) => {
       if (token !== _playToken) return;
@@ -1049,30 +1073,79 @@ async function play(ch) {
   };
 
   const startHls = () => {
-    if (url.includes(".m3u8") || true) {
-      if (window.Hls && Hls.isSupported()) {
-        hlsInst = new Hls();
+    if (window.Hls && Hls.isSupported()) {
+      hlsInst = new Hls({
+        enableWorker: true,
+        lowLatencyMode: false,
 
-        // (NUOVO) intercettiamo errori HLS e li trasformiamo in skip
-        hlsInst.on(Hls.Events.ERROR, (_, data) => {
-          if (token !== _playToken) return;
-          // Se è fatal -> skip
-          if (data?.fatal) {
+        // parte subito in basso
+        startLevel: 0,
+        testBandwidth: false,
+
+        // ABR normale
+        abrEwmaDefaultEstimate: 500000,
+        capLevelToPlayerSize: false
+      });
+
+      hlsInst.on(Hls.Events.ERROR, (_, data) => {
+        if (token !== _playToken) return;
+        if (!data?.fatal) return;
+
+        switch (data.type) {
+          case Hls.ErrorTypes.NETWORK_ERROR:
+            console.warn("[XVB] HLS network error -> recover");
+            if (hlsRecoverCount >= HLS_MAX_RECOVER) {
+              clearWatchdogs();
+              failAndSkip("HLS network error");
+              return;
+            }
+            hlsRecoverCount++;
+            try {
+              hlsInst.startLoad();
+            } catch {
+              clearWatchdogs();
+              failAndSkip("HLS network error");
+            }
+            break;
+
+          case Hls.ErrorTypes.MEDIA_ERROR:
+            console.warn("[XVB] HLS media error -> recover");
+            if (hlsRecoverCount >= HLS_MAX_RECOVER) {
+              clearWatchdogs();
+              failAndSkip("HLS media error");
+              return;
+            }
+            hlsRecoverCount++;
+            try {
+              hlsInst.recoverMediaError();
+            } catch {
+              clearWatchdogs();
+              failAndSkip("HLS media error");
+            }
+            break;
+
+          default:
             clearWatchdogs();
             failAndSkip("HLS fatal error");
-          }
-        });
+            break;
+        }
+      });
 
-        hlsInst.loadSource(url);
-        hlsInst.attachMedia(el.video);
-        if (typeof attachHlsQualityListeners === "function") attachHlsQualityListeners(name);
-        hlsInst.on(Hls.Events.MANIFEST_PARSED, () => {
-          if (token === _playToken) el.video.play().catch(() => {});
-        });
-      } else {
-        el.video.src = url;
-        el.video.play().catch(() => {});
+      hlsInst.loadSource(url);
+      hlsInst.attachMedia(el.video);
+
+      if (typeof attachHlsQualityListeners === "function") {
+        attachHlsQualityListeners(name);
       }
+
+      hlsInst.on(Hls.Events.MANIFEST_PARSED, () => {
+        if (token === _playToken) {
+          el.video.play().catch(() => {});
+        }
+      });
+    } else {
+      el.video.src = url;
+      el.video.play().catch(() => {});
     }
   };
 
@@ -1080,7 +1153,6 @@ async function play(ch) {
     if (window.mpegts && mpegts.getFeatureList().mseLivePlayback) {
       mpegtsInst = mpegts.createPlayer({ type: "mpegts", isLive: true, url });
 
-      // (NUOVO) se mpegts.js emette errore -> skip
       try {
         mpegtsInst.on(mpegts.Events.ERROR, () => {
           if (token !== _playToken) return;
@@ -1098,9 +1170,6 @@ async function play(ch) {
     }
   };
 
-  // -------------------------
-  // AUTO-DETECTION STREAM TYPE
-  // -------------------------
   const sniffByUrl = () => {
     const u = url.toLowerCase();
     if (u.includes(".mpd")) return "dash";
@@ -1112,7 +1181,6 @@ async function play(ch) {
     return "";
   };
 
-  // (NUOVO) fetch con timeout, così non resta appeso
   const fetchWithTimeout = async (input, init, timeoutMs) => {
     const ctrl = new AbortController();
     const t = setTimeout(() => ctrl.abort(), timeoutMs);
@@ -1146,13 +1214,11 @@ async function play(ch) {
       return { ct, text: text.slice(0, 2048) };
     };
 
-    // 1) prova HEAD
     try {
       const ct = await tryHead();
       if (ct) return { ct, text: "" };
     } catch {}
 
-    // 2) fallback GET range
     try {
       return await tryRangeGet();
     } catch {}
@@ -1163,29 +1229,23 @@ async function play(ch) {
   const decideFromSniff = (ct, headText) => {
     const c = (ct || "").toLowerCase();
     const t = (headText || "").trim();
+    const upper = t.toUpperCase();
 
-    // Content-Type
     if (c.includes("dash") || c.includes("mpd") || c.includes("application/dash+xml")) return "dash";
     if (c.includes("application/vnd.apple.mpegurl") || c.includes("application/x-mpegurl") || c.includes("mpegurl")) return "hls";
     if (c.includes("video/mp2t") || c.includes("mp2t")) return "mpegts";
 
-    // Body sniff (solo se abbiamo qualche byte di testo)
-    const upper = t.toUpperCase();
     if (upper.includes("#EXTM3U") || upper.includes("#EXT-X-STREAM-INF") || upper.includes("#EXT-X-TARGETDURATION")) return "hls";
     if (upper.includes("<MPD") || upper.includes("URN: MPEG:DASH")) return "dash";
 
     return "";
   };
 
-  // -------------------------
-  // PLAY STRATEGY
-  // -------------------------
   const hinted = sniffByUrl();
   if (hinted === "dash") { startDash(); return; }
   if (hinted === "hls") { startHls(); return; }
   if (hinted === "mpegts") { startMpegTs(); return; }
 
-  // se URL non dice nulla => sniff rete
   const sniff = await sniffByContentType();
   if (token !== _playToken) return;
 
@@ -1195,7 +1255,6 @@ async function play(ch) {
   if (decided === "hls") { startHls(); return; }
   if (decided === "mpegts") { startMpegTs(); return; }
 
-  // fallback "best effort": prima DASH (se c'è DRM), poi HLS, poi TS, poi src
   if (parseKidKey(lic)) { startDash(); return; }
 
   try {
@@ -1211,7 +1270,6 @@ async function play(ch) {
   el.video.src = url;
   el.video.play().catch(() => {});
 }
-
 
 
 
