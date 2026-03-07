@@ -936,7 +936,7 @@ async function play(ch) {
     el.video.removeAttribute("src");
     el.video.load();
     el.video.preload = "auto";
-    el.video.crossOrigin = "anonymous";
+    //el.video.crossOrigin = "anonymous";
     el.video.playsInline = true;
   }
 
