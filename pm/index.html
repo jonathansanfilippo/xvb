@@ -6,7 +6,7 @@
   <title>XVB - Playlist Manager</title>
 
   <link rel="icon" type="image/png" href="assets/icon.jpg">
-  <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v7.2.0/css/all.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer">
   <link rel="stylesheet" href="css/manager.css">
 </head>
 
@@ -35,7 +35,7 @@
       <div class="section">
         <div class="label"><i class="fa-solid fa-circle dot-server"></i> Download from XVB server</div>
         <div class="sub">
-          <i class="fa-duotone fa-solid fa-circle-info"></i> Verified playlists for improved compatibility.
+          <i class="fa-solid fa-circle-info"></i> Verified playlists for improved compatibility.
         </div>
         <div class="sub" style="margin:20px 0 10px 2px; max-width:none;"></div>
 
@@ -47,7 +47,7 @@
       <div class="section">
         <div class="label"><i class="fa-solid fa-circle dot-server2"></i> Download from other server</div>
         <div class="sub">
-          <i class="fa-duotone fa-solid fa-circle-info"></i> Unverified playlists – lower compatibility.
+          <i class="fa-solid fa-circle-info"></i> Unverified playlists – lower compatibility.
         </div>
         <div class="sub" style="margin:20px 0 10px 2px; max-width:none;"></div>
 
@@ -59,12 +59,12 @@
       <div class="section">
         <div class="label"><i class="fa-solid fa-circle dot-url"></i> Add URL</div>
          <div class="sub">
-          <i class="fa-duotone fa-solid fa-circle-info"></i> Direct links only. No auto-updating playlists.
+          <i class="fa-solid fa-circle-info"></i> Direct links only. No auto-updating playlists.
         </div> <div class="sub" style="margin:20px 0 10px 2px; max-width:none;"></div>
         <div class="row">
           <input class="input" id="urlInput" type="text" placeholder="https://server.com/path/playlist.m3u">
           <button class="iconbtn " id="btnAddUrl" title="Add URL">
-            <i class="fa-duotone fa-solid fa-file-circle-plus"></i>
+            <i class="fa-solid fa-file-circle-plus"></i>
           </button>
         </div>
         <div class="status" id="statusUrl"></div>
@@ -74,7 +74,7 @@
       <div class="section">
         <div class="label"><i class="fa-solid fa-circle dot-local"></i> Add file</div>
          <div class="sub">
-          <i class="fa-duotone fa-solid fa-circle-info"></i> M3U format required.
+          <i class="fa-solid fa-circle-info"></i> M3U format required.
         </div> <div class="sub" style="margin:20px 0 10px 2px; max-width:none;"></div>
         <div class="row">
           <input class="file empty" id="fileInput" type="file" accept=".m3u, .m3u8">
@@ -86,7 +86,7 @@
       <div class="section">
         <div class="h1">Saved playlists</div>
         <div class="sub">
-          <i class="fa-duotone fa-solid fa-circle-info"></i> Manage Stored Playlists.
+          <i class="fa-solid fa-circle-info"></i> Manage Stored Playlists.
         </div> <div class="sub" style="margin:20px 0 10px 2px; max-width:none;"></div>
         <ul class="list" id="playlistList"></ul>
         <div class="status" id="statusList"></div>
@@ -98,7 +98,7 @@
   <div class="epg-header">
     <div class="h1">EPG Guide</div>
     <div class="sub">
-          <i class="fa-duotone fa-solid fa-circle-info"></i> Active EPG Guides.
+          <i class="fa-solid fa-circle-info"></i> Active EPG Guides.
         </div> <div class="sub" style="margin:20px 0 10px 2px; max-width:none;"></div>
     <button id="btnDownloadEpg"
             class="iconbtn"
@@ -134,23 +134,23 @@
           <div>
             <div class="h1">Live Logs</div>
             <div class="sub">
-              <i class="fa-duotone fa-solid fa-circle-info"></i> Real-time logs via BroadcastChannel.
+              <i class="fa-solid fa-circle-info"></i> Real-time logs via BroadcastChannel.
             </div>
           </div>
 
           <div class="log-actions">
             <button class="iconbtn" id="btnLogClear" title="Clear logs">
-              <i class="fa-duotone fa-solid fa-trash-can"></i>
+              <i class="fa-solid fa-trash-can"></i>
             </button>
             <button class="iconbtn" id="btnLogCopy" title="Copy logs">
-              <i class="fa-duotone fa-solid fa-copy"></i>
+              <i class="fa-solid fa-copy"></i>
             </button>
           </div>
         </div>
 
         <div class="log-console" id="logConsole" aria-live="polite"></div>
         <div class="status info" id="logStatus">
-          <i class="fa-duotone fa-solid fa-tower-broadcast"></i>
+          <i class="fa-solid fa-tower-broadcast"></i>
           Listening on <span class="accent" id="logChannelName">xvb_logs</span>
         </div>
       </div>
@@ -164,7 +164,7 @@
       <div class="section">
         <div class="h1">Reset & Maintenance</div>
         <div class="sub-reset warning">
-          <i class="fa-duotone fa-triangle-exclamation"></i>
+          <i class="fa-triangle-exclamation"></i>
           Remove stored playlists and cached channels to resolve issues or reset the player.
         </div>
         <div class="legal">
@@ -174,7 +174,7 @@
 
         <div style="margin: 30px 0px 30px 0px; max-width: 600px;">
           <button id="btnClearAll" class="iconbtn btnClearAll danger">
-            <i class="fa-duotone fa-solid fa-trash-can-xmark"></i>
+            <i class="fa-solid fa-trash-can-xmark"></i>
             
           </button>
           <span class="resetlabel">Reset</span>
