@@ -1750,6 +1750,21 @@ function openVolumeUI() {
   volumeUiTimer = setTimeout(() => c.classList.remove("open"), 3000);
 }
 
+
+function updateVolumeSliderFill() {
+  const volumeSlider = document.getElementById("volumeSlider");
+  if (!volumeSlider) return;
+
+  const min = parseFloat(volumeSlider.min) || 0;
+  const max = parseFloat(volumeSlider.max) || 1;
+  const val = parseFloat(volumeSlider.value) || 0;
+  const percent = ((val - min) / (max - min)) * 100;
+
+  volumeSlider.style.background =
+    `linear-gradient(to right, #ffffff 0%, #ffffff ${percent}%, rgba(255,255,255,0.3) ${percent}%, rgba(255,255,255,0.3) 100%)`;
+}
+
+
 function changeVolume(val) {
   if (!el.video) return;
 
@@ -1774,6 +1789,7 @@ function changeVolume(val) {
             ? "fa-solid fa-volume-low"
             : "fa-solid fa-volume-high";
   }
+    updateVolumeSliderFill();
 }
 
 function toggleMute() {
