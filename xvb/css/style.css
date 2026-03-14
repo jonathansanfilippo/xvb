@@ -831,7 +831,7 @@ justify-content: center;
 
 
 .quality-badge[data-q="1440p"] { color: #94e1ff; }
-.quality-badge[data-q="1080"] { color: #8ad6ff; }
+.quality-badge[data-q="1080p"] { color: #8ad6ff; }
 
 .quality-badge[data-q="720p"]  { color: #ffe69c; }
 .quality-badge[data-q="576p"]  { color: #ffcc90; }
@@ -844,9 +844,7 @@ justify-content: center;
 .quality-badge[data-q="120p"],
 .quality-badge[data-q="96p"] { color: #ff8585; }
 
-.quality-badge[data-q="hdr"] { color: #c2f5ff; font-weight: bold; }
-.quality-badge[data-q="sd"]  { color: #ffb3b3; }
-.quality-badge[data-q="hd"]  { color: #ffe180; }
+
 
 
 
