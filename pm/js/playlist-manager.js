@@ -218,7 +218,7 @@ function renderSaved() {
 
     const del = document.createElement("button");
     del.className = "iconbtn warning";
-    del.innerHTML = '<i class="fa-duotone fa-solid fa-trash"></i>';
+    del.innerHTML = '<i class="fa-solid fa-trash"></i>';
     del.onclick = () => {
       if (!confirm(`Delete "${it.name}"?`)) return;
       pl2_remove(it.id);
@@ -281,7 +281,7 @@ function renderServer(
   data,
   label = "XVB-SERVER",
   dotClass = "dot-server",
-  iconClass = "fa-duotone fa-solid fa-cloud-arrow-down",
+  iconClass = "fa-solid fa-cloud-arrow-down",
   btnExtraClass = "primary"
 ) {
   const ul = $(listId);
@@ -298,7 +298,7 @@ function renderServer(
 
     btn.onclick = async () => {
       // spinner
-      btn.innerHTML = `<i class="fa-duotone fa-solid fa-spinner-third fa-spin"></i>`;
+      btn.innerHTML = `<i class="fa-solid fa-spinner-third fa-spin"></i>`;
 
       const res = pl2_addUrl(pl.url, pl.name);
 
@@ -465,7 +465,7 @@ function initManager() {
     SERVER_PLAYLISTS,
     "XVB-SERVER",
     "dot-server",
-    "fa-duotone fa-solid fa-cloud-arrow-down",
+    "fa-solid fa-cloud-arrow-down",
     "primary"
   );
 
@@ -476,7 +476,7 @@ function initManager() {
     SERVER_PLAYLISTS_2,
     "THIRD-PARTY",
     "dot-server2",
-    "fa-duotone fa-solid fa-cloud-question",
+    "fa-solid fa-cloud-arrow-down",
     "server2"
   );
 
