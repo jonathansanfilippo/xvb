@@ -407,23 +407,41 @@ function showQualityBadge(label, opts = {}) {
 }
 
 
-
 function keyFromHeight(h) {
   h = Number(h) || 0;
+
+  if (h >= 15360) return "16k";
+  if (h >= 7680) return "8k";
+  if (h >= 5120) return "5k";
   if (h >= 2160) return "4k";
-  if (h >= 1080) return "fhd";
-  if (h >= 720) return "hd";
-  if (h > 0) return "sd";
+  if (h >= 1440) return "1440p";
+  if (h >= 1080) return "1080p";
+  if (h >= 720) return "720p";
+  if (h >= 576) return "576p";
+  if (h >= 480) return "480p";
+  if (h >= 360) return "360p";
+  if (h >= 240) return "240p";
+  if (h > 0) return h + "p";
+
   return "";
 }
 
-
 function labelFromHeight(h) {
   h = Number(h) || 0;
+
+  if (h >= 15360) return "16K";
+  if (h >= 7680) return "8K";
+  if (h >= 5120) return "5K";
   if (h >= 2160) return "4K";
+  if (h >= 1440) return "1440p";
   if (h >= 1080) return "1080p";
   if (h >= 720) return "720p";
+  if (h >= 576) return "576p";
+  if (h >= 480) return "480p";
+  if (h >= 360) return "360p";
+  if (h >= 240) return "240p";
   if (h > 0) return h + "p";
+
   return "AUTO";
 }
 
