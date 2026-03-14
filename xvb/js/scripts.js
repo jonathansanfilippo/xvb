@@ -1769,9 +1769,9 @@ function changeVolume(val) {
       volumeValue === 0
         ? "fa-solid fa-volume-xmark"
         : volumeValue <= 0.33
-          ? "fa-solid fa-volume-low"
+          ? "fa-solid fa-volume-off"
           : volumeValue <= 0.66
-            ? "fa-solid fa-volume"
+            ? "fa-solid fa-volume-low"
             : "fa-solid fa-volume-high";
   }
 }
