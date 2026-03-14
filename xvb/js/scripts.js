@@ -410,13 +410,13 @@ function showQualityBadge(label, opts = {}) {
 function qualityIconForKey(key) {
   switch (key) {
     case "4k":
-      return "fa-duotone fa-solid fa-rectangle-4k";
+      return "fa-solid fa-rectangle-4k";
     case "hdr":
-      return "fa-duotone fa-solid  fa-rectangle-high-dynamic-range";
+      return "fa-solid  fa-rectangle-high-dynamic-range";
     case "hd":
-      return "fa-duotone fa-solid  fa-high-definition";
+      return "fa-solid  fa-high-definition";
     case "sd":
-      return "fa-duotone fa-solid  fa-standard-definition";
+      return "fa-solid  fa-standard-definition";
     default:
       return "";
   }
@@ -450,7 +450,7 @@ function showLoadStatus(state, opts = {}) {
   if (state === "loading") {
     el.qBadge.setAttribute("data-q", "loading");
     el.qBadge.title = opts.title || "Loading…";
-    el.qBadge.innerHTML = `<i class="fa-duotone fa-solid fa-spinner-third fa-spin" aria-hidden="true"></i>`;
+    el.qBadge.innerHTML = `<i class="fa-solid fa-spinner-third fa-spin" aria-hidden="true"></i>`;
     return;
   }
 
@@ -479,7 +479,7 @@ function showRadioBadge() {
   el.qBadge.style.display = "inline-flex";
   el.qBadge.setAttribute("data-q", "radio");
   el.qBadge.title = "Audio";
-  el.qBadge.innerHTML = `<i style="font-size:28px;" class="fa-duotone fa-solid fa-radio" aria-hidden="true"></i>`;
+  el.qBadge.innerHTML = `<i style="font-size:28px;" class="fa-solid fa-radio" aria-hidden="true"></i>`;
 }
 
 function checkIfAudioOnlyAndShowIcon(token) {
@@ -742,7 +742,7 @@ function updateEPGUI(channelName, tvgId = "") {
     overlay?.classList.add("media-progress");
     el.epgNow.textContent = "No guide available";
     el.epgNextList.innerHTML =
-      "<p class='epg-next-item'><i class='fa-duotone fa-solid fa-circle-info'></i> No guide available.</p>";
+      "<p class='epg-next-item'><i class='fa-solid fa-circle-info'></i> No guide available.</p>";
     startMediaBar();
     return;
   }
@@ -774,7 +774,7 @@ function updateEPGUI(channelName, tvgId = "") {
     });
   } else {
     el.epgNextList.innerHTML =
-      "<p class='epg-next-item'><i class='fa-duotone fa-solid fa-circle-info'></i> No upcoming events.</p>";
+      "<p class='epg-next-item'><i class='fa-solid fa-circle-info'></i> No upcoming events.</p>";
   }
 }
 
@@ -1296,7 +1296,7 @@ function injectPlaylistManagerButton() {
     span.style.cursor = "pointer";
     span.innerHTML = `
       <i style="font-size: 18px; cursor: pointer; margin-right: 3px;"
-         class="fa-duotone fa-solid fa-list-check"></i>
+         class="fa-solid fa-list-check"></i>
     `;
     span.onclick = () => window.open("playlist-manager/index.html", "_blank");
     actions.appendChild(span);
@@ -1480,9 +1480,9 @@ function makeChannelItem(ch) {
       ch.logo
         ? `<img class="item-img" src="${ch.logo}"
              onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-flex';">`
-        : `<span class="item-icon"><i class="fa-duotone fa-solid fa-clapperboard-play"></i></span>`
+        : `<span class="item-icon"><i class="fa-solid fa-clapperboard-play"></i></span>`
     }
-    ${ch.logo ? `<span class="item-icon" style="display:none;"><i class="fa-duotone fa-solid fa-clapperboard-play"></i></span>` : ""}
+    ${ch.logo ? `<span class="item-icon" style="display:none;"><i class="fa-solid fa-clapperboard-play"></i></span>` : ""}
     <span>${ch.name}</span>
   `;
 
@@ -1767,12 +1767,12 @@ function changeVolume(val) {
   if (muteBtnIcon) {
     muteBtnIcon.className =
       volumeValue === 0
-        ? "fa-duotone fa-solid fa-volume-xmark"
+        ? "fa-solid fa-volume-xmark"
         : volumeValue <= 0.33
-          ? "fa-duotone fa-solid fa-volume-low"
+          ? "fa-solid fa-volume-low"
           : volumeValue <= 0.66
-            ? "fa-duotone fa-solid fa-volume"
-            : "fa-duotone fa-solid fa-volume-high";
+            ? "fa-solid fa-volume"
+            : "fa-solid fa-volume-high";
   }
 }
 
