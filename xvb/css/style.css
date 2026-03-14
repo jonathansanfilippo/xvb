@@ -584,48 +584,60 @@ background:
 
 #volumeSlider {
   -webkit-appearance: none;
+  appearance: none;
   width: 70px;
   height: 7px;
-  background: rgba(255, 255, 255, 0.3);
   border-radius: 5px;
   outline: none;
   opacity: 0;
   margin-left: 8px;
-  transition: opacity 0.25s ease; /* ← questo fa il fade */
-  accent-color: #ffffff;
+  transition: opacity 0.25s ease;
+  background: linear-gradient(to right, #ffffff 100%, rgba(255,255,255,0.3) 100%);
 }
 
 .volume-container.open #volumeSlider {
   opacity: 1;
 }
 
-/* Thumb (Chrome, Edge, Safari) */
+/* Track Chrome / Safari */
+#volumeSlider::-webkit-slider-runnable-track {
+  height: 7px;
+  border-radius: 5px;
+  background: transparent;
+}
+
+/* Thumb Chrome / Safari */
 #volumeSlider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 0px;
-  height: 0px;
-  background: #ffffff;
-  border-radius: 50%;
-  cursor: pointer;
+  width: 0;
+  height: 0;
   border: none;
+  background: transparent;
+  box-shadow: none;
 }
 
-/* Thumb (Firefox) */
-#volumeSlider::-moz-range-thumb {
-  width: 0px;
-  height: 0px;
-  background: #ffffff;
-  border-radius: 50%;
-  cursor: pointer;
-  border: none;
-}
-
-/* Progress (Firefox) */
-#volumeSlider::-moz-range-progress {
-  background-color: #d0d0d0;
-
+/* Track Firefox */
+#volumeSlider::-moz-range-track {
   height: 7px;
+  border-radius: 5px;
+  background: transparent;
+}
+
+/* Progress Firefox */
+#volumeSlider::-moz-range-progress {
+  height: 7px;
+  border-radius: 5px;
+  background: transparent;
+}
+
+/* Thumb Firefox */
+#volumeSlider::-moz-range-thumb {
+  width: 0;
+  height: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
 }
 
 #muteBtn {
@@ -635,7 +647,10 @@ background:
   font-size: 20px;
 }
 
-.fa-volume-xmark { color: #ff6b6b; }
+.fa-volume-xmark {
+  color: #ff6b6b;
+}
+
 
 /* ================= QUALITY BADGE ================= */
 .quality-badge{
