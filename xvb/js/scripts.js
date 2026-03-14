@@ -1485,9 +1485,9 @@ function makeChannelItem(ch) {
       ch.logo
         ? `<img class="item-img" src="${ch.logo}"
              onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-flex';">`
-        : `<span class="item-icon"><i class="fa-solid fa-clapperboard-play"></i></span>`
+        : `<span class="item-icon"><i class="fa-solid fa-clapperboard"></i></span>`
     }
-    ${ch.logo ? `<span class="item-icon" style="display:none;"><i class="fa-solid fa-clapperboard-play"></i></span>` : ""}
+    ${ch.logo ? `<span class="item-icon" style="display:none;"><i class="fa-solid fa-clapperboard"></i></span>` : ""}
     <span>${ch.name}</span>
   `;
 
