@@ -393,43 +393,30 @@ function showQualityBadge(label, opts = {}) {
 
   if (!label) {
     el.qBadge.style.display = "none";
-    el.qBadge.innerHTML = "";
+    el.qBadge.textContent = "";
     el.qBadge.removeAttribute("data-q");
     return;
   }
 
   const qKey = opts.key || "custom";
-  const iconClass = opts.iconClass || "";
 
   el.qBadge.style.display = "inline-flex";
   el.qBadge.setAttribute("data-q", qKey);
   el.qBadge.title = opts.title || "";
-  el.qBadge.innerHTML = iconClass ? `<i style="font-size:28px;" class="${iconClass}" aria-hidden="true"></i>` : "";
+  el.qBadge.textContent = label;
 }
 
-function qualityIconForKey(key) {
-  switch (key) {
-    case "4k":
-      return "fa-solid fa-rectangle-4k";
-    case "hdr":
-      return "fa-solid  fa-rectangle-high-dynamic-range";
-    case "hd":
-      return "fa-solid  fa-high-definition";
-    case "sd":
-      return "fa-solid  fa-standard-definition";
-    default:
-      return "";
-  }
-}
+
 
 function keyFromHeight(h) {
   h = Number(h) || 0;
   if (h >= 2160) return "4k";
-  if (h >= 1080) return "hdr";
+  if (h >= 1080) return "fhd";
   if (h >= 720) return "hd";
   if (h > 0) return "sd";
   return "";
 }
+
 
 function labelFromHeight(h) {
   h = Number(h) || 0;
@@ -450,14 +437,14 @@ function showLoadStatus(state, opts = {}) {
   if (state === "loading") {
     el.qBadge.setAttribute("data-q", "loading");
     el.qBadge.title = opts.title || "Loading…";
-    el.qBadge.innerHTML = `<i class="fa-solid fa-spinner-third fa-spin" aria-hidden="true"></i>`;
+    el.qBadge.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin" aria-hidden="true"></i>`;
     return;
   }
 
   if (state === "error") {
     el.qBadge.setAttribute("data-q", "error");
     el.qBadge.title = opts.title || "Error";
-    el.qBadge.innerHTML = `<i class="fa-regular fa-solid fa-triangle-exclamation" aria-hidden="true"></i>`;
+    el.qBadge.innerHTML = `<i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>`;
   }
 }
 
@@ -546,7 +533,7 @@ function detectQualityFromName(name) {
   else if (n.includes("SD") || n.includes("480")) h = 480;
 
   const key = keyFromHeight(h);
-  if (key) showQualityBadge(labelFromHeight(h), { key, iconClass: qualityIconForKey(key) });
+  if (key) showQualityBadge(labelFromHeight(h), { key });
   else showQualityBadge("");
 }
 
@@ -554,7 +541,7 @@ function updateQualityFromHlsLevel(levelObj) {
   if (!levelObj) return;
   const h = levelObj.height || 0;
   const key = keyFromHeight(h);
-  showQualityBadge(labelFromHeight(h), { key, iconClass: qualityIconForKey(key) });
+  showQualityBadge(labelFromHeight(h), { key });
 }
 
 function attachHlsQualityListeners(nameForFallback) {
@@ -594,7 +581,7 @@ function attachDashQualityListeners(nameForFallback) {
 
       const h = info.height || 0;
       const key = keyFromHeight(h);
-      showQualityBadge(labelFromHeight(h), { key, iconClass: qualityIconForKey(key) });
+      showQualityBadge(labelFromHeight(h), { key });
     } catch {
       detectQualityFromName(nameForFallback);
     }
