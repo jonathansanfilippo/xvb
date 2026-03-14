@@ -814,7 +814,7 @@ justify-content: center;
 
 
 
-/* ===== Soft & Clear Quality Colors ===== */
+/* ===== Soft & Clear Quality Colors ===== 
 
 .quality-badge[data-q="16k"] {
   color: #ffffff;
@@ -844,6 +844,66 @@ justify-content: center;
 .quality-badge[data-q="120p"],
 .quality-badge[data-q="96p"] { color: #ff8585; }
 
+*/
+
+.quality-badge[data-q="16k"] {
+  color: #ffffff;
+  text-shadow: 0 0 16px rgba(255, 255, 255, 0.45);
+}
+
+.quality-badge[data-q="8k"]  {
+  color: #e9d8ff;
+  text-shadow: 0 0 10px rgba(186, 132, 255, 0.22);
+}
+
+.quality-badge[data-q="5k"]  {
+  color: #d8c2ff;
+  text-shadow: 0 0 10px rgba(167, 118, 255, 0.18);
+}
+
+.quality-badge[data-q="4k"]  {
+  color: #b8ffe4;
+  text-shadow: 0 0 10px rgba(92, 255, 185, 0.18);
+}
+
+.quality-badge[data-q="2k"],
+.quality-badge[data-q="1440p"] {
+  color: #9fe7ff;
+  text-shadow: 0 0 10px rgba(76, 207, 255, 0.16);
+}
+
+.quality-badge[data-q="1080p"] {
+  color: #7fd4ff;
+  text-shadow: 0 0 9px rgba(66, 180, 255, 0.14);
+}
+
+.quality-badge[data-q="720p"]  {
+  color: #ffe08a;
+  text-shadow: 0 0 9px rgba(255, 205, 84, 0.14);
+}
+
+.quality-badge[data-q="576p"]  {
+  color: #ffc27a;
+  text-shadow: 0 0 8px rgba(255, 170, 75, 0.13);
+}
+
+.quality-badge[data-q="480p"]  {
+  color: #ffad8a;
+  text-shadow: 0 0 8px rgba(255, 132, 90, 0.12);
+}
+
+.quality-badge[data-q="360p"]  {
+  color: #ff8f8f;
+  text-shadow: 0 0 8px rgba(255, 95, 95, 0.12);
+}
+
+.quality-badge[data-q="240p"],
+.quality-badge[data-q="144p"],
+.quality-badge[data-q="120p"],
+.quality-badge[data-q="96p"] {
+  color: #ff7878;
+  text-shadow: 0 0 8px rgba(255, 70, 70, 0.12);
+}
 
 
 
